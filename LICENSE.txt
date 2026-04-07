@@ -1,0 +1,40 @@
+Tone & Beats by Hostility
+Copyright (c) 2026 Hostility Music. www.hostilitymusic.com. Todos los derechos reservados.
+
+=============================================================================
+
+LICENCIA DE USO
+
+Este software es propiedad de Hostility Music. Queda prohibida la reproducción,
+distribución, modificación o uso no autorizado de este programa sin el 
+consentimiento expreso por escrito de Hostility Music.
+
+El usuario puede usar esta aplicación de forma gratuita para uso personal y/o 
+comercial, siempre que no se modifique, redistribuya o se elimine la 
+información de copyright y atribución.
+
+=============================================================================
+
+TERMS AND CONDITIONS
+
+1. This software is provided "as is", without warranty of any kind, express
+   or implied, including but not limited to the warranties of merchantability,
+   fitness for a particular purpose and noninfringement.
+
+2. In no event shall the authors or copyright holders be liable for any claim,
+   damages or other liability, whether in an action of contract, tort or 
+   otherwise, arising from, out of or in connection with the software or the 
+   use or other dealings in the software.
+
+3. This software uses third-party libraries under their respective licenses.
+   See "Acerca De" in the application for a complete list of used libraries.
+
+=============================================================================
+
+CONTACTO
+
+Para consultas, soporte o información adicional:
+Email: info@hostilitymusic.com
+Web: www.hostilitymusic.com
+
+=============================================================================

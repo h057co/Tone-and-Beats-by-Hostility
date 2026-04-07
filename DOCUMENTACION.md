@@ -1,8 +1,9 @@
 # Tone & Beats by Hostility - Documentación Técnica
 
-**Versión:** 1.0.0-beta  
-**Fecha:** 6 de Abril de 2026  
-**Framework:** .NET 8.0 + WPF
+**Versión:** 1.0.0  
+**Fecha:** 7 de Abril de 2026  
+**Framework:** .NET 8.0 + WPF  
+**Estado:** Release
 
 ---
 
@@ -15,13 +16,16 @@
 
 ### Características Principales
 
-- Interfaz redimensionable con escala proporcional (Viewbox)
+- Interfaz redimensionable con escala proporcional (Viewbox) - solo diagonal
 - Sistema de temas visuales (Dark, Light, Blue)
 - Reproducción de audio con seek interactivo
 - Guardado de metadatos BPM y Key en el archivo
 - Drag & drop de archivos
 - Ajuste manual de BPM detectado
 - Visualización de tonalidad relativa (mayor/menor)
+- Análisis paralelo de BPM + Key + Waveform
+- Redimensionado desde esquinas (no bordes)
+- Ventana de tamaño fijo 400x760px con proporcionalidad
 
 ---
 
@@ -30,7 +34,7 @@
 ### Estructura de Archivos
 
 ```
-AudioAnalyzer/
+src/
 ├── App.xaml / App.xaml.cs           # Punto de entrada WPF
 ├── MainWindow.xaml / .cs            # Ventana principal
 ├── AboutWindow.xaml / .cs           # Ventana Acerca De
@@ -70,7 +74,8 @@ AudioAnalyzer/
 │   ├── ViewModelBase.cs          # Base ViewModel
 │   ├── MessageBoxService.cs      # Servicio de MessageBox
 │   ├── FilePickerService.cs      # Selector de archivos
-│   └── BoolToVisibilityConverter.cs
+│   ├── BoolToVisibilityConverter.cs
+│   └── CornerResizeBehavior.cs   # Redimensionado solo esquinas
 │
 ├── Interfaces/                     # Contratos de servicios
 │   ├── IAudioPlayerService.cs
@@ -111,18 +116,17 @@ El sistema utiliza un enfoque de **detección híbrida** combinando:
    - Autocorrelación para periodicidad
    - Configuración: MinBpm=50, MaxBpm=220, PreferStableTempo=true
 
-2. **Análisis avanzado propio** (validación secundaria)
+2. **Análisis avanzado propio** (validación secundaria - deshabilitado por performance)
    - Pre-procesamiento: Low-frequency emphasis + Normalization
    - 3 onset functions: Spectral Flux, Energy Flux, Complex Domain
    - Multi-candidato BPM con weighted voting
-   - Harmonic checking (half-time, double-time detection)
-   - Beat period consistency check
-   - Rango adaptativo basado en energía de graves
 
 3. **Combinación**
    - Si ambos resultados < 3 BPM de diferencia: promedio
    - Si harmonicDiff < 3 y confianza > 0.6: usar análisis avanzado
    - Sino: weighted average (60% BpmFinder, 40% avanzado)
+
+**Nota:** El análisis avanzado está deshabilitado temporalmente para mejorar rendimiento. El BPM se detecta únicamente con BpmFinder.
 
 ### 4.2 Detección de Tonalidad
 
@@ -139,19 +143,11 @@ El sistema utiliza un enfoque de **detección híbrida** combinando:
 1. Downsample a 1000 puntos
 2. Calcula min/max por ventana
 3. Renderiza usando WPF Path
-4. Beat grid superpuesto basado en BPM
+4. Beat grid superpuesto basado en BPM (simplificado para rendimiento)
 
-### 4.4 Información Técnica de Audio
+### 4.4 Análisis Paralelo
 
-**Biblioteca**: MediaInfo.Wrapper.Core
-
-Proporciona:
-- File Type
-- Sample Rate
-- Bit Depth
-- Channels
-- Bitrate
-- Bitrate Mode (CBR/VBR)
+Los tres análisis (BPM, Key, Waveform) se ejecutan en paralelo usando `Task.WhenAll` para reducir el tiempo total de procesamiento.
 
 ---
 
@@ -160,6 +156,7 @@ Proporciona:
 ### 5.1 Cargar un Archivo
 - **Opción A**: Click en "Browse" y seleccionar archivo
 - **Opción B**: Arrastrar archivo a la ventana (drag & drop)
+- **Filtros**: MP3, WAV, OGG, FLAC, M4A, AAC, AIFF, WMA
 
 ### 5.2 Reproducir Audio
 - **▶ Play**: Inicia reproducción
@@ -169,8 +166,9 @@ Proporciona:
 ### 5.3 Análisis de Audio
 1. Cargar archivo de audio
 2. Click en "🔍 Analyze Audio"
-3. Resultados aparecen en Row 6 (BPM y Key)
-4. Opcional: Click en "💾 Save to Metadata" para guardar
+3. Los tres análisis (BPM, Key, Waveform) se ejecutan en paralelo
+4. Resultados aparecen en Row 6 (BPM y Key)
+5. Opcional: Click en "💾 Save to Metadata" para guardar en el archivo
 
 ### 5.4 Ajuste de BPM (Row 6)
 - **Click izquierdo**: Ajusta BPM
@@ -193,6 +191,12 @@ Proporciona:
 - Click en botón "🎨" en esquina superior derecha
 - Cicla: Dark → Light → Blue → Dark
 
+### 5.8 Redimensionar Ventana
+- **Solo desde esquinas**: La ventana escala proporcionalmente en diagonal
+- **Ancho fijo**: MinWidth=450, MaxWidth=400 (ancho fijo)
+- **Altura variable**: MinHeight=500
+- Proporción mantenida: ~1.9 (760/400)
+
 ---
 
 ## 6. Construcción y Distribución
@@ -200,79 +204,168 @@ Proporciona:
 ### Compilación
 
 ```bash
-dotnet build -c Release
+cd src
+dotnet publish -c Release -r win-x64 --self-contained true -o ../publish
 ```
 
-### Publicación Framework-Dependent
+### Instalador (Inno Setup)
+
+El instalador se genera con Inno Setup 6:
 
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained false -o ./bin/Beta/framework-dependent
+iscc setup.iss
 ```
 
-**Requiere**: .NET 8 Runtime instalado
+Ubicación del instalador:
+- `installer/ToneAndBeatsByHostility_Setup_v1.0.0.exe`
 
-### Publicación Single-File
+### Distribución
 
-```bash
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./bin/Beta/single-file
-```
-
-**Incluye**: Runtime .NET 8 (no requiere instalación)
-
-### Ubicaciones de Builds
-
-| Tipo | Ubicación |
-|------|-----------|
-| Framework-Dependent | `bin/Beta/framework-dependent/` |
-| Single-File | `bin/Beta/single-file/` |
+| Método | Ubicación | Descripción |
+|--------|-----------|-------------|
+| Instalador | `installer/ToneAndBeatsByHostility_Setup_v1.0.0.exe` | ~140 MB (comprimido) |
+| Portable | `publish/` | 511 archivos (incluye runtime) |
 
 ---
 
-## 7. Historial de Versiones
+## 7. Copyright y Legal
 
-### v1.0.0-beta (6 de Abril 2026)
+### Información de Copyright
+
+```
+© 2026 Hostility Music. www.hostilitymusic.com. Todos los derechos reservados.
+info@hostilitymusic.com
+```
+
+### Licencia de Uso
+
+El software es propiedad de Hostility Music. Queda prohibida la reproducción, distribución, modificación o uso no autorizado sin consentimiento expreso por escrito.
+
+Ver archivo `LICENSE.txt` para información completa.
+
+### Ubicaciones del Copyright
+
+1. Ventana "Acerca de" de la aplicación
+2. Archivo LICENSE.txt
+3. Instalador (propiedades)
+4. AssemblyInfo.cs
+
+---
+
+## 8. Historial de Versiones
+
+### v1.0.0 (7 de Abril 2026) - RELEASE
 
 **Features implementadas:**
-- Detección BPM híbrida (BpmFinder + análisis avanzado propio)
-- Detección de tonalidad con relativo mayor/menor
-- Sistema de temas (Dark/Light/Blue)
-- Interfaz redimensionable con Viewbox
-- Row 2 dinámico según formato de audio
-- Row 6 con click handlers para BPM y Key
-- Sistema de logging
-- MediaInfo para información técnica de audio
-- Guardado de metadatos
-- Drag & drop
+- ✅ Detección BPM (BpmFinder)
+- ✅ Detección de tonalidad con relativo mayor/menor
+- ✅ Sistema de temas (Dark/Light/Blue)
+- ✅ Interfaz redimensionable con Viewbox
+- ✅ Row 2 dinámico según formato de audio
+- ✅ Row 6 con click handlers para BPM y Key
+- ✅ Sistema de logging
+- ✅ MediaInfo para información técnica de audio
+- ✅ Guardado de metadatos
+- ✅ Drag & drop
+- ✅ Análisis paralelo (BPM + Key + Waveform)
+- ✅ Redimensionado solo desde esquinas (CornerResizeBehavior)
+- ✅ Proporcionalidad de ventana (1.9 ratio)
+- ✅ Ventana fija 400x760px
+- ✅ Nuevo Row 4 para Status
+- ✅ Copyright y licencia actualizados
+- ✅ Installer con Inno Setup
+- ✅ VERSION 1.0.0 OFICIAL
+
+### v1.0.0-beta (6 de Abril 2026) - BETA
+
+- Versión inicial beta
 
 ---
 
-## 8. Sistema de Archivos de Build
+## 9. Especificaciones Técnicas
 
-```
-bin/
-├── Beta/
-│   ├── framework-dependent/    # Requiere .NET 8 Runtime
-│   │   ├── ToneAndBeatsByHostility.exe
-│   │   └── [39 DLLs]
-│   └── single-file/           # Self-contained
-│       └── ToneAndBeatsByHostility.exe (~158MB)
-└── Checkpoint-1140AM/        # Backup del build de las 11:40 AM
-```
-
----
-
-## 9. Notas de Desarrollo
-
-### Licencias de Librerías
-
-Ver archivo `LICENSES.md` para información detallada.
-
-### Compatibilidad
+### Requisitos del Sistema
 
 - **Windows**: 10/11 (x64)
-- **.NET**: 8.0 Runtime o superior
 - **Arquitectura**: x64
+- **Espacio**: ~150 MB (portable), ~140 MB (instalado)
+
+### Memoria y Rendimiento
+
+- Tiempo de análisis típico: 3-15 segundos (dependiendo del archivo)
+- Memoria: ~200-500 MB durante análisis
+- Formatos soportados: MP3, WAV, OGG, FLAC, M4A, AAC, AIFF, WMA
+
+### Configuración de Build
+
+```xml
+<TargetFramework>net8.0-windows</TargetFramework>
+<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+<SelfContained>true</SelfContained>
+```
 
 ---
 
-*Documentación actualizada: 6 de Abril de 2026*
+## 10. Estructura de Archivos de Release
+
+```
+O:\Test\BPM KEY\
+├── publish/                    # Build portable (511 archivos)
+│   └── ToneAndBeatsByHostility.exe
+│
+├── installer/                  # Instalador
+│   ├── setup.iss              # Script Inno Setup
+│   └── ToneAndBeatsByHostility_Setup_v1.0.0.exe
+│
+├── LICENSE.txt                 # Licencia completa
+│
+└── DOCUMENTACION.md            # Este documento
+```
+
+---
+
+## 11. Próximos Pasos / Backlog
+
+### Features para v1.1+ (Propuestas)
+
+1. **Batch Processing** - Procesar múltiples archivos
+2. **Botón Donation** - PayPal en ventana "Acerca de"
+3. **Exportar reporte** - CSV/JSON de análisis
+4. **Detección de secciones** - Intro/Verse/Chorus
+5. **Mejoras de UI** - Waveform interactivo avanzado
+
+### Known Issues
+
+- El análisis avanzado de BPM está deshabilitado temporalmente
+- Depuración de código pendientes (eventos, try/catch)
+- Testing con archivos grandes no realizado
+
+---
+
+## 12. Notas de Desarrollo
+
+### Changelog Reciente (7 Abril 2026)
+
+- Implementado análisis paralelo de procesos
+- Agregado CornerResizeBehavior para redimensionado diagonal
+- Agregado Status al Row 4
+- Actualizado Row 6 con MaxWidth fijo
+- Actualizada ventana "Acerca de" con copyright completo
+- Creado LICENSE.txt
+- Generado instalador con Inno Setup
+- Versionado a 1.0.0
+
+### Git Checkpoints
+
+| Commit | Descripción |
+|--------|-------------|
+| 37bae79 | ventana - Ajuste de redimensionado |
+| 1aa1f7a | Procesando - Mensaje de estado en waveform |
+| 861b85d | revision_codigo_pre_implementacion - Code review |
+
+---
+
+*Documentación actualizada: 7 de Abril de 2026*
+*Desarrollado por: Luis Jimenez (Hostility Music)*
+*Contacto: info@hostilitymusic.com*
+*Web: www.hostilitymusic.com*

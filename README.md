@@ -2,94 +2,134 @@
 
 Aplicación de escritorio Windows para análisis de audio que detecta BPM y tonalidad musical.
 
+## Versión 1.0.0 - Release
+
+**Fecha:** 7 de Abril de 2026  
+**Estado:** ✅ Estable / Production Ready
+
+---
+
 ## Requisitos
 
 - **Windows 10/11** (x64)
-- **.NET 8.0 SDK** (para desarrollo)
-- **.NET 8.0 Runtime** (para ejecutar, si no usas self-contained)
+- **No requiere .NET Runtime** (self-contained)
 
-## Inicio Rápido
+## Descarga e Instalación
 
-### Desarrollo
+### Opción 1: Instalador (Recomendado)
+Ejecutar: `installer/ToneAndBeatsByHostility_Setup_v1.0.0.exe`
 
-```bash
-# Restaurar paquetes
-dotnet restore
+### Opción 2: Portable
+Carpeta: `publish/` (511 archivos)
 
-# Compilar
-dotnet build
+---
 
-# Ejecutar
-dotnet run
-```
+## Características
 
-### Builds Pre-compilados
+- ✅ Detección de BPM automático
+- ✅ Detección de tonalidad (Key)
+- ✅ Visualización de forma de onda
+- ✅ Reproducción de audio con seek
+- ✅ Guardar metadatos en archivo
+- ✅ Temas: Dark / Light / Blue
+- ✅ Análisis paralelo (más rápido)
+- ✅ Redimensionado proporcional
 
-| Tipo | Ubicación | Requiere Runtime |
-|------|----------|-----------------|
-| Framework-Dependent | `build/framework-dependent/` | ✅ .NET 8 Runtime |
-| Single-File | `build/single-file/` | ❌ No |
+---
+
+## Guía de Uso
+
+### Cargar Archivo
+- Click en "Browse" o arrastrar archivo
+
+### Analizar
+- Click en "🔍 Analyze Audio"
+- Procesa BPM + Key + Waveform en paralelo
+
+### Ajustar BPM
+- Click izquierdo: ×2 o ÷2
+- Click derecho: acción inversa
+- Segundo click: reset
+
+### Cambiar Tonalidad
+- Click en Key: alterna Major/Minor relativo
+
+### Temas
+- Click en 🎨 para cambiar tema
+
+---
 
 ## Estructura del Proyecto
 
 ```
-ToneAndBeats/
-├── src/                          # Código fuente
-│   ├── AudioAnalyzer/           # Proyecto principal
-│   │   ├── Services/            # Lógica de negocio
-│   │   ├── ViewModels/         # MVVM
-│   │   ├── Models/             # Modelos de datos
-│   │   ├── Controls/           # Controles WPF
-│   │   ├── Themes/            # Sistema de temas
-│   │   └── ...
-│   └── AudioAnalyzer.sln       # Solución
-├── build/                        # Builds pre-compilados
-├── docs/                         # Documentación
-│   ├── DOCUMENTACION.md
-│   └── LICENSES.md
-├── assets/                       # Recursos gráficos
-│   └── README.md
-└── README.md
+src/
+├── MainWindow.xaml / .cs            # Interfaz principal
+├── AboutWindow.xaml / .cs           # Acerca de
+├── Services/                         # Lógica de negocio
+│   ├── BpmDetector.cs              # Detección BPM
+│   ├── KeyDetector.cs              # Detección Key
+│   ├── WaveformAnalyzer.cs         # Waveform
+│   └── AudioPlayerService.cs       # Reproducción
+├── ViewModels/                      # MVVM
+│   └── MainViewModel.cs
+└── Themes/                         # Temas
+    ├── DarkTheme.xaml
+    ├── LightTheme.xaml
+    └── BlueTheme.xaml
 ```
-
-## Librerías Principales
-
-| Librería | Uso |
-|----------|-----|
-| NAudio | Reproducción de audio |
-| BpmFinder | Detección de BPM |
-| libKeyFinder.NET | Detección de tonalidad |
-| MediaInfo.Wrapper.Core | Información técnica de audio |
-| LiveChartsCore | Visualización |
-| TagLibSharp | Metadatos |
-
-## Comandos Útiles
-
-```bash
-# Desarrollo
-dotnet build
-dotnet run
-
-# Publicación
-dotnet publish -c Release -r win-x64 --self-contained false -o ./build/framework-dependent
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./build/single-file
-
-# Limpiar
-dotnet clean
-```
-
-## Documentación
-
-- `docs/DOCUMENTACION.md` - Documentación técnica completa
-- `docs/LICENSES.md` - Licencias de librerías
-
-## Plataforma
-
-- **Framework**: .NET 8.0 + WPF
-- **Arquitectura**: x64
-- **OS**: Windows 10/11
 
 ---
 
-**Versión**: 1.0.0-beta  
-**Fecha**: 6 de Abril de 2026
+## Librerías
+
+| Librería | Propósito |
+|----------|-----------|
+| NAudio | Audio playback |
+| BpmFinder | BPM detection |
+| libKeyFinder.NET | Key detection |
+| MediaInfo.Wrapper.Core | Audio metadata |
+| TagLibSharp | Write metadata |
+
+---
+
+## Desarrollo
+
+```bash
+# Compilar
+cd src
+dotnet build
+
+# Ejecutar
+dotnet run
+
+# Publicar
+dotnet publish -c Release -r win-x64 --self-contained true -o ../publish
+```
+
+---
+
+## Documentación
+
+- `DOCUMENTACION.md` - Documentación técnica completa
+- `LICENSE.txt` - Licencia y Copyright
+
+---
+
+## Copyright
+
+```
+© 2026 Hostility Music. www.hostilitymusic.com. Todos los derechos reservados.
+info@hostilitymusic.com
+```
+
+---
+
+## Contacto
+
+- **Web:** www.hostilitymusic.com
+- **Email:** info@hostilitymusic.com
+
+---
+
+*Version 1.0.0 - Release*
+*Desarrollado por Luis Jimenez - Hostility Music*

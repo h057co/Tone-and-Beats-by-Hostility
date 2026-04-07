@@ -8,11 +8,17 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>ToneAndBeatsByHostility</AssemblyName>
     <ApplicationIcon>Assets\HOSTBLANCO.ico</ApplicationIcon>
-    <Product>Tone %%26 Beats by Hostility</Product>
+    <Product>Tone %26 Beats by Hostility</Product>
     <Description>Desktop application for detecting BPM and musical key in audio files</Description>
-    <Company>Hostility</Company>
-    <Copyright>Copyright 2026</Copyright>
-    <Version>1.0.0-beta</Version>
+    <Company>Hostility Music</Company>
+    <Copyright>Copyright 2026 Hostility Music</Copyright>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
