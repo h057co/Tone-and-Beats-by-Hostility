@@ -1,0 +1,130 @@
+<Window x:Class="AudioAnalyzer.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Acerca De - Tone And Beat's by Hostility"
+        Height="500" Width="450"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{DynamicResource BackgroundBrush}">
+    
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+        </Style>
+        <Style TargetType="Hyperlink">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Title -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,20">
+            <TextBlock Text="Tone And Beat's by Hostility" FontSize="22" FontWeight="Bold" 
+                       Foreground="{DynamicResource TitleBrush}" HorizontalAlignment="Center"/>
+            <TextBlock Text="Versión 1.0.3" FontSize="12" 
+                       Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+        </StackPanel>
+        
+        <!-- Libraries List -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Librerías usadas:" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                
+                <!-- NAudio -->
+                <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="NAudio" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="Autor: Mark Heath" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Versión: 2.2.1" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Licencia: Microsoft Public License (Ms-PL)" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock FontSize="10" Margin="0,3,0,0">
+                            <Hyperlink NavigateUri="https://github.com/naudio/NAudio" Foreground="{DynamicResource AccentBrush}">
+                                Ver en GitHub
+                            </Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                
+                <!-- TagLibSharp -->
+                <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="TagLibSharp" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="Autor: mono" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Versión: 2.3.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Licencia: LGPL-2.1" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock FontSize="10" Margin="0,3,0,0">
+                            <Hyperlink NavigateUri="https://github.com/mono/taglib-sharp" Foreground="{DynamicResource AccentBrush}">
+                                Ver en GitHub
+                            </Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                
+                <!-- libKeyFinder.NET -->
+                <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="libKeyFinder.NET" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="Autor: Restroyer" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Versión: 1.0.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Licencia: GPL-2.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock FontSize="10" Margin="0,3,0,0">
+                            <Hyperlink NavigateUri="https://github.com/Restroyer/libKeyFinder.NET" Foreground="{DynamicResource AccentBrush}">
+                                Ver en GitHub
+                            </Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                
+                <!-- BpmFinder -->
+                <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="BpmFinder" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="Autor: bpmfinder" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Versión: 0.1.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Licencia: MIT" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock FontSize="10" Margin="0,3,0,0">
+                            <Hyperlink NavigateUri="https://github.com/bpmfinder/bpm-finder" Foreground="{DynamicResource AccentBrush}">
+                                Ver en GitHub
+                            </Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                
+                <!-- LiveChartsCore -->
+                <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="LiveChartsCore.SkiaSharpView.WPF" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="Autor: LiveChartsCore" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Versión: 2.0.0-rc2" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Licencia: MIT" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock FontSize="10" Margin="0,3,0,0">
+                            <Hyperlink NavigateUri="https://github.com/LiveChartsCore/LiveChartsCore" Foreground="{DynamicResource AccentBrush}">
+                                Ver en GitHub
+                            </Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Hostility Link -->
+        <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,15,0,0">
+            <TextBlock FontSize="12" HorizontalAlignment="Center">
+                <Hyperlink NavigateUri="https://www.hostilitymusic.com" Foreground="{DynamicResource AccentBrush}">
+                    www.hostilitymusic.com
+                </Hyperlink>
+            </TextBlock>
+        </StackPanel>
+        
+        <!-- Close Button -->
+        <Button Grid.Row="3" Content="Cerrar" HorizontalAlignment="Center" 
+                Margin="0,15,0,0" Width="100" Click="CloseButton_Click"/>
+    </Grid>
+</Window>

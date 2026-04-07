@@ -1,0 +1,34 @@
+<UserControl x:Class="AudioAnalyzer.Controls.WaveformControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="100" d:DesignWidth="600"
+             Background="{DynamicResource WaveformBackgroundBrush}"
+             Loaded="OnLoaded">
+    
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Waveform Display Area -->
+        <Border Grid.Row="0" Background="{DynamicResource WaveformBackgroundBrush}" ClipToBounds="True">
+            <Canvas x:Name="WaveformCanvas" Background="Transparent" 
+                    MouseLeftButtonDown="WaveformCanvas_MouseLeftButtonDown"
+                    MouseMove="WaveformCanvas_MouseMove"
+                    MouseLeftButtonUp="WaveformCanvas_MouseLeftButtonUp"
+                    Cursor="Hand"/>
+        </Border>
+        
+        <!-- Timeline -->
+        <Border Grid.Row="1" Background="{DynamicResource ResultBoxBackgroundBrush}">
+            <Grid>
+                <TextBlock x:Name="TimeStartLabel" Text="0:00" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Left" Margin="5,2,0,0"/>
+                <TextBlock x:Name="TimeEndLabel" Text="0:00" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" Margin="0,2,5,0"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

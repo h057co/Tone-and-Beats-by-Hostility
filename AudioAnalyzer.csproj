@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>ToneAndBeatsByHostility</AssemblyName>
+    <ApplicationIcon>Assets\HOSTBLANCO.ico</ApplicationIcon>
+    <Product>Tone %%26 Beats by Hostility</Product>
+    <Description>Desktop application for detecting BPM and musical key in audio files</Description>
+    <Company>Hostility</Company>
+    <Copyright>Copyright 2026</Copyright>
+    <Version>1.0.0-beta</Version>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BpmFinder" Version="0.1.0" />
+    <PackageReference Include="libKeyFinder.NET" Version="1.0.0" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc2" />
+    <PackageReference Include="MediaInfo.Wrapper.Core" Version="26.1.0" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\HOST_BLANCO.png" />
+    <Resource Include="Assets\HOST_NEGRO.png" />
+    <Resource Include="Assets\HOSTBLANCO.ico" />
+  </ItemGroup>
+
+</Project>

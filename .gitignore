@@ -1,0 +1,47 @@
+# .NET
+bin/
+obj/
+out/
+[Bb]uild/
+[Ll]og/
+*.user
+*.suo
+*.cache
+*.dotnet*
+*.dll
+*.exe
+*.pdb
+*.md.bak
+
+# Visual Studio
+.vs/
+*.userprefs
+*.rsuser
+*.suo
+*.user
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# Compiled
+*.dll
+*.exe
+*.pdb
+*.mdb
+
+# Logs
+*.log
+AppData/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build outputs
+publish/
+publish-single/
+publish-selfcontained/
+Output/
