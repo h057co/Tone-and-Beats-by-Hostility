@@ -18,16 +18,27 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
     public WaveformData Analyze(string filePath, double? globalBpm = null)
     {
+        LoggerService.Log($"WaveformAnalyzer.Analyze - Iniciando para: {filePath}");
+        
         var samples = LoadAudioFile(filePath);
         var sampleRate = 44100;
         
         using var reader = new NAudio.Wave.AudioFileReader(filePath);
         sampleRate = reader.WaveFormat.SampleRate;
+        LoggerService.Log($"WaveformAnalyzer.Analyze - Muestras cargadas: {samples.Length}, SampleRate: {sampleRate}");
 
         var waveformData = GetWaveformData(samples, 1000);
-        var beatPositions = globalBpm.HasValue ? GetBeatGrid(samples, sampleRate, globalBpm.Value) : new List<double>();
+        LoggerService.Log($"WaveformAnalyzer.Analyze - Waveform data completado");
+
+        // Simplified for performance - skip complex beat detection
+        var beatPositions = new List<double>();
+        LoggerService.Log($"WaveformAnalyzer.Analyze - Beat positions simplificado");
+
         var energyData = GetEnergySections(samples, sampleRate);
-        var tempoChanges = DetectTempoChanges(samples, sampleRate, globalBpm);
+        LoggerService.Log($"WaveformAnalyzer.Analyze - Energy sections completado");
+
+        var tempoChanges = new List<TempoChange>();
+        LoggerService.Log($"WaveformAnalyzer.Analyze - Tempo changes simplificado");
 
         return new WaveformData
         {

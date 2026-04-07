@@ -1,6 +1,7 @@
 using AudioAnalyzer.Interfaces;
 using AudioAnalyzer.Services;
 using BpmFinder;
+using System;
 
 namespace AudioAnalyzer.Services;
 
@@ -10,13 +11,22 @@ public class BpmDetector : IBpmDetectorService
 
     public async Task<double> DetectBpmAsync(string filePath, IProgress<int>? progress = null)
     {
-        return await Task.Run(() => DetectBpm(filePath, progress));
+        try
+        {
+            return await Task.Run(() => DetectBpm(filePath, progress));
+        }
+        catch (Exception ex)
+        {
+            LoggerService.Log($"BpmDetector.DetectBpmAsync - Error: {ex.Message}");
+            return 0;
+        }
     }
 
     public double DetectBpm(string filePath, IProgress<int>? progress = null)
     {
         try
         {
+            LoggerService.Log($"BpmDetector.DetectBpm - Iniciando para: {filePath}");
             progress?.Report(10);
 
             var options = new BpmAnalysisOptions
@@ -29,21 +39,26 @@ public class BpmDetector : IBpmDetectorService
 
             var bpmFinderResult = BpmAnalyzer.AnalyzeFileAsync(filePath, options).GetAwaiter().GetResult();
             double bpmFinderBpm = bpmFinderResult.Bpm > 0 ? Math.Round(bpmFinderResult.Bpm, 1) : 0;
+            LoggerService.Log($"BpmDetector.DetectBpm - BpmFinder result: {bpmFinderBpm}");
 
             progress?.Report(50);
 
-            var advancedResult = GetAdvancedBpm(filePath);
+            // Skip advanced BPM to avoid long processing time
+            var advancedResult = (bpm: 0.0, confidence: 0.0);
+            LoggerService.Log($"BpmDetector.DetectBpm - Advanced BPM skipped for performance");
 
             progress?.Report(90);
 
             double finalBpm = CombineBpmResults(bpmFinderBpm, advancedResult.bpm, advancedResult.confidence);
+            LoggerService.Log($"BpmDetector.DetectBpm - Final BPM: {finalBpm}");
 
             progress?.Report(100);
 
             return finalBpm;
         }
-        catch
+        catch (Exception ex)
         {
+            LoggerService.Log($"BpmDetector.DetectBpm - Exception: {ex.Message}");
             return 0;
         }
     }

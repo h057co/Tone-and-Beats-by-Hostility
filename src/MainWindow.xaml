@@ -8,7 +8,7 @@
         xmlns:infra="clr-namespace:AudioAnalyzer.Infrastructure"
         mc:Ignorable="d"
         Title="Tone &amp; Beats by Hostility" 
-        MinWidth="700" MinHeight="800" MaxWidth="700"
+        Width="400" Height="760" MinWidth="450" MinHeight="500"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen" 
         Background="{DynamicResource BackgroundBrush}"
         AllowDrop="True"
@@ -98,12 +98,13 @@
     </Window.Resources>
     
     <Viewbox Stretch="Uniform">
-    <Grid Margin="15">
+    <Grid Margin="0" Width="400" Height="760">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="120"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -164,8 +165,17 @@
             <controls:WaveformControl x:Name="WaveformDisplay"/>
         </Border>
         
-        <!-- Row 4: Playback Controls -->
-        <Border Grid.Row="4" Style="{StaticResource ResultBox}">
+        <!-- Row 4: Status (NEW) -->
+        <Border Grid.Row="4" Style="{StaticResource ResultBox}" Padding="10,8">
+            <TextBlock Text="{Binding StatusText}" 
+                       Foreground="{Binding StatusForeground}" 
+                       FontSize="12" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"/>
+        </Border>
+        
+        <!-- Row 5: Playback Controls -->
+        <Border Grid.Row="5" Style="{StaticResource ResultBox}">
             <StackPanel HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,10">
                     <Button Content="▶ Play" Command="{Binding PlayCommand}" Width="80" Margin="5"/>
@@ -180,8 +190,8 @@
             </StackPanel>
         </Border>
         
-        <!-- Row 5: Analyze Button -->
-        <Border Grid.Row="5" Style="{StaticResource ResultBox}">
+        <!-- Row 6: Analyze Button -->
+        <Border Grid.Row="6" Style="{StaticResource ResultBox}">
             <StackPanel HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="🔍 Analyze Audio" Style="{StaticResource AnalyzeButton}" 
@@ -197,8 +207,8 @@
             </StackPanel>
         </Border>
         
-        <!-- Row 6: Results (BPM/Key) -->
-        <Border Grid.Row="6" Style="{StaticResource ResultBox}" Padding="15,20">
+        <!-- Row 7: Results (BPM/Key) -->
+        <Border Grid.Row="7" Style="{StaticResource ResultBox}" Padding="15,20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -208,8 +218,9 @@
                 <!-- BPM Result -->
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                     <TextBlock Text="BPM" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding BpmDisplayText}" FontSize="48" FontWeight="Bold" 
+                    <TextBlock Text="{Binding BpmDisplayText}" FontSize="36" FontWeight="Bold" 
                               Foreground="{Binding BpmForeground}" HorizontalAlignment="Center" Margin="0,5"
+                              MaxWidth="160"
                               MouseLeftButtonDown="BpmText_LeftClick"
                               MouseRightButtonDown="BpmText_RightClick"
                               Cursor="Hand"
@@ -221,8 +232,9 @@
                 <!-- Key Result -->
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                     <TextBlock Text="KEY" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding KeyDisplayText}" FontSize="48" FontWeight="Bold" Foreground="#E070DF"
+                    <TextBlock Text="{Binding KeyDisplayText}" FontSize="36" FontWeight="Bold" Foreground="#E070DF"
                               HorizontalAlignment="Center" Margin="0,5"
+                              MaxWidth="160"
                               MouseLeftButtonDown="KeyText_Click"
                               Cursor="Hand"
                               ToolTip="Click para ver tonalidad relativa (mayor/menor)"/>
@@ -232,8 +244,8 @@
             </Grid>
         </Border>
         
-        <!-- Row 7: Link + Status + About -->
-        <Grid Grid.Row="7" Margin="0,5">
+        <!-- Row 8: Link + About (sin Status) -->
+        <Grid Grid.Row="8" Margin="0,5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -248,14 +260,6 @@
                     www.hostilitymusic.com
                 </Hyperlink>
             </TextBlock>
-            
-            <!-- Status - Center -->
-            <TextBlock Grid.Column="1" 
-                       Text="{Binding StatusText}" 
-                       Foreground="{Binding StatusForeground}" 
-                       FontSize="11" 
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"/>
             
             <!-- About Button - Right -->
             <Button Grid.Column="2" Content="Acerca De" Click="AboutButton_Click" 

@@ -45,6 +45,7 @@ public class MainViewModel : ViewModelBase
     private RelayCommand? _pauseCommand;
     private RelayCommand? _stopCommand;
     private RelayCommand? _saveMetadataCommand;
+    private RelayCommand? _analyzeCommand;
     private double _originalBpm;
     private double _displayBpm;
     private bool _bpmAdjusted;
@@ -338,7 +339,13 @@ public class MainViewModel : ViewModelBase
         get => _stopCommand ??= new RelayCommand(ExecuteStop, () => ArePlaybackControlsEnabled);
         private set => _stopCommand = value;
     }
-    public ICommand AnalyzeCommand { get; }
+    public RelayCommand AnalyzeCommand 
+    {
+        get => _analyzeCommand ??= new RelayCommand(
+            () => { if (!string.IsNullOrEmpty(FilePath)) ExecuteAnalyze(); },
+            () => !string.IsNullOrEmpty(FilePath) && !_isAnalyzingInProgress);
+        private set => _analyzeCommand = value;
+    }
 
     public bool IsAnalyzingInProgress => _isAnalyzingInProgress;
 
@@ -359,8 +366,6 @@ public class MainViewModel : ViewModelBase
         get => _saveMetadataCommand ??= new RelayCommand(ExecuteSaveMetadata, () => IsSaveMetadataEnabled);
         private set => _saveMetadataCommand = value;
     }
-
-    public event EventHandler<double>? SeekRequested;
 
     private void ExecuteBrowse()
     {
@@ -520,6 +525,12 @@ public class MainViewModel : ViewModelBase
     {
         if (string.IsNullOrEmpty(FilePath)) return;
 
+        try
+        {
+            _audioPlayerService.Stop();
+        }
+        catch { }
+
         _isAnalyzingInProgress = true;
         IsAnalyzeButtonEnabled = false;
         IsAnalysisProgressVisible = true;
@@ -533,9 +544,20 @@ public class MainViewModel : ViewModelBase
         try
         {
             AnalysisProgress = 10;
-            StatusText = "Detecting BPM...";
+            StatusText = "Detecting BPM & Key...";
+            LoggerService.Log("ExecuteAnalyze - Iniciando deteccion paralela BPM y Key");
 
-            var bpm = await _bpmDetectorService.DetectBpmAsync(FilePath);
+            var bpmTask = _bpmDetectorService.DetectBpmAsync(FilePath);
+            var keyTask = _keyDetectorService.DetectKeyAsync(FilePath);
+            var waveformTask = _waveformAnalyzerService.AnalyzeAsync(FilePath, null);
+
+            await Task.WhenAll(bpmTask, keyTask, waveformTask);
+
+            var bpm = await bpmTask;
+            var (key, mode, confidence) = await keyTask;
+            var waveformData = await waveformTask;
+
+            LoggerService.Log($"ExecuteAnalyze - BPM detectado: {bpm}");
             BpmText = bpm > 0 ? bpm.ToString("F1") : "--";
             BpmConfidence = bpm > 0 ? "Detected" : "";
             if (bpm > 0)
@@ -548,10 +570,7 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(BpmForeground));
             }
 
-            AnalysisProgress = 40;
-            StatusText = "Detecting Key...";
-
-            var (key, mode, confidence) = await _keyDetectorService.DetectKeyAsync(FilePath);
+            LoggerService.Log($"ExecuteAnalyze - Key detectada: {key}, Mode: {mode}");
             KeyText = key != "Error" ? key : "--";
             ModeText = mode != "Error" ? mode : "";
             KeyConfidence = confidence > 0 ? $"Confidence: {confidence:P0}" : "";
@@ -560,17 +579,26 @@ public class MainViewModel : ViewModelBase
             _showRelativeKey = false;
             OnPropertyChanged(nameof(KeyDisplayText));
 
-            AnalysisProgress = 60;
-            StatusText = "Analyzing waveform...";
+            if (bpm > 0)
+            {
+                LoggerService.Log("ExecuteAnalyze - Re-analizando waveform con BPM");
+                WaveformData = await _waveformAnalyzerService.AnalyzeAsync(FilePath, bpm);
+            }
+            else
+            {
+                WaveformData = waveformData;
+            }
 
-            WaveformData = await _waveformAnalyzerService.AnalyzeAsync(FilePath, bpm > 0 ? bpm : null);
+            LoggerService.Log("ExecuteAnalyze - Waveform analizado");
 
             AnalysisProgress = 100;
             StatusText = "Analysis complete!";
+            LoggerService.Log("ExecuteAnalyze - Analisis completo");
         }
         catch (Exception ex)
         {
             StatusText = $"Analysis error: {ex.Message}";
+            LoggerService.Log($"ExecuteAnalyze - Error: {ex.Message}");
         }
         finally
         {

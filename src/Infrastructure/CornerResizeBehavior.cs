@@ -7,6 +7,8 @@ namespace AudioAnalyzer.Infrastructure;
 
 public static class CornerResizeBehavior
 {
+    private static double _aspectRatio = 1.9; // Default (760/400)
+
     public static readonly DependencyProperty EnableOnlyCornerResizeProperty =
         DependencyProperty.RegisterAttached(
             "EnableOnlyCornerResize",
@@ -25,6 +27,18 @@ public static class CornerResizeBehavior
         if (d is Window window && (bool)e.NewValue)
         {
             window.SourceInitialized += Window_SourceInitialized;
+            window.Loaded += Window_Loaded;
+        }
+    }
+
+    private static void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is Window window)
+        {
+            if (window.ActualWidth > 0 && window.ActualHeight > 0)
+            {
+                _aspectRatio = window.ActualHeight / window.ActualWidth;
+            }
         }
     }
 
@@ -39,6 +53,7 @@ public static class CornerResizeBehavior
     }
 
     private const int WM_NCHITTEST = 0x0084;
+    private const int WM_WINDOWPOSCHANGING = 0x0046;
     private const int HTCLIENT = 1;
     private const int HTTOPLEFT = 13;
     private const int HTTOPRIGHT = 14;
@@ -47,24 +62,51 @@ public static class CornerResizeBehavior
 
     private static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg == WM_NCHITTEST)
+        switch (msg)
         {
-            int xPos = (short)(lParam.ToInt32() & 0xFFFF);
-            int yPos = (short)((lParam.ToInt32() >> 16) & 0xFFFF);
-
-            var result = GetHitTestResult(hwnd, xPos, yPos);
-            if (result != 0)
-            {
-                handled = true;
-                return new IntPtr(result);
-            }
-            else
-            {
-                handled = true;
-                return new IntPtr(HTCLIENT);
-            }
+            case WM_NCHITTEST:
+                return HandleNCHitTest(hwnd, lParam, ref handled);
+            case WM_WINDOWPOSCHANGING:
+                HandleWindowPosChanging(hwnd, lParam);
+                break;
         }
         return IntPtr.Zero;
+    }
+
+    private static IntPtr HandleNCHitTest(IntPtr hwnd, IntPtr lParam, ref bool handled)
+    {
+        int xPos = (short)(lParam.ToInt32() & 0xFFFF);
+        int yPos = (short)((lParam.ToInt32() >> 16) & 0xFFFF);
+
+        var result = GetHitTestResult(hwnd, xPos, yPos);
+        if (result != 0)
+        {
+            handled = true;
+            return new IntPtr(result);
+        }
+        else
+        {
+            handled = true;
+            return new IntPtr(HTCLIENT);
+        }
+    }
+
+    private static void HandleWindowPosChanging(IntPtr hwnd, IntPtr lParam)
+    {
+        try
+        {
+            var pos = Marshal.PtrToStructure<WINDOWPOS>(lParam);
+
+            if ((pos.flags & 0x0001) != 0) return; // SWP_NOSIZE flag set
+
+            if (pos.cx > 0 && pos.cy > 0)
+            {
+                double newHeight = pos.cx * _aspectRatio;
+                pos.cy = (int)Math.Round(newHeight);
+                Marshal.StructureToPtr(pos, lParam, true);
+            }
+        }
+        catch { }
     }
 
     private static int GetHitTestResult(IntPtr hwnd, int xPos, int yPos)
@@ -99,6 +141,18 @@ public static class CornerResizeBehavior
         public int Top;
         public int Right;
         public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct WINDOWPOS
+    {
+        public IntPtr hwnd;
+        public IntPtr hwndInsertAfter;
+        public int x;
+        public int y;
+        public int cx;
+        public int cy;
+        public int flags;
     }
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
