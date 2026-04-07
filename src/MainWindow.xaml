@@ -5,15 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:AudioAnalyzer.Controls"
         xmlns:themes="clr-namespace:AudioAnalyzer.Themes"
+        xmlns:infra="clr-namespace:AudioAnalyzer.Infrastructure"
         mc:Ignorable="d"
         Title="Tone &amp; Beats by Hostility" 
-        MinWidth="700" MinHeight="800"
+        MinWidth="700" MinHeight="800" MaxWidth="700"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen" 
         Background="{DynamicResource BackgroundBrush}"
         AllowDrop="True"
         DragEnter="Window_DragEnter"
         DragLeave="Window_DragLeave"
         Drop="Window_Drop"
+        infra:CornerResizeBehavior.EnableOnlyCornerResize="True"
         DataContext="{Binding}">
     
     <Window.Resources>
@@ -96,7 +98,7 @@
     </Window.Resources>
     
     <Viewbox Stretch="Uniform">
-    <Grid Margin="15" Width="700" Height="800">
+    <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
