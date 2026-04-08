@@ -29,7 +29,7 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
             var startInfo = new ProcessStartInfo
             {
                 FileName = ffmpegPath,
-                Arguments = $"-threads 0 -hide_banner -i \"{filePath}\" -af \"ebur128=peak=true\" -f null -",
+                Arguments = $"-threads 0 -hide_banner -i \"{filePath}\" -af \"loudnorm=I=-23:print_format=json\" -f null -",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -156,25 +156,14 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
 
         try
         {
-            // Try ebur128 format first (new format)
-            result.IntegratedLufs = ExtractValue(output, "I:");
-            result.TruePeak = ExtractValue(output, "Peak:");
-            result.ShortTermLufs = ExtractValue(output, "LRA:");
+            // loudnorm format (JSON)
+            result.IntegratedLufs = ExtractValue(output, "input_i");
+            result.TruePeak = ExtractValue(output, "input_tp");
+            result.ShortTermLufs = ExtractValue(output, "input_lra");
 
-            // If not found, try loudnorm format (legacy format)
-            if (result.IntegratedLufs == 0)
-            {
-                result.IntegratedLufs = ExtractValue(output, "input_i");
-                result.TruePeak = ExtractValue(output, "input_tp");
-                result.ShortTermLufs = ExtractValue(output, "input_lra");
-            }
-
-            // ebur128 outputs True Peak in dBFS (already in correct format)
-            // Keep as-is (positive values = above 0dB, negative = below)
-
-            LoggerService.Log("LoudnessAnalyzer - Integrated: " + result.IntegratedLufs + " LUFS");
-            LoggerService.Log("LoudnessAnalyzer - True Peak: " + result.TruePeak + " dBTP");
-            LoggerService.Log("LoudnessAnalyzer - LRA: " + result.ShortTermLufs + " LU");
+            LoggerService.Log("LoudnessAnalyzer - input_i (Integrated): " + result.IntegratedLufs + " LUFS");
+            LoggerService.Log("LoudnessAnalyzer - input_tp (True Peak): " + result.TruePeak + " dBTP");
+            LoggerService.Log("LoudnessAnalyzer - input_lra (LRA): " + result.ShortTermLufs + " LUFS");
 
             if (result.ShortTermLufs == 0)
             {

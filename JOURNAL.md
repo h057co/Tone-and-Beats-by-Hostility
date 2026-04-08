@@ -160,6 +160,114 @@
 
 ---
 
+## 2026-04-08 - Resumen de Jornada (Sesión Noche)
+
+### Auditoría Completa del Código
+
+**Fecha:** 8 de Abril de 2026
+**Auditor:** opencode (agente AI)
+**Alcance:** Seguridad, Rendimiento, Calidad de Código, Arquitectura
+
+---
+
+### 1. Registro de Cambios (Changelog)
+
+**Optimizaciones de Rendimiento:**
+- FFmpeg ahora usa `-threads 0` (todos los cores disponibles)
+- LoudnessAnalyzer: loudnorm con análisis de LUFS estándar
+- OGG support agregado con NAudio.Vorbis
+
+**Nueva Infraestructura:**
+- AudioReaderFactory.cs creado para manejo de formatos de audio
+- Proyecto de test de rendimiento: AudioAnalyzer.PerfTest
+- .gitignore actualizado (Assets/audiotest/ ignorado)
+
+**Assets:**
+- qrdonaciones.png agregado en dos ubicaciones
+- Test files en Assets/audiotest/
+
+---
+
+### 2. Cambios en Infraestructura y Lógica
+
+**Archivos modificados:**
+- `AudioAnalyzer.csproj`: NAudio.Vorbis package agregado
+- `LoudnessAnalyzer.cs`: FFmpeg threads + loudnorm
+- `WaveformAnalyzer.cs`: AudioReaderFactory integration
+- `BpmDetector.cs`: AudioReaderFactory integration  
+- `KeyDetector.cs`: AudioReaderFactory integration
+- `AudioPlayerService.cs`: AudioReaderFactory integration
+- `.gitignore`: Assets/audiotest/ agregado
+
+**Archivos nuevos:**
+- `src/Services/AudioReaderFactory.cs`: Factory para detectar formato de audio
+- `src/AudioAnalyzer.PerfTest/`: Proyecto de test de rendimiento
+
+---
+
+### 3. Nota de Traspaso (Handover)
+
+**Estado actual:**
+- OGG ahora funciona correctamente
+- FFmpeg optimizado con multithreading
+- Rendimiento documentado (1.12 archivos/min)
+- Auditoría completa completada
+
+**CRITICAL - Issues a resolver mañana:**
+1. `BpmDetector.cs:46` - `.GetAwaiter().GetResult()` bloquea async thread pool
+2. Memory: Archivos completos cargados en memoria (no streaming)
+3. duplicated FFT code en KeyDetector y WaveformAnalyzer
+
+**Para continuar mañana:**
+- Refactorizar BpmDetector para usar async/await correcto
+- Extraer FFT a clase compartida utils
+- Implementar streaming de audio para archivos grandes
+
+---
+
+### 4. Pendientes (Backlog)
+
+| # | Tarea | Prioridad | Estado |
+|---|-------|-----------|--------|
+| 1 | Fix .GetAwaiter().GetResult() blocking en BpmDetector | **Crítica** | ⏳ Pendiente |
+| 2 | Extraer FFT a utility class compartida | Alta | ⏳ Pendiente |
+| 3 | Implementar streaming audio (archivos grandes) | Alta | ⏳ Pendiente |
+| 4 | Split MainViewModel (god class 900+ líneas) | Media | ⏳ Pendiente |
+| 5 | Add null checks para sampleProvider | Media | ⏳ Pendiente |
+| 6 | Constantes para magic numbers | Baja | ⏳ Pendiente |
+
+**Errores bloqueantes:** Ninguno
+
+---
+
+### Auditoría - Resultados Completos
+
+#### SEGURIDAD (7/10)
+- Log Injection (medium): Rutas de archivos sin sanitizar en logs
+- Path Traversal Risk (low): FFmpeg path search
+- Input Validation (low): Solo extensión, no magic bytes
+- Exception Handling: ✅ Correcto (captura genérica, retorna defaults seguros)
+
+#### RENDIMIENTO (5/10)
+- **CRITICAL**: `.GetAwaiter().GetResult()` blocks thread pool
+- **HIGH**: Archivos completos en memoria (no streaming)
+- **HIGH**: Archivo cargado 2 veces (BPM + Key)
+- Custom FFT sin optimización SIMD
+
+#### CALIDAD (6/10)
+- **HIGH**: FFT duplicado en KeyDetector y WaveformAnalyzer
+- **MEDIUM**: MainViewModel god class (903 líneas)
+- Magic numbers hardcoded
+- Mixed English/Spanish (logger en español, código en inglés)
+
+#### ARQUITECTURA (7/10)
+- ✅ DI bien implementado
+- ✅ Interface segregation correcto
+- ⚠️ Static LoggerService crea dependencias ocultas
+- ⚠️ MainViewModel viola SRP
+
+---
+
 *Entrada registrada: 8 de Abril de 2026*
 *Proyecto: Tone & Beats by Hostility v1.0.2*
 
