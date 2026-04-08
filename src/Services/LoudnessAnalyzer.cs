@@ -65,10 +65,13 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
 
     private string FindFFmpeg()
     {
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
         var possiblePaths = new[]
         {
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg", "ffmpeg.exe"),
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg.exe"),
+            Path.Combine(baseDir, "publish", "ffmpeg", "ffmpeg.exe"),
+            Path.Combine(baseDir, "ffmpeg", "ffmpeg.exe"),
+            Path.Combine(baseDir, "publish", "ffmpeg.exe"),
+            Path.Combine(baseDir, "ffmpeg.exe"),
             "ffmpeg"
         };
 

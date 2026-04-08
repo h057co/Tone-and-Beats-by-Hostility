@@ -180,7 +180,7 @@
                     <TextBlock Text="LUFS" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding LoudnessIntegratedDisplay}" FontSize="20" FontWeight="Bold" 
                               Foreground="{Binding LoudnessIntegratedForeground}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Integrated" FontSize="9" Foreground="{DynamicResource BorderBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Integrated" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- LRA -->
@@ -188,7 +188,7 @@
                     <TextBlock Text="LRA" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding LoudnessShortTermDisplay}" FontSize="20" FontWeight="Bold" 
                               Foreground="{DynamicResource ForegroundBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="LUFS" FontSize="9" Foreground="{DynamicResource BorderBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="LUFS" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- True Peak -->
@@ -196,7 +196,7 @@
                     <TextBlock Text="True Peak" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding LoudnessTruePeakDisplay}" FontSize="20" FontWeight="Bold" 
                               Foreground="{Binding LoudnessTruePeakForeground}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="dBTP" FontSize="9" Foreground="{DynamicResource BorderBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="dBTP" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -211,7 +211,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding PositionText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"/>
-                    <TextBlock Text=" / " Foreground="{DynamicResource BorderBrush}" FontSize="12"/>
+                    <TextBlock Text=" / " Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"/>
                     <TextBlock Text="{Binding DurationText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"/>
                 </StackPanel>
             </StackPanel>
@@ -261,20 +261,20 @@
                               MouseRightButtonDown="BpmText_RightClick"
                               Cursor="Hand"
                               ToolTip="Click para ajustar: 1er click = ajusta (65-135), 2do click = reset"/>
-                    <TextBlock Text="{Binding BpmConfidence}" FontSize="10" Foreground="{DynamicResource BorderBrush}" 
+                    <TextBlock Text="{Binding BpmConfidence}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" 
                               HorizontalAlignment="Center"/>
                 </StackPanel>
                 
                 <!-- Key Result -->
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                     <TextBlock Text="KEY" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding KeyDisplayText}" FontSize="36" FontWeight="Bold" Foreground="#E070DF"
+                    <TextBlock Text="{Binding KeyDisplayText}" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource KeyForegroundBrush}"
                               HorizontalAlignment="Center" Margin="0,5"
                               MaxWidth="160"
                               MouseLeftButtonDown="KeyText_Click"
                               Cursor="Hand"
                               ToolTip="Click para ver tonalidad relativa (mayor/menor)"/>
-                    <TextBlock Text="{Binding KeyConfidence}" FontSize="10" Foreground="{DynamicResource BorderBrush}" 
+                    <TextBlock Text="{Binding KeyConfidence}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" 
                               HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>

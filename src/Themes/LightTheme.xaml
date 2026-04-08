@@ -9,9 +9,10 @@
     <SolidColorBrush x:Key="ButtonHoverBrush" Color="#2980B9"/>
     <SolidColorBrush x:Key="ButtonDisabledBrush" Color="#CCCCCC"/>
     <SolidColorBrush x:Key="ResultBoxBackgroundBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#666666"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#555555"/>
     <SolidColorBrush x:Key="BorderBrush" Color="#E0E0E0"/>
     <SolidColorBrush x:Key="TitleBrush" Color="#3498DB"/>
+    <SolidColorBrush x:Key="KeyForegroundBrush" Color="#9B59B6"/>
     <SolidColorBrush x:Key="AnalyzeButtonBrush" Color="#9B59B6"/>
     <SolidColorBrush x:Key="AnalyzeButtonHoverBrush" Color="#8E44AD"/>
     <SolidColorBrush x:Key="ProgressBarBackgroundBrush" Color="#E0E0E0"/>

@@ -31,4 +31,13 @@
     <Content Include="Assets\HOSTBLANCO.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\publish\ffmpeg\ffmpeg.exe" CopyToOutputDirectory="PreserveNewest">
+      <Link>publish\ffmpeg\ffmpeg.exe</Link>
+    </Content>
+    <Content Include="..\publish\ffmpeg\ffprobe.exe" CopyToOutputDirectory="PreserveNewest">
+      <Link>publish\ffmpeg\ffprobe.exe</Link>
+    </Content>
+  </ItemGroup>
+
 </Project>
