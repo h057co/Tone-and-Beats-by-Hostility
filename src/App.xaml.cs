@@ -22,6 +22,7 @@ public partial class App : Application
         IWaveformAnalyzerService waveformAnalyzerService = new WaveformAnalyzer();
         IFilePickerService filePickerService = new FilePickerService();
         IMessageBoxService messageBoxService = new MessageBoxService();
+        ILoudnessAnalyzerService loudnessAnalyzerService = new LoudnessAnalyzer();
 
         // Create ViewModel with injected dependencies (DIP)
         _viewModel = new MainViewModel(
@@ -30,7 +31,8 @@ public partial class App : Application
             keyDetectorService,
             waveformAnalyzerService,
             filePickerService,
-            messageBoxService);
+            messageBoxService,
+            loudnessAnalyzerService);
 
         // Create and show MainWindow
         var mainWindow = new MainWindow

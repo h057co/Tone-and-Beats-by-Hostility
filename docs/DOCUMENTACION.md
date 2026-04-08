@@ -97,10 +97,9 @@ src/
 |---------|---------|----------|----------|
 | NAudio | 2.2.1 | Reproducción y análisis de audio | Ms-PL |
 | TagLibSharp | 2.3.0 | Lectura/escritura de metadatos | LGPL 2.1 |
-| BpmFinder | 0.1.0 | Detección de tempo | MIT |
+| BpmFinder | 0.1.0 | Detección de tempo (MP3/WAV) | MIT |
 | MediaInfo.Wrapper.Core | 26.1.0 | Info técnica de audio | BSD-2-Clause |
-| libKeyFinder.NET | 1.0.0 | Detección de tonalidad | GPL 2.0 |
-| LiveChartsCore.SkiaSharpView.WPF | 2.0.0-rc2 | Visualización de gráficos | MIT |
+| KeyDetector (custom) | - | Detección de tonalidad (implementación propia) | - |
 
 ---
 

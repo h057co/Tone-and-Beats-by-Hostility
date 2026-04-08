@@ -19,6 +19,7 @@ public class MainViewModel : ViewModelBase
     private readonly IWaveformAnalyzerService _waveformAnalyzerService;
     private readonly IFilePickerService _filePickerService;
     private readonly IMessageBoxService _messageBoxService;
+    private readonly ILoudnessAnalyzerService _loudnessAnalyzerService;
     private readonly MetadataWriter _metadataWriter;
 
     private string _fileName = "No file selected";
@@ -59,6 +60,8 @@ public class MainViewModel : ViewModelBase
     private AudioFileInfo? _currentAudioInfo;
     private int _keyIndex = -1;
     private bool _showRelativeKey = false;
+    private LoudnessResult? _loudnessResult;
+    private bool _isLoudnessVisible = false;
 
     public MainViewModel(
         IAudioPlayerService audioPlayerService,
@@ -66,7 +69,8 @@ public class MainViewModel : ViewModelBase
         IKeyDetectorService keyDetectorService,
         IWaveformAnalyzerService waveformAnalyzerService,
         IFilePickerService filePickerService,
-        IMessageBoxService messageBoxService)
+        IMessageBoxService messageBoxService,
+        ILoudnessAnalyzerService loudnessAnalyzerService)
     {
         _audioPlayerService = audioPlayerService;
         _bpmDetectorService = bpmDetectorService;
@@ -74,6 +78,7 @@ public class MainViewModel : ViewModelBase
         _waveformAnalyzerService = waveformAnalyzerService;
         _filePickerService = filePickerService;
         _messageBoxService = messageBoxService;
+        _loudnessAnalyzerService = loudnessAnalyzerService;
         _metadataWriter = new MetadataWriter();
 
         _audioPlayerService.PlaybackStateChanged += OnPlaybackStateChanged;
@@ -215,6 +220,64 @@ public class MainViewModel : ViewModelBase
     {
         get => _keyConfidence;
         set => SetProperty(ref _keyConfidence, value);
+    }
+
+    public LoudnessResult? LoudnessResult
+    {
+        get => _loudnessResult;
+        set
+        {
+            SetProperty(ref _loudnessResult, value);
+            OnPropertyChanged(nameof(LoudnessIntegratedDisplay));
+            OnPropertyChanged(nameof(LoudnessShortTermDisplay));
+            OnPropertyChanged(nameof(LoudnessTruePeakDisplay));
+            OnPropertyChanged(nameof(LoudnessIntegratedForeground));
+            OnPropertyChanged(nameof(LoudnessTruePeakForeground));
+        }
+    }
+
+    public bool IsLoudnessVisible
+    {
+        get => _isLoudnessVisible;
+        set => SetProperty(ref _isLoudnessVisible, value);
+    }
+
+    public string LoudnessIntegratedDisplay => _loudnessResult?.IntegratedDisplay ?? "--";
+    public string LoudnessShortTermDisplay => _loudnessResult?.ShortTermDisplay ?? "--";
+    public string LoudnessTruePeakDisplay => _loudnessResult?.TruePeakDisplay ?? "--";
+
+    public Brush LoudnessIntegratedForeground
+    {
+        get
+        {
+            if (_loudnessResult == null || !_loudnessResult.IsValid)
+                return new SolidColorBrush(Color.FromRgb(102, 102, 102));
+
+            if (_loudnessResult.IntegratedLufs >= -12)
+                return new SolidColorBrush(Color.FromRgb(255, 100, 100)); // Red - too loud
+
+            if (_loudnessResult.IntegratedLufs >= -16)
+                return new SolidColorBrush(Color.FromRgb(255, 200, 100)); // Yellow - warning
+
+            return new SolidColorBrush(Color.FromRgb(100, 200, 100)); // Green - OK
+        }
+    }
+
+    public Brush LoudnessTruePeakForeground
+    {
+        get
+        {
+            if (_loudnessResult == null || _loudnessResult.TruePeak == 0)
+                return new SolidColorBrush(Color.FromRgb(102, 102, 102));
+
+            if (_loudnessResult.TruePeak >= 0)
+                return new SolidColorBrush(Color.FromRgb(255, 100, 100)); // Red - clipping/positive
+
+            if (_loudnessResult.TruePeak > -1)
+                return new SolidColorBrush(Color.FromRgb(255, 200, 100)); // Yellow - warning
+
+            return new SolidColorBrush(Color.FromRgb(100, 200, 100)); // Green - OK
+        }
     }
 
     private static readonly string[] NoteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
@@ -385,7 +448,7 @@ public class MainViewModel : ViewModelBase
             if (!_filePickerService.ValidateAudioFile(filePath))
             {
                 _messageBoxService.ShowError("Archivo no válido. Seleccione un archivo de audio válido (MP3, WAV, OGG, FLAC, M4A, AAC, AIFF, WMA).");
-                StatusText = "Invalid file selected.";
+                StatusText = "Archivo no válido.";
                 return;
             }
 
@@ -492,32 +555,32 @@ public class MainViewModel : ViewModelBase
             OnPropertyChanged(nameof(KeyDisplayText));
 
             UpdatePositionDisplay();
-            StatusText = "File loaded. Ready to analyze.";
+            StatusText = "Archivo cargado. Listo para analizar.";
             StatusForeground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
         }
         catch (Exception ex)
         {
-            _messageBoxService.ShowError($"Error loading file: {ex.Message}");
-            StatusText = "Error loading file.";
+            _messageBoxService.ShowError($"Error al cargar archivo: {ex.Message}");
+            StatusText = "Error al cargar archivo.";
         }
     }
 
     private void ExecutePlay()
     {
         _audioPlayerService.Play();
-        StatusText = "Playing...";
+        StatusText = "Reproduciendo...";
     }
 
     private void ExecutePause()
     {
         _audioPlayerService.Pause();
-        StatusText = "Paused.";
+        StatusText = "En pausa.";
     }
 
     private void ExecuteStop()
     {
         _audioPlayerService.Stop();
-        StatusText = "Stopped.";
+        StatusText = "Detenido.";
         UpdatePositionDisplay();
     }
 
@@ -539,23 +602,25 @@ public class MainViewModel : ViewModelBase
         BpmText = "...";
         KeyText = "...";
         ModeText = "";
-        StatusText = "Analyzing audio...";
+        StatusText = "Analizando audio...";
 
         try
         {
             AnalysisProgress = 10;
-            StatusText = "Detecting BPM & Key...";
-            LoggerService.Log("ExecuteAnalyze - Iniciando deteccion paralela BPM y Key");
+            StatusText = "Detectando BPM, Key y Loudness...";
+            LoggerService.Log("ExecuteAnalyze - Iniciando deteccion paralela BPM, Key, Loudness y Waveform");
 
             var bpmTask = _bpmDetectorService.DetectBpmAsync(FilePath);
             var keyTask = _keyDetectorService.DetectKeyAsync(FilePath);
             var waveformTask = _waveformAnalyzerService.AnalyzeAsync(FilePath, null);
+            var loudnessTask = _loudnessAnalyzerService.AnalyzeAsync(FilePath, null);
 
-            await Task.WhenAll(bpmTask, keyTask, waveformTask);
+            await Task.WhenAll(bpmTask, keyTask, waveformTask, loudnessTask);
 
             var bpm = await bpmTask;
             var (key, mode, confidence) = await keyTask;
             var waveformData = await waveformTask;
+            var loudness = await loudnessTask;
 
             LoggerService.Log($"ExecuteAnalyze - BPM detectado: {bpm}");
             BpmText = bpm > 0 ? bpm.ToString("F1") : "--";
@@ -579,6 +644,10 @@ public class MainViewModel : ViewModelBase
             _showRelativeKey = false;
             OnPropertyChanged(nameof(KeyDisplayText));
 
+            LoggerService.Log($"ExecuteAnalyze - Loudness: LUFS={loudness.IntegratedDisplay}, TP={loudness.TruePeakDisplay}");
+            LoudnessResult = loudness;
+            IsLoudnessVisible = loudness.IsValid;
+
             if (bpm > 0)
             {
                 LoggerService.Log("ExecuteAnalyze - Re-analizando waveform con BPM");
@@ -592,12 +661,12 @@ public class MainViewModel : ViewModelBase
             LoggerService.Log("ExecuteAnalyze - Waveform analizado");
 
             AnalysisProgress = 100;
-            StatusText = "Analysis complete!";
+            StatusText = "¡Análisis completo!";
             LoggerService.Log("ExecuteAnalyze - Analisis completo");
         }
         catch (Exception ex)
         {
-            StatusText = $"Analysis error: {ex.Message}";
+            StatusText = $"Error en análisis: {ex.Message}";
             LoggerService.Log($"ExecuteAnalyze - Error: {ex.Message}");
         }
         finally
@@ -669,7 +738,7 @@ public class MainViewModel : ViewModelBase
             switch (state)
             {
                 case NAudio.Wave.PlaybackState.Playing:
-                    StatusText = "Playing...";
+                    StatusText = "Reproduciendo...";
                     break;
                 case NAudio.Wave.PlaybackState.Stopped:
                 case NAudio.Wave.PlaybackState.Paused:
@@ -726,25 +795,25 @@ public class MainViewModel : ViewModelBase
             if (files?.Length > 0 && _filePickerService.ValidateAudioFile(files[0]))
             {
                 e.Effects = DragDropEffects.Copy;
-                StatusText = "Drop audio file here";
+                StatusText = "Suelta el archivo de audio aquí";
                 StatusForeground = new SolidColorBrush(Color.FromRgb(100, 200, 100));
                 return;
             }
         }
         e.Effects = DragDropEffects.None;
-        StatusText = "Invalid file format - Audio files only";
+        StatusText = "Formato no válido - Solo archivos de audio";
         StatusForeground = new SolidColorBrush(Color.FromRgb(255, 100, 100));
     }
 
     public void HandleDragLeave()
     {
-        StatusText = "Ready";
+        StatusText = "Listo";
         StatusForeground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
     }
 
     public void HandleDrop(DragEventArgs e)
     {
-        StatusText = "Ready";
+        StatusText = "Listo";
         StatusForeground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
 
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -756,7 +825,7 @@ public class MainViewModel : ViewModelBase
             }
             else
             {
-                StatusText = "Invalid file format - Audio files only";
+                StatusText = "Formato no válido - Solo archivos de audio";
                 StatusForeground = new SolidColorBrush(Color.FromRgb(255, 100, 100));
             }
         }

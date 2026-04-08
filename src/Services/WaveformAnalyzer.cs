@@ -485,7 +485,10 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
             double sum = 0;
             int count = 0;
             for (int i = 0; i < onsetStrength.Length - lag; i++)
+            {
                 sum += onsetStrength[i] * onsetStrength[i + lag];
+                count++;
+            }
             if (count > 0) acf[lag] = sum / count;
         }
 

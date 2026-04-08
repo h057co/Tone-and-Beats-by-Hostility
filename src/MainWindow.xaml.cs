@@ -64,9 +64,9 @@ public partial class MainWindow : Window
                     new Uri("pack://application:,,,/Assets/HOST_BLANCO.png"));
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Logo failed to load - ignore silently
+            Services.LoggerService.Log($"MainWindow.UpdateLogoForTheme - Error: {ex.Message}");
         }
     }
 
@@ -81,7 +81,10 @@ public partial class MainWindow : Window
             });
             e.Handled = true;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Services.LoggerService.Log($"MainWindow.Hyperlink_RequestNavigate - Error: {ex.Message}");
+        }
     }
 
     private void ThemeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)

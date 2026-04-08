@@ -68,21 +68,6 @@
                     </StackPanel>
                 </Border>
                 
-                <!-- libKeyFinder.NET -->
-                <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
-                    <StackPanel>
-                        <TextBlock Text="libKeyFinder.NET" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="Autor: Restroyer" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="Versión: 1.0.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="Licencia: GPL-2.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock FontSize="10" Margin="0,3,0,0">
-                            <Hyperlink NavigateUri="https://github.com/Restroyer/libKeyFinder.NET" Foreground="{DynamicResource AccentBrush}">
-                                Ver en GitHub
-                            </Hyperlink>
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
-                
                 <!-- BpmFinder -->
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
                     <StackPanel>
@@ -98,15 +83,15 @@
                     </StackPanel>
                 </Border>
                 
-                <!-- LiveChartsCore -->
+                <!-- MediaInfo.Wrapper.Core -->
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="LiveChartsCore.SkiaSharpView.WPF" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="Autor: LiveChartsCore" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="Versión: 2.0.0-rc2" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="Licencia: MIT" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="MediaInfo.Wrapper.Core" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="Autor: MediaArea" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Versión: 26.1.0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="Licencia: BSD-2-Clause" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock FontSize="10" Margin="0,3,0,0">
-                            <Hyperlink NavigateUri="https://github.com/LiveChartsCore/LiveChartsCore" Foreground="{DynamicResource AccentBrush}">
+                            <Hyperlink NavigateUri="https://github.com/MediaArea/MediaInfo" Foreground="{DynamicResource AccentBrush}">
                                 Ver en GitHub
                             </Hyperlink>
                         </TextBlock>

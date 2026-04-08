@@ -65,9 +65,9 @@ public static class ThemeManager
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore errors in style updates
+            Services.LoggerService.Log($"ThemeManager.UpdateStaticStyles error: {ex.Message}");
         }
     }
 

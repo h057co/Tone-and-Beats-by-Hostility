@@ -49,8 +49,9 @@ public class KeyDetector : IKeyDetectorService
 
             return (NoteNames[keyIndex], mode == 0 ? "Major" : "Minor", correlation);
         }
-        catch
+        catch (Exception ex)
         {
+            LoggerService.Log($"KeyDetector.DetectKey - Error: {ex.Message}");
             return ("Error", "Error", 0);
         }
     }

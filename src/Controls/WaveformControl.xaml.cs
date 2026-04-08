@@ -217,7 +217,9 @@ public partial class WaveformControl : UserControl
             {
                 if (_duration > 0)
                 {
-                    TimeEndLabel.Text = $"{(int)_duration / 60}:{(_duration % 60):D2}";
+                    int minutes = (int)(_duration / 60);
+                    int seconds = (int)(_duration % 60);
+                    TimeEndLabel.Text = $"{minutes}:{seconds:D2}";
                 }
                 else
                 {
@@ -225,9 +227,9 @@ public partial class WaveformControl : UserControl
                 }
             }
         }
-            catch (System.Exception)
+        catch (System.Exception ex)
         {
-            // Silently handle
+            LoggerService.Log($"UpdateTimeline error: {ex.Message}");
         }
     }
 

@@ -1,7 +1,7 @@
 # Tone & Beats by Hostility - Documentación Técnica
 
-**Versión:** 1.0.0  
-**Fecha:** 7 de Abril de 2026  
+**Versión:** 1.0.2  
+**Fecha:** 8 de Abril de 2026  
 **Framework:** .NET 8.0 + WPF  
 **Estado:** Release
 
@@ -13,6 +13,7 @@
 - **BPM** (Beats Per Minute) del archivo de audio
 - **Tonalidad** (Key) en formato estándar musical (C, C#, D, etc.)
 - **Información técnica** del archivo (formato, sample rate, bit depth, bitrate, canales)
+- **LUFS** (Loudness): Integrated, LRA, True Peak
 
 ### Características Principales
 
@@ -58,8 +59,7 @@ src/
 │
 ├── Models/                          # Modelos de datos
 │   ├── AudioFileInfo.cs           # Información del archivo
-│   ├── WaveformData.cs           # Datos de forma de onda
-│   └── AnalysisResult.cs          # Resultado de análisis
+│   └── WaveformData.cs           # Datos de forma de onda
 │
 ├── Controls/                        # Controles personalizados
 │   └── WaveformControl.xaml / .cs # Visualizador de forma de onda
@@ -97,40 +97,39 @@ src/
 |---------|---------|----------|----------|
 | NAudio | 2.2.1 | Reproducción y análisis de audio | Ms-PL |
 | TagLibSharp | 2.3.0 | Lectura/escritura de metadatos | LGPL 2.1 |
-| BpmFinder | 0.1.0 | Detección de tempo | MIT |
+| BpmFinder | 0.1.0 | Detección de tempo (MP3/WAV) | MIT |
 | MediaInfo.Wrapper.Core | 26.1.0 | Info técnica de audio | BSD-2-Clause |
-| libKeyFinder.NET | 1.0.0 | Detección de tonalidad | GPL 2.0 |
-| LiveChartsCore.SkiaSharpView.WPF | 2.0.0-rc2 | Visualización de gráficos | MIT |
+| KeyDetector (custom) | - | Detección de tonalidad (implementación propia) | - |
+| FFMpegCore | 5.1.0 | Análisis loudness LUFS (wrapper FFmpeg) | MIT |
 
 ---
 
 ## 4. Algoritmos de Análisis
 
-### 4.1 Detección de BPM (Híbrido)
+### 4.1 Detección de BPM (Híbrido con Fallback)
 
-El sistema utiliza un enfoque de **detección híbrida** combinando:
+El sistema utiliza un enfoque de **detección híbrida** con fallback para formatos no soportados:
 
-1. **BpmFinder** (análisis primario)
+1. **BpmFinder** (análisis primario - solo MP3/WAV)
    - Análisis de energía en bandas de frecuencia
    - Detección de beats mediante onset detection
    - Autocorrelación para periodicidad
    - Configuración: MinBpm=50, MaxBpm=220, PreferStableTempo=true
 
-2. **Análisis avanzado propio** (validación secundaria - deshabilitado por performance)
+2. **Algoritmo avanzado propio** (fallback para FLAC/OGG/M4A/AAC/AIFF/WMA)
+   - Detección de rango adaptativo basada en energía de graves
    - Pre-procesamiento: Low-frequency emphasis + Normalization
    - 3 onset functions: Spectral Flux, Energy Flux, Complex Domain
-   - Multi-candidato BPM con weighted voting
+   - Multi-candidato BPM con weighted voting y verificación de consistencia
 
-3. **Combinación**
-   - Si ambos resultados < 3 BPM de diferencia: promedio
-   - Si harmonicDiff < 3 y confianza > 0.6: usar análisis avanzado
-   - Sino: weighted average (60% BpmFinder, 40% avanzado)
-
-**Nota:** El análisis avanzado está deshabilitado temporalmente para mejorar rendimiento. El BPM se detecta únicamente con BpmFinder.
+3. **Lógica de selección**
+   - Si formato es MP3/WAV: usa BpmFinder primero, fallback a avanzado si falla
+   - Si formato es FLAC/OGG/etc: usa algoritmo avanzado directamente
+   - Nota: El análisis avanzado tiene mayor precisión pero es más lento
 
 ### 4.2 Detección de Tonalidad
 
-**Biblioteca**: libKeyFinder.NET (algoritmo Krumhansl-Schmuckler)
+**Biblioteca**: KeyDetector personalizado (implementación propia del algoritmo Krumhansl-Schmuckler)
 
 - Pitch Class Profile (PCP): Calcula perfil cromático
 - FFT de 16384 samples, A4=440Hz referencia
@@ -192,8 +191,9 @@ Los tres análisis (BPM, Key, Waveform) se ejecutan en paralelo usando `Task.Whe
 - Cicla: Dark → Light → Blue → Dark
 
 ### 5.8 Redimensionar Ventana
+
 - **Solo desde esquinas**: La ventana escala proporcionalmente en diagonal
-- **Ancho fijo**: MinWidth=450, MaxWidth=400 (ancho fijo)
+- **Ancho variable**: MinWidth=350, MaxWidth=600
 - **Altura variable**: MinHeight=500
 - Proporción mantenida: ~1.9 (760/400)
 
@@ -253,6 +253,24 @@ Ver archivo `LICENSE.txt` para información completa.
 ---
 
 ## 8. Historial de Versiones
+
+### v1.0.2 (8 de Abril 2026) - LUFS MODULE
+
+**Nuevo módulo implementado:**
+- ✅ Análisis de loudness usando FFmpeg loudnorm filter
+- ✅ Detección de LUFS Integrated
+- ✅ Detección de LRA (Loudness Range)
+- ✅ Detección de True Peak (dBTP)
+- ✅ Row 4 en UI para mostrar resultados de loudness
+- ✅ Etiqueta "Short Term" cambiada a "LRA"
+- ✅ Sistema de colores según nivel de loudness (verde/amarillo/rojo)
+
+### v1.0.1 (7 de Abril 2026) - HOTFIX
+
+**Bug corregido:**
+- ✅ BpmFinder no soporta archivos FLAC/OGG/M4A/AAC/AIFF/WMA
+- ✅ Implementado algoritmo avanzado como fallback para todos los formatos
+- ✅ Ahora el BPM se detecta correctamente en archivos FLAC
 
 ### v1.0.0 (7 de Abril 2026) - RELEASE
 
@@ -336,7 +354,6 @@ O:\Test\BPM KEY\
 
 ### Known Issues
 
-- El análisis avanzado de BPM está deshabilitado temporalmente
 - Depuración de código pendientes (eventos, try/catch)
 - Testing con archivos grandes no realizado
 
@@ -354,6 +371,7 @@ O:\Test\BPM KEY\
 - Creado LICENSE.txt
 - Generado instalador con Inno Setup
 - Versionado a 1.0.0
+- **FIX**: Detectado bug - BpmFinder no soporta FLAC. Implementado fallback con algoritmo avanzado para formatos no soportados.
 
 ### Git Checkpoints
 

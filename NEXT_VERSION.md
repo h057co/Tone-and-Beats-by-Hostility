@@ -1,6 +1,6 @@
 # v1.1.0 - Próximos Pasos
 
-## Estado Actual: v1.0.0 ✅ Lanzada
+## Estado Actual: v1.0.2 ✅ LUFS Module implementado
 
 ---
 
@@ -33,17 +33,16 @@
 
 ## Bugs Conocidos
 
-1. ⚠️ Análisis avanzado de BPM deshabilitado temporalmente (performance)
-2. ⚠️ No hay testing con archivos >100MB
-3. ⚠️ Redimensionado mínimo requiere afinación
+1. ⚠️ No hay testing con archivos >100MB
+2. ⚠️ Redimensionado mínimo requiere afinación
 
 ---
 
-##Notas para Desarrollo Futuro
+## Notas para Desarrollo Futuro
 
 ### Git
-- Ultimo commit: `861b85d revision_codigo_pre_implementacion`
-- Para volver a v1.0.0: `git checkout 861b85d`
+- Ultimo commit: Implementado fallback BPM para FLAC
+- Para volver a v1.0.0: `git checkout <commit-anterior>`
 
 ### Builds
 - Release: `publish/`
@@ -52,6 +51,7 @@
 ### Documentación
 - Principal: `DOCUMENTACION.md`
 - License: `LICENSE.txt`
+- RPD: `RPD.md`
 
 ---
 
@@ -67,5 +67,5 @@
 
 ---
 
-*Archivo creado: 7 de Abril 2026*
-*Para uso en próximo ciclo de desarrollo*
+*Ultima actualización: 7 de Abril 2026*
+*Hotfix v1.0.1: Bug de detección BPM en FLAC corregido*

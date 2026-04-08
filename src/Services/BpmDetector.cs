@@ -2,6 +2,7 @@ using AudioAnalyzer.Interfaces;
 using AudioAnalyzer.Services;
 using BpmFinder;
 using System;
+using System.IO;
 
 namespace AudioAnalyzer.Services;
 
@@ -29,27 +30,41 @@ public class BpmDetector : IBpmDetectorService
             LoggerService.Log($"BpmDetector.DetectBpm - Iniciando para: {filePath}");
             progress?.Report(10);
 
-            var options = new BpmAnalysisOptions
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            double bpmFinderBpm = 0;
+
+            if (extension == ".mp3" || extension == ".wav")
             {
-                MinBpm = 50,
-                MaxBpm = 220,
-                TrimLeadingSilence = true,
-                PreferStableTempo = true
-            };
+                var options = new BpmAnalysisOptions
+                {
+                    MinBpm = 50,
+                    MaxBpm = 220,
+                    TrimLeadingSilence = true,
+                    PreferStableTempo = true
+                };
 
-            var bpmFinderResult = BpmAnalyzer.AnalyzeFileAsync(filePath, options).GetAwaiter().GetResult();
-            double bpmFinderBpm = bpmFinderResult.Bpm > 0 ? Math.Round(bpmFinderResult.Bpm, 1) : 0;
-            LoggerService.Log($"BpmDetector.DetectBpm - BpmFinder result: {bpmFinderBpm}");
+                var bpmFinderResult = BpmAnalyzer.AnalyzeFileAsync(filePath, options).GetAwaiter().GetResult();
+                bpmFinderBpm = bpmFinderResult.Bpm > 0 ? Math.Round(bpmFinderResult.Bpm, 1) : 0;
+                LoggerService.Log($"BpmDetector.DetectBpm - BpmFinder result: {bpmFinderBpm}");
+            }
+            else
+            {
+                LoggerService.Log($"BpmDetector.DetectBpm - Formato no soportado por BpmFinder: {extension}, usando algoritmo avanzado");
+            }
 
-            progress?.Report(50);
+            progress?.Report(30);
 
-            // Skip advanced BPM to avoid long processing time
-            var advancedResult = (bpm: 0.0, confidence: 0.0);
-            LoggerService.Log($"BpmDetector.DetectBpm - Advanced BPM skipped for performance");
+            if (bpmFinderBpm <= 0)
+            {
+                LoggerService.Log($"BpmDetector.DetectBpm - Usando algoritmo avanzado para: {filePath}");
+                var advancedResult = GetAdvancedBpm(filePath);
+                bpmFinderBpm = advancedResult.bpm;
+                LoggerService.Log($"BpmDetector.DetectBpm - Advanced BPM result: {bpmFinderBpm}");
+            }
 
             progress?.Report(90);
 
-            double finalBpm = CombineBpmResults(bpmFinderBpm, advancedResult.bpm, advancedResult.confidence);
+            double finalBpm = bpmFinderBpm;
             LoggerService.Log($"BpmDetector.DetectBpm - Final BPM: {finalBpm}");
 
             progress?.Report(100);
@@ -83,8 +98,9 @@ public class BpmDetector : IBpmDetectorService
 
             return _waveformAnalyzer.DetectBpmWithConfidence(samples.ToArray(), sampleRate);
         }
-        catch
+        catch (Exception ex)
         {
+            LoggerService.Log($"BpmDetector.GetAdvancedBpm - Error: {ex.Message}");
             return (0, 0);
         }
     }

@@ -2,9 +2,9 @@
 
 Aplicación de escritorio Windows para análisis de audio que detecta BPM y tonalidad musical.
 
-## Versión 1.0.0 - Release
+## Versión 1.0.2 - Release (LUFS Module)
 
-**Fecha:** 7 de Abril de 2026  
+**Fecha:** 8 de Abril de 2026  
 **Estado:** ✅ Estable / Production Ready
 
 ---
@@ -13,6 +13,7 @@ Aplicación de escritorio Windows para análisis de audio que detecta BPM y tona
 
 - **Windows 10/11** (x64)
 - **No requiere .NET Runtime** (self-contained)
+- **FFmpeg** (incluido en la carpeta `ffmpeg/`)
 
 ## Descarga e Instalación
 
@@ -20,14 +21,23 @@ Aplicación de escritorio Windows para análisis de audio que detecta BPM y tona
 Ejecutar: `installer/ToneAndBeatsByHostility_Setup_v1.0.0.exe`
 
 ### Opción 2: Portable
-Carpeta: `publish/` (511 archivos)
+Carpeta: `publish/` (contiene `ffmpeg/` para análisis LUFS)
 
 ---
 
 ## Características
 
-- ✅ Detección de BPM automático
+- ✅ Detección de BPM automático (todos los formatos)
 - ✅ Detección de tonalidad (Key)
+- ✅ Análisis de loudness: LUFS, LRA, True Peak
+- ✅ Soporte para FLAC, MP3, WAV, OGG, M4A, AAC, AIFF, WMA
+- ✅ Visualización de forma de onda
+- ✅ Reproducción de audio con seek
+- ✅ Guardar metadatos en archivo
+- ✅ Temas: Dark / Light / Blue
+- ✅ Análisis paralelo (más rápido)
+- ✅ Redimensionado proporcional
+- ✅ Soporte para FLAC, MP3, WAV, OGG, M4A, AAC, AIFF, WMA
 - ✅ Visualización de forma de onda
 - ✅ Reproducción de audio con seek
 - ✅ Guardar metadatos en archivo
@@ -85,10 +95,10 @@ src/
 | Librería | Propósito |
 |----------|-----------|
 | NAudio | Audio playback |
-| BpmFinder | BPM detection |
-| libKeyFinder.NET | Key detection |
+| BpmFinder | BPM detection (MP3/WAV) |
 | MediaInfo.Wrapper.Core | Audio metadata |
 | TagLibSharp | Write metadata |
+| KeyDetector (custom) | Key detection (implementación propia) |
 
 ---
 
@@ -131,5 +141,5 @@ info@hostilitymusic.com
 
 ---
 
-*Version 1.0.0 - Release*
+*Version 1.0.1 - Release (Hotfix)*
 *Desarrollado por Luis Jimenez - Hostility Music*

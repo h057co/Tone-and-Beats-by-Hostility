@@ -34,8 +34,6 @@ public class MetadataWriter
                 file.Tag.Comment += $"; {keyComment}";
             }
             
-            file.Tag.Performers = new[] { "Tone And Beat's by Hostility" };
-            
             file.Save();
             file.Dispose();
             file = null;
@@ -104,8 +102,9 @@ public class MetadataWriter
             
             return (hasMetadata, currentBpm, currentKey);
         }
-        catch
+        catch (Exception ex)
         {
+            LoggerService.Log($"MetadataWriter.GetCurrentMetadata - Error: {ex.Message}");
             return (false, "Error", "Error");
         }
     }
