@@ -14,6 +14,7 @@
     <Version>1.0.2</Version>
     <FileVersion>1.0.2.0</FileVersion>
     <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <ApplicationIcon>Assets\HOSTBLANCO.ico</ApplicationIcon>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
@@ -22,13 +23,15 @@
     <PackageReference Include="FFMpegCore" Version="5.1.0" />
     <PackageReference Include="MediaInfo.Wrapper.Core" Version="26.1.0" />
     <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
+    <ItemGroup>
     <Content Include="Assets\HOST_BLANCO.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\HOST_NEGRO.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\HOSTBLANCO.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\qrdonaciones.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

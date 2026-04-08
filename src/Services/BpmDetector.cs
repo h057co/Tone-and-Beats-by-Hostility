@@ -82,21 +82,24 @@ public class BpmDetector : IBpmDetectorService
     {
         try
         {
-            using var reader = new NAudio.Wave.AudioFileReader(filePath);
-            var sampleRate = reader.WaveFormat.SampleRate;
-            var samples = new List<float>();
-            var buffer = new float[reader.Length / sizeof(float)];
-            int read = reader.Read(buffer, 0, buffer.Length);
-
-            for (int i = 0; i < read; i += reader.WaveFormat.Channels)
+            var (sampleProvider, waveStream) = AudioReaderFactory.CreateReader(filePath);
+            using (waveStream)
             {
-                float sum = 0;
-                for (int c = 0; c < reader.WaveFormat.Channels && i + c < read; c++)
-                    sum += buffer[i + c];
-                samples.Add(sum / reader.WaveFormat.Channels);
-            }
+                var sampleRate = waveStream.WaveFormat.SampleRate;
+                var samples = new List<float>();
+                var buffer = new float[waveStream.Length / sizeof(float)];
+                int read = sampleProvider.Read(buffer, 0, buffer.Length);
 
-            return _waveformAnalyzer.DetectBpmWithConfidence(samples.ToArray(), sampleRate);
+                for (int i = 0; i < read; i += waveStream.WaveFormat.Channels)
+                {
+                    float sum = 0;
+                    for (int c = 0; c < waveStream.WaveFormat.Channels && i + c < read; c++)
+                        sum += buffer[i + c];
+                    samples.Add(sum / waveStream.WaveFormat.Channels);
+                }
+
+                return _waveformAnalyzer.DetectBpmWithConfidence(samples.ToArray(), sampleRate);
+            }
         }
         catch (Exception ex)
         {

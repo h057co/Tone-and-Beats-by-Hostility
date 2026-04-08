@@ -9,7 +9,7 @@ namespace AudioAnalyzer.Services;
 public class AudioPlayerService : IAudioPlayerService
 {
     private IWavePlayer? _waveOut;
-    private AudioFileReader? _audioFile;
+    private WaveStream? _audioFile;
     private bool _disposed;
 
     public event EventHandler<PlaybackState>? PlaybackStateChanged;
@@ -34,7 +34,8 @@ public class AudioPlayerService : IAudioPlayerService
 
         try
         {
-            _audioFile = new AudioFileReader(filePath);
+            var (_, waveStream) = AudioReaderFactory.CreateReader(filePath);
+            _audioFile = waveStream;
             _waveOut = new WaveOutEvent();
             _waveOut.Init(_audioFile);
             _waveOut.PlaybackStopped += OnPlaybackStopped;

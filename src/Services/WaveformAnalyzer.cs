@@ -23,9 +23,12 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         var samples = LoadAudioFile(filePath);
         var sampleRate = 44100;
         
-        using var reader = new NAudio.Wave.AudioFileReader(filePath);
-        sampleRate = reader.WaveFormat.SampleRate;
-        LoggerService.Log($"WaveformAnalyzer.Analyze - Muestras cargadas: {samples.Length}, SampleRate: {sampleRate}");
+        var (sampleProvider, waveStream) = AudioReaderFactory.CreateReader(filePath);
+        using (waveStream)
+        {
+            sampleRate = waveStream.WaveFormat.SampleRate;
+            LoggerService.Log($"WaveformAnalyzer.Analyze - Muestras cargadas: {samples.Length}, SampleRate: {sampleRate}");
+        }
 
         var waveformData = GetWaveformData(samples, 1000);
         LoggerService.Log($"WaveformAnalyzer.Analyze - Waveform data completado");
@@ -53,20 +56,23 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
     private float[] LoadAudioFile(string filePath)
     {
-        using var reader = new NAudio.Wave.AudioFileReader(filePath);
-        var samples = new List<float>();
-        var buffer = new float[reader.Length / sizeof(float)];
-        int read = reader.Read(buffer, 0, buffer.Length);
-
-        for (int i = 0; i < read; i += reader.WaveFormat.Channels)
+        var (sampleProvider, waveStream) = AudioReaderFactory.CreateReader(filePath);
+        using (waveStream)
         {
-            float sum = 0;
-            for (int c = 0; c < reader.WaveFormat.Channels && i + c < read; c++)
-                sum += buffer[i + c];
-            samples.Add(sum / reader.WaveFormat.Channels);
-        }
+            var samples = new List<float>();
+            var buffer = new float[waveStream.Length / sizeof(float)];
+            int read = sampleProvider.Read(buffer, 0, buffer.Length);
 
-        return samples.ToArray();
+            for (int i = 0; i < read; i += waveStream.WaveFormat.Channels)
+            {
+                float sum = 0;
+                for (int c = 0; c < waveStream.WaveFormat.Channels && i + c < read; c++)
+                    sum += buffer[i + c];
+                samples.Add(sum / waveStream.WaveFormat.Channels);
+            }
+
+            return samples.ToArray();
+        }
     }
 
     public List<double[]> GetWaveformData(float[] samples, int numPoints)

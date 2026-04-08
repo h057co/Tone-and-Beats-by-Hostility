@@ -18,36 +18,39 @@ public class KeyDetector : IKeyDetectorService
     {
         try
         {
-            using var reader = new NAudio.Wave.AudioFileReader(filePath);
-            var sampleRate = reader.WaveFormat.SampleRate;
-            var channels = reader.WaveFormat.Channels;
-
-            var samples = new List<float>();
-            var buffer = new float[reader.Length / sizeof(float)];
-            int read = reader.Read(buffer, 0, buffer.Length);
-            
-            for (int i = 0; i < read; i += channels)
+            var (sampleProvider, waveStream) = AudioReaderFactory.CreateReader(filePath);
+            using (waveStream)
             {
-                float sum = 0;
-                for (int c = 0; c < channels && i + c < read; c++)
-                    sum += buffer[i + c];
-                samples.Add(sum / channels);
+                var sampleRate = waveStream.WaveFormat.SampleRate;
+                var channels = waveStream.WaveFormat.Channels;
+
+                var samples = new List<float>();
+                var buffer = new float[waveStream.Length / sizeof(float)];
+                int read = sampleProvider.Read(buffer, 0, buffer.Length);
+                
+                for (int i = 0; i < read; i += channels)
+                {
+                    float sum = 0;
+                    for (int c = 0; c < channels && i + c < read; c++)
+                        sum += buffer[i + c];
+                    samples.Add(sum / channels);
+                }
+
+                if (samples.Count < sampleRate)
+                    return ("Unknown", "Unknown", 0);
+
+                progress?.Report(20);
+
+                var pcp = ComputePitchClassProfile(samples.ToArray(), sampleRate);
+                
+                progress?.Report(50);
+
+                var (keyIndex, mode, correlation) = FindBestKey(pcp);
+                
+                progress?.Report(100);
+
+                return (NoteNames[keyIndex], mode == 0 ? "Major" : "Minor", correlation);
             }
-
-            if (samples.Count < sampleRate)
-                return ("Unknown", "Unknown", 0);
-
-            progress?.Report(20);
-
-            var pcp = ComputePitchClassProfile(samples.ToArray(), sampleRate);
-            
-            progress?.Report(50);
-
-            var (keyIndex, mode, correlation) = FindBestKey(pcp);
-
-            progress?.Report(100);
-
-            return (NoteNames[keyIndex], mode == 0 ? "Major" : "Minor", correlation);
         }
         catch (Exception ex)
         {

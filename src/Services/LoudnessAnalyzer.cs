@@ -29,7 +29,7 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
             var startInfo = new ProcessStartInfo
             {
                 FileName = ffmpegPath,
-                Arguments = $"-hide_banner -i \"{filePath}\" -af \"loudnorm=I=-23:print_format=json\" -f null -",
+                Arguments = $"-threads 0 -hide_banner -i \"{filePath}\" -af \"ebur128=peak=true\" -f null -",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -90,32 +90,55 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
 
     private double ExtractValue(string output, string key)
     {
-        // Find the key in the output
+        // Try JSON format first (key in quotes)
         var keyIndex = output.IndexOf("\"" + key + "\"");
-        if (keyIndex < 0)
-            return 0;
-
-        // Move past the key and find the colon
-        var afterKey = output.Substring(keyIndex);
-        var colonIndex = afterKey.IndexOf(':');
-        if (colonIndex < 0)
-            return 0;
-
-        // Get the value part after colon
-        var valuePart = afterKey.Substring(colonIndex + 1).Trim();
-
-        // Remove quotes if present
-        if (valuePart.StartsWith("\""))
+        if (keyIndex >= 0)
         {
-            var endQuote = valuePart.IndexOf('"', 1);
-            if (endQuote > 0)
-                valuePart = valuePart.Substring(1, endQuote - 1);
+            var afterKey = output.Substring(keyIndex);
+            var colonIndex = afterKey.IndexOf(':');
+            if (colonIndex < 0)
+                return 0;
+
+            var valuePart = afterKey.Substring(colonIndex + 1).Trim();
+            if (valuePart.StartsWith("\""))
+            {
+                var endQuote = valuePart.IndexOf('"', 1);
+                if (endQuote > 0)
+                    valuePart = valuePart.Substring(1, endQuote - 1);
+            }
+
+            if (double.TryParse(valuePart, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var result))
+                return result;
         }
 
-        // Try to parse as double
-        if (double.TryParse(valuePart, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var result))
+        // Try ebur128 format (I: -7.6 LUFS or Peak: 2.9 dBFS)
+        var simpleKeyIndex = output.LastIndexOf(key, StringComparison.OrdinalIgnoreCase);
+        if (simpleKeyIndex >= 0)
         {
-            return result;
+            var afterKey = output.Substring(simpleKeyIndex);
+            var colonIndex = afterKey.IndexOf(':');
+            if (colonIndex < 0)
+                return 0;
+
+            var valuePart = afterKey.Substring(colonIndex + 1).Trim();
+            
+            // Extract numeric part (e.g., "-7.6 LUFS" -> "-7.6", "2.9 dBFS" -> "2.9")
+            var numericEnd = 0;
+            for (int i = 0; i < valuePart.Length; i++)
+            {
+                char c = valuePart[i];
+                if ((c == '-' || c == '.' || char.IsDigit(c)) && i > numericEnd)
+                    numericEnd = i + 1;
+                else if (numericEnd > 0 && !char.IsDigit(valuePart[i]) && valuePart[i] != '.' && valuePart[i] != '-')
+                    break;
+            }
+
+            if (numericEnd > 0)
+            {
+                var numStr = valuePart.Substring(0, numericEnd).Trim();
+                if (double.TryParse(numStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var result))
+                    return result;
+            }
         }
 
         return 0;
@@ -133,14 +156,25 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
 
         try
         {
-            // Extract values using the robust extraction method
-            result.IntegratedLufs = ExtractValue(output, "input_i");
-            result.TruePeak = ExtractValue(output, "input_tp");
-            result.ShortTermLufs = ExtractValue(output, "input_lra");
+            // Try ebur128 format first (new format)
+            result.IntegratedLufs = ExtractValue(output, "I:");
+            result.TruePeak = ExtractValue(output, "Peak:");
+            result.ShortTermLufs = ExtractValue(output, "LRA:");
 
-            LoggerService.Log("LoudnessAnalyzer - input_i (Integrated): " + result.IntegratedLufs + " LUFS");
-            LoggerService.Log("LoudnessAnalyzer - input_tp (True Peak): " + result.TruePeak + " dBTP");
-            LoggerService.Log("LoudnessAnalyzer - input_lra (LRA): " + result.ShortTermLufs + " LUFS");
+            // If not found, try loudnorm format (legacy format)
+            if (result.IntegratedLufs == 0)
+            {
+                result.IntegratedLufs = ExtractValue(output, "input_i");
+                result.TruePeak = ExtractValue(output, "input_tp");
+                result.ShortTermLufs = ExtractValue(output, "input_lra");
+            }
+
+            // ebur128 outputs True Peak in dBFS (already in correct format)
+            // Keep as-is (positive values = above 0dB, negative = below)
+
+            LoggerService.Log("LoudnessAnalyzer - Integrated: " + result.IntegratedLufs + " LUFS");
+            LoggerService.Log("LoudnessAnalyzer - True Peak: " + result.TruePeak + " dBTP");
+            LoggerService.Log("LoudnessAnalyzer - LRA: " + result.ShortTermLufs + " LU");
 
             if (result.ShortTermLufs == 0)
             {
