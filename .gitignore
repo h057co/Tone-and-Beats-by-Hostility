@@ -45,3 +45,6 @@ publish/
 publish-single/
 publish-selfcontained/
 Output/
+
+# Test assets (large audio files)
+Assets/audiotest/
