@@ -2,6 +2,65 @@
 
 ---
 
+## 2026-04-08 - Resumen de Jornada (Sesión Noche)
+
+### Snapshot de Seguridad Realizado
+- **Fecha:** 8 de Abril de 2026 (noche)
+- **Acción:** Recovery de optimización fallida, retorno a estado estable
+- **Rama activa:** master
+- **Commit actual:** 82cfce6
+
+---
+
+### 1. Registro de Cambios (Changelog)
+
+**Temas iOS (Apple Style):**
+- `IosLightTheme.xaml` - Colores claros estilo iOS 17
+  - Background: #F2F2F7, Accent: #007AFF, Key: #AF52DE
+  - Button style con corner radius 12 y sombras sutiles
+- `IosDarkTheme.xaml` - Colores oscuros estilo iOS 17
+  - Background: #000000, Accent: #0A84FF, Key: #BF5AF2
+  - Estilos de botones con efecto glow
+
+**Fix Terminología Loudness:**
+- MainWindow.xaml: LRA subtitle corregido de "LUFS" → "LRA"
+- MainWindow.xaml: LRA value binding corregido a `LoudnessLraDisplay`
+- MainViewModel.cs: Añadida propiedad `LoudnessLraDisplay`
+- OnPropertyChanged añadido para `LoudnessLraDisplay`
+
+**About Window (traído de stable-v2):**
+- Botón KoFi con mensaje "Invítame a una cosita? Click Aquí"
+- QR Donaciones (qrdonaciones.png)
+- Mensaje de invitación a donación
+
+**ThemeManager:**
+- Añadidos "iOS Light" y "iOS Dark" a la lista de temas disponibles
+
+---
+
+### 2. Deuda Técnica
+
+- [TODO] Unificar estilos de botones entre temas (actualmente cada tema define sus estilos)
+- [TODO] LRA muestra ShortTermLufs - verificar si es el valor correcto de LRA
+- [TODO] Los hipervínculos en AboutWindow no tienen handlers (solo appearance)
+- [TODO] Cleanup: Eliminar logs de debugging añadidos en AboutWindow.xaml.cs
+
+---
+
+### 3. Handover Notes
+
+**Punto exacto de reinicio:**
+- Commit: `82cfce6` (master)
+- Estado: 5 temas disponibles (Dark, Light, Blue, iOS Light, iOS Dark)
+- App funcionando correctamente
+
+**Para continuar:**
+1. Probar análisis de audio con tema iOS
+2. Verificar valores de LRA muestran correctamente
+3. Considerar unificar sistemas de estilos entre temas
+
+---
+
 ## 2026-04-08 - Resumen de Jornada (Sesión Tarde)
 
 ### Snapshot de Seguridad Realizado
