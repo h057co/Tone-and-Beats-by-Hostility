@@ -2,6 +2,35 @@
 
 ---
 
+## 2026-04-09 - Mejoras de UI (Resize Grabber)
+
+### Snapshot de Seguridad
+- **Fecha:** 9 de Abril de 2026 (madrugada)
+- **Acción:** Implementación de Grabber visual en MainWindow
+- **Rama activa:** master
+- **Resultado compilación:** ✅ 0 errores, 0 warnings
+- **Git Commit Hash:** `5cff32d`
+
+---
+
+### 🌟 Ritual de Cierre Maestro
+
+**Resumen Técnico (Lo logrado):**
+- **UX/UI Enhancement:** Se añadió un identificador visual estético (Grabber triangular) en la esquina inferior derecha de `MainWindow.xaml` para indicar intuitivamente la zona de redimensionamiento de ventana.
+- Se respetó la arquitectura limpia incrustando el elemento nativamente con `DynamicResource` de modo que obedece al tema actual sin tapar eventos del ratón (`IsHitTestVisible="False"`).
+- **Integrity Check:** `dotnet build` ejecutado exitosamente sin errores estructurales (compilación impecable).
+- **Git Consolidación:** Realizado commit "feat(ui): add visual resize grabber to main window".
+
+**Deuda Técnica / [TODO]:**
+1. **Instalador:** Pendiente compilar el Inno Setup y empaquetar la versión v1.0.3 con los arreglos recientes.
+2. **Testing de regresión:** Se sugiere un test exhaustivo de los modos de interfaz al cambiar resoluciones.
+
+**Shutdown:**
+Persistencia asegurada ✅
+Entorno limpio ✅
+
+---
+
 ## 2026-04-09 - Implementación de Auditoría Estática
 
 ### Snapshot de Seguridad
