@@ -70,7 +70,7 @@ public class BpmDetector : IBpmDetectorService
 
             progress?.Report(90);
 
-            double finalBpm = bpmFinderBpm;
+            double finalBpm = ApplyHarmonicCorrection(bpmFinderBpm);
             LoggerService.Log($"BpmDetector.DetectBpm - Final BPM: {finalBpm}");
 
             progress?.Report(100);
@@ -114,6 +114,41 @@ public class BpmDetector : IBpmDetectorService
             LoggerService.Log($"BpmDetector.GetAdvancedBpm - Error: {ex.Message}");
             return (0, 0);
         }
+    }
+
+    private double ApplyHarmonicCorrection(double bpm)
+    {
+        if (bpm <= 0) return bpm;
+
+        if (bpm > 150)
+        {
+            double[] divisors = { 2.0, 3.0, 1.5 };
+            foreach (var div in divisors)
+            {
+                double corrected = bpm / div;
+                if (corrected >= 60 && corrected <= 140)
+                {
+                    LoggerService.Log($"BpmDetector.ApplyHarmonicCorrection - {bpm} -> {corrected} (divided by {div})");
+                    return Math.Round(corrected * 2) / 2;
+                }
+            }
+        }
+
+        if (bpm < 55)
+        {
+            double[] multipliers = { 2.0, 3.0 };
+            foreach (var mult in multipliers)
+            {
+                double corrected = bpm * mult;
+                if (corrected >= 60 && corrected <= 180)
+                {
+                    LoggerService.Log($"BpmDetector.ApplyHarmonicCorrection - {bpm} -> {corrected} (multiplied by {mult})");
+                    return Math.Round(corrected * 2) / 2;
+                }
+            }
+        }
+
+        return bpm;
     }
 
     private double CombineBpmResults(double bpmFinderBpm, double advancedBpm, double advancedConfidence)
