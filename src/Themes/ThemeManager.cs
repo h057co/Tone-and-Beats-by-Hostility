@@ -9,7 +9,9 @@ public static class ThemeManager
     {
         { "Dark", "Themes/DarkTheme.xaml" },
         { "Light", "Themes/LightTheme.xaml" },
-        { "Blue", "Themes/BlueTheme.xaml" }
+        { "Blue", "Themes/BlueTheme.xaml" },
+        { "iOS Light", "Themes/IosLightTheme.xaml" },
+        { "iOS Dark", "Themes/IosDarkTheme.xaml" }
     };
 
     public static string CurrentTheme => _currentTheme;

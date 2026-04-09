@@ -186,9 +186,9 @@
                 <!-- LRA -->
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                     <TextBlock Text="LRA" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding LoudnessShortTermDisplay}" FontSize="20" FontWeight="Bold" 
+                    <TextBlock Text="{Binding LoudnessLraDisplay}" FontSize="20" FontWeight="Bold" 
                               Foreground="{DynamicResource ForegroundBrush}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="LUFS" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="LRA" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- True Peak -->
