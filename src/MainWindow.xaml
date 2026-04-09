@@ -95,6 +95,8 @@
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="MinWidth" Value="70"/>
         </Style>
+        
+        <infra:LevelToBrushConverter x:Key="LevelToBrushConverter"/>
     </Window.Resources>
     
     <Viewbox Stretch="Uniform">
@@ -145,8 +147,18 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding FileName}" VerticalAlignment="Center" 
-                          Foreground="{Binding FileNameForeground}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding FileName}" VerticalAlignment="Center" FontSize="12" TextTrimming="CharacterEllipsis">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource FileNameInactiveBrush}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFileSelected}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource FileNameActiveBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <Button Grid.Column="1" Content="Browse" Command="{Binding BrowseCommand}" Width="80"/>
             </Grid>
         </Border>
@@ -179,7 +191,7 @@
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                     <TextBlock Text="LUFS" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding LoudnessIntegratedDisplay}" FontSize="20" FontWeight="Bold" 
-                              Foreground="{Binding LoudnessIntegratedForeground}" HorizontalAlignment="Center"/>
+                              Foreground="{Binding LoudnessIntegratedLevel, Converter={StaticResource LevelToBrushConverter}}" HorizontalAlignment="Center"/>
                     <TextBlock Text="Integrated" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
 
@@ -195,7 +207,7 @@
                 <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                     <TextBlock Text="True Peak" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding LoudnessTruePeakDisplay}" FontSize="20" FontWeight="Bold" 
-                              Foreground="{Binding LoudnessTruePeakForeground}" HorizontalAlignment="Center"/>
+                              Foreground="{Binding LoudnessTruePeakLevel, Converter={StaticResource LevelToBrushConverter}}" HorizontalAlignment="Center"/>
                     <TextBlock Text="dBTP" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>
@@ -220,10 +232,23 @@
         <!-- Row 6: Status -->
         <Border Grid.Row="6" Style="{StaticResource ResultBox}" Padding="10,8">
             <TextBlock Text="{Binding StatusText}" 
-                       Foreground="{Binding StatusForeground}" 
                        FontSize="12" 
                        HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                        <Setter Property="Foreground" Value="{DynamicResource StatusForegroundBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusState}" Value="Success">
+                                <Setter Property="Foreground" Value="{DynamicResource StatusSuccessBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding StatusState}" Value="Error">
+                                <Setter Property="Foreground" Value="{DynamicResource StatusErrorBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </Border>
         
         <!-- Row 7: Analyze Button -->
@@ -255,12 +280,23 @@
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                     <TextBlock Text="BPM" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding BpmDisplayText}" FontSize="36" FontWeight="Bold" 
-                              Foreground="{Binding BpmForeground}" HorizontalAlignment="Center" Margin="0,5"
+                              HorizontalAlignment="Center" Margin="0,5"
                               MaxWidth="160"
                               MouseLeftButtonDown="BpmText_LeftClick"
                               MouseRightButtonDown="BpmText_RightClick"
                               Cursor="Hand"
-                              ToolTip="Click para ajustar: 1er click = ajusta (65-135), 2do click = reset"/>
+                              ToolTip="Click para ajustar: 1er click = ajusta (65-135), 2do click = reset">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                <Setter Property="Foreground" Value="{DynamicResource TitleBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBpmModified}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource BpmModifiedBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <TextBlock Text="{Binding BpmConfidence}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" 
                               HorizontalAlignment="Center"/>
                 </StackPanel>

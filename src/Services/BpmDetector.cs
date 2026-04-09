@@ -14,7 +14,7 @@ public class BpmDetector : IBpmDetectorService
     {
         try
         {
-            return await Task.Run(() => DetectBpm(filePath, progress));
+            return await Task.Run(async () => await DetectBpmInternalAsync(filePath, progress));
         }
         catch (Exception ex)
         {
@@ -24,6 +24,12 @@ public class BpmDetector : IBpmDetectorService
     }
 
     public double DetectBpm(string filePath, IProgress<int>? progress = null)
+    {
+        // Sync wrapper for backward compatibility - delegates to async implementation
+        return Task.Run(async () => await DetectBpmInternalAsync(filePath, progress)).GetAwaiter().GetResult();
+    }
+
+    private async Task<double> DetectBpmInternalAsync(string filePath, IProgress<int>? progress = null)
     {
         try
         {
@@ -43,7 +49,7 @@ public class BpmDetector : IBpmDetectorService
                     PreferStableTempo = true
                 };
 
-                var bpmFinderResult = BpmAnalyzer.AnalyzeFileAsync(filePath, options).GetAwaiter().GetResult();
+                var bpmFinderResult = await BpmAnalyzer.AnalyzeFileAsync(filePath, options);
                 bpmFinderBpm = bpmFinderResult.Bpm > 0 ? Math.Round(bpmFinderResult.Bpm, 1) : 0;
                 LoggerService.Log($"BpmDetector.DetectBpm - BpmFinder result: {bpmFinderBpm}");
             }
@@ -86,7 +92,9 @@ public class BpmDetector : IBpmDetectorService
             using (waveStream)
             {
                 var sampleRate = waveStream.WaveFormat.SampleRate;
-                var samples = new List<float>();
+                var channels = waveStream.WaveFormat.Channels;
+                var estimatedMonoSamples = (int)(waveStream.Length / sizeof(float) / channels);
+                var samples = new List<float>(estimatedMonoSamples);
                 var buffer = new float[waveStream.Length / sizeof(float)];
                 int read = sampleProvider.Read(buffer, 0, buffer.Length);
 

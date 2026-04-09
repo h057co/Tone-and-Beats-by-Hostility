@@ -20,6 +20,14 @@
     <SolidColorBrush x:Key="WaveformBrush" Color="#007AFF"/>
     <SolidColorBrush x:Key="PlayheadBrush" Color="#FF3B30"/>
     
+    <!-- Semantic State Brushes (Audit Fix #6 - ViewModel decoupling) -->
+    <SolidColorBrush x:Key="StatusForegroundBrush" Color="#8E8E93"/>
+    <SolidColorBrush x:Key="StatusSuccessBrush" Color="#34C759"/>
+    <SolidColorBrush x:Key="StatusErrorBrush" Color="#FF3B30"/>
+    <SolidColorBrush x:Key="FileNameInactiveBrush" Color="#8E8E93"/>
+    <SolidColorBrush x:Key="FileNameActiveBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="BpmModifiedBrush" Color="#FF3B30"/>
+    
     <!-- iOS Button Style -->
     <Style x:Key="IosButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>

@@ -2,7 +2,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using AudioAnalyzer.Commands;
 using AudioAnalyzer.Infrastructure;
 using AudioAnalyzer.Interfaces;
@@ -23,7 +22,7 @@ public class MainViewModel : ViewModelBase
     private readonly MetadataWriter _metadataWriter;
 
     private string _fileName = "No file selected";
-    private Brush _fileNameForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
+    private bool _isFileSelected = false;
     private string _positionText = "00:00";
     private string _durationText = "00:00";
     private string _bpmText = "--";
@@ -32,7 +31,7 @@ public class MainViewModel : ViewModelBase
     private string _bpmConfidence = "";
     private string _keyConfidence = "";
     private string _statusText = "Ready";
-    private Brush _statusForeground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+    private string _statusState = "Normal";
     private double _analysisProgress;
     private bool _isAnalysisProgressVisible;
     private bool _arePlaybackControlsEnabled;
@@ -90,10 +89,14 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _fileName, value);
     }
 
-    public Brush FileNameForeground
+    /// <summary>
+    /// Semantic flag: true when a valid audio file is loaded.
+    /// The View uses this with DataTrigger to switch FileNameForeground color.
+    /// </summary>
+    public bool IsFileSelected
     {
-        get => _fileNameForeground;
-        set => SetProperty(ref _fileNameForeground, value);
+        get => _isFileSelected;
+        set => SetProperty(ref _isFileSelected, value);
     }
 
     public string PositionText
@@ -191,12 +194,11 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    public Brush BpmForeground
-    {
-        get => !string.IsNullOrEmpty(_bpmModifierText)
-            ? new SolidColorBrush(Color.FromRgb(255, 107, 107))  // Rojo/salmon cuando modificado
-            : (Brush)Application.Current.Resources["TitleBrush"];
-    }
+    /// <summary>
+    /// Semantic flag: true when BPM has been adjusted (×2 or ÷2).
+    /// The View uses this with DataTrigger to switch between TitleBrush and BpmModifiedBrush.
+    /// </summary>
+    public bool IsBpmModified => !string.IsNullOrEmpty(_bpmModifierText);
 
     public string KeyText
     {
@@ -232,8 +234,8 @@ public class MainViewModel : ViewModelBase
             OnPropertyChanged(nameof(LoudnessShortTermDisplay));
             OnPropertyChanged(nameof(LoudnessLraDisplay));
             OnPropertyChanged(nameof(LoudnessTruePeakDisplay));
-            OnPropertyChanged(nameof(LoudnessIntegratedForeground));
-            OnPropertyChanged(nameof(LoudnessTruePeakForeground));
+            OnPropertyChanged(nameof(LoudnessIntegratedLevel));
+            OnPropertyChanged(nameof(LoudnessTruePeakLevel));
         }
     }
 
@@ -248,37 +250,45 @@ public class MainViewModel : ViewModelBase
     public string LoudnessLraDisplay => _loudnessResult?.ShortTermDisplay ?? "--";
     public string LoudnessTruePeakDisplay => _loudnessResult?.TruePeakDisplay ?? "--";
 
-    public Brush LoudnessIntegratedForeground
+    /// <summary>
+    /// Semantic level for LUFS Integrated: "Good", "Warning", "Danger", or "None".
+    /// The View uses LevelToBrushConverter to map this to the appropriate color.
+    /// </summary>
+    public string LoudnessIntegratedLevel
     {
         get
         {
             if (_loudnessResult == null || !_loudnessResult.IsValid)
-                return new SolidColorBrush(Color.FromRgb(102, 102, 102));
+                return "None";
 
             if (_loudnessResult.IntegratedLufs >= -12)
-                return new SolidColorBrush(Color.FromRgb(255, 100, 100)); // Red - too loud
+                return "Danger";   // Too loud
 
             if (_loudnessResult.IntegratedLufs >= -16)
-                return new SolidColorBrush(Color.FromRgb(255, 200, 100)); // Yellow - warning
+                return "Warning";  // Caution
 
-            return new SolidColorBrush(Color.FromRgb(100, 200, 100)); // Green - OK
+            return "Good";         // OK
         }
     }
 
-    public Brush LoudnessTruePeakForeground
+    /// <summary>
+    /// Semantic level for True Peak: "Good", "Warning", "Danger", or "None".
+    /// The View uses LevelToBrushConverter to map this to the appropriate color.
+    /// </summary>
+    public string LoudnessTruePeakLevel
     {
         get
         {
             if (_loudnessResult == null || _loudnessResult.TruePeak == 0)
-                return new SolidColorBrush(Color.FromRgb(102, 102, 102));
+                return "None";
 
             if (_loudnessResult.TruePeak >= 0)
-                return new SolidColorBrush(Color.FromRgb(255, 100, 100)); // Red - clipping/positive
+                return "Danger";   // Clipping
 
             if (_loudnessResult.TruePeak > -1)
-                return new SolidColorBrush(Color.FromRgb(255, 200, 100)); // Yellow - warning
+                return "Warning";  // Close to clipping
 
-            return new SolidColorBrush(Color.FromRgb(100, 200, 100)); // Green - OK
+            return "Good";         // OK
         }
     }
 
@@ -331,10 +341,14 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _statusText, value);
     }
 
-    public Brush StatusForeground
+    /// <summary>
+    /// Semantic state: "Normal", "Success", or "Error".
+    /// The View uses DataTriggers to map these to StatusForegroundBrush, StatusSuccessBrush, StatusErrorBrush.
+    /// </summary>
+    public string StatusState
     {
-        get => _statusForeground;
-        set => SetProperty(ref _statusForeground, value);
+        get => _statusState;
+        set => SetProperty(ref _statusState, value);
     }
 
     public double AnalysisProgress
@@ -468,17 +482,23 @@ public class MainViewModel : ViewModelBase
                 {
                     _audioPlayerService.Stop();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LoggerService.Log($"Warning: AudioPlayer Stop failed during file queue - {ex.Message}");
+                }
                 
                 try
                 {
                     _audioPlayerService.UnloadFile();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LoggerService.Log($"Warning: AudioPlayer Unload failed during file queue - {ex.Message}");
+                }
                 
                 FilePath = null;
                 FileName = "Archivo en cola";
-                FileNameForeground = new SolidColorBrush(Color.FromRgb(136, 136, 136));
+                IsFileSelected = false;
                 
                 StatusText = "Análisis en proceso. Archivo en cola.";
                 return;
@@ -488,7 +508,7 @@ public class MainViewModel : ViewModelBase
             _audioPlayerService.LoadFile(filePath);
 
             FileName = Path.GetFileName(filePath);
-            FileNameForeground = new SolidColorBrush(Color.FromRgb(224, 224, 224));
+            IsFileSelected = true;
 
             ArePlaybackControlsEnabled = true;
             IsAnalyzeButtonEnabled = true;
@@ -553,12 +573,12 @@ public class MainViewModel : ViewModelBase
             _keyIndex = -1;
             _showRelativeKey = false;
             OnPropertyChanged(nameof(BpmDisplayText));
-            OnPropertyChanged(nameof(BpmForeground));
+            OnPropertyChanged(nameof(IsBpmModified));
             OnPropertyChanged(nameof(KeyDisplayText));
 
             UpdatePositionDisplay();
             StatusText = "Archivo cargado. Listo para analizar.";
-            StatusForeground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+            StatusState = "Normal";
         }
         catch (Exception ex)
         {
@@ -594,7 +614,10 @@ public class MainViewModel : ViewModelBase
         {
             _audioPlayerService.Stop();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            LoggerService.Log($"Warning: AudioPlayer Stop failed before analysis - {ex.Message}");
+        }
 
         _isAnalyzingInProgress = true;
         IsAnalyzeButtonEnabled = false;
@@ -634,7 +657,7 @@ public class MainViewModel : ViewModelBase
                 _bpmAdjusted = false;
                 _bpmModifierText = "";
                 OnPropertyChanged(nameof(BpmDisplayText));
-                OnPropertyChanged(nameof(BpmForeground));
+                OnPropertyChanged(nameof(IsBpmModified));
             }
 
             LoggerService.Log($"ExecuteAnalyze - Key detectada: {key}, Mode: {mode}");
@@ -798,25 +821,25 @@ public class MainViewModel : ViewModelBase
             {
                 e.Effects = DragDropEffects.Copy;
                 StatusText = "Suelta el archivo de audio aquí";
-                StatusForeground = new SolidColorBrush(Color.FromRgb(100, 200, 100));
+                StatusState = "Success";
                 return;
             }
         }
         e.Effects = DragDropEffects.None;
         StatusText = "Formato no válido - Solo archivos de audio";
-        StatusForeground = new SolidColorBrush(Color.FromRgb(255, 100, 100));
+        StatusState = "Error";
     }
 
     public void HandleDragLeave()
     {
         StatusText = "Listo";
-        StatusForeground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+        StatusState = "Normal";
     }
 
     public void HandleDrop(DragEventArgs e)
     {
         StatusText = "Listo";
-        StatusForeground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+        StatusState = "Normal";
 
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
@@ -828,7 +851,7 @@ public class MainViewModel : ViewModelBase
             else
             {
                 StatusText = "Formato no válido - Solo archivos de audio";
-                StatusForeground = new SolidColorBrush(Color.FromRgb(255, 100, 100));
+                StatusState = "Error";
             }
         }
     }
@@ -859,7 +882,7 @@ public class MainViewModel : ViewModelBase
                 StatusText = $"BPM adjusted ÷2 = {_displayBpm}";
             }
             OnPropertyChanged(nameof(BpmDisplayText));
-            OnPropertyChanged(nameof(BpmForeground));
+            OnPropertyChanged(nameof(IsBpmModified));
         }
     }
 
@@ -889,7 +912,7 @@ public class MainViewModel : ViewModelBase
                 StatusText = $"BPM adjusted ×2 = {_displayBpm}";
             }
             OnPropertyChanged(nameof(BpmDisplayText));
-            OnPropertyChanged(nameof(BpmForeground));
+            OnPropertyChanged(nameof(IsBpmModified));
         }
     }
 

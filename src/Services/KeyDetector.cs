@@ -24,7 +24,8 @@ public class KeyDetector : IKeyDetectorService
                 var sampleRate = waveStream.WaveFormat.SampleRate;
                 var channels = waveStream.WaveFormat.Channels;
 
-                var samples = new List<float>();
+                var estimatedMonoSamples = (int)(waveStream.Length / sizeof(float) / channels);
+                var samples = new List<float>(estimatedMonoSamples);
                 var buffer = new float[waveStream.Length / sizeof(float)];
                 int read = sampleProvider.Read(buffer, 0, buffer.Length);
                 
@@ -132,48 +133,7 @@ public class KeyDetector : IKeyDetectorService
         }
     }
 
-    private void FFT(System.Numerics.Complex[] data)
-    {
-        int n = data.Length;
-        int bits = (int)Math.Log2(n);
-
-        for (int i = 0; i < n; i++)
-        {
-            int j = BitReverse(i, bits);
-            if (j > i)
-                (data[i], data[j]) = (data[j], data[i]);
-        }
-
-        for (int len = 2; len <= n; len *= 2)
-        {
-            double angle = -2 * Math.PI / len;
-            var wLen = new System.Numerics.Complex(Math.Cos(angle), Math.Sin(angle));
-
-            for (int i = 0; i < n; i += len)
-            {
-                var w = new System.Numerics.Complex(1, 0);
-                for (int j = 0; j < len / 2; j++)
-                {
-                    var u = data[i + j];
-                    var v = data[i + j + len / 2] * w;
-                    data[i + j] = u + v;
-                    data[i + j + len / 2] = u - v;
-                    w *= wLen;
-                }
-            }
-        }
-    }
-
-    private int BitReverse(int value, int bits)
-    {
-        int result = 0;
-        for (int i = 0; i < bits; i++)
-        {
-            result = (result << 1) | (value & 1);
-            value >>= 1;
-        }
-        return result;
-    }
+    private void FFT(System.Numerics.Complex[] data) => FftHelper.FFT(data);
 
     private (int keyIndex, int mode, double correlation) FindBestKey(double[] pcp)
     {

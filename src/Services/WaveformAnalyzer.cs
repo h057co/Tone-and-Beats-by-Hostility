@@ -20,15 +20,8 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     {
         LoggerService.Log($"WaveformAnalyzer.Analyze - Iniciando para: {filePath}");
         
-        var samples = LoadAudioFile(filePath);
-        var sampleRate = 44100;
-        
-        var (sampleProvider, waveStream) = AudioReaderFactory.CreateReader(filePath);
-        using (waveStream)
-        {
-            sampleRate = waveStream.WaveFormat.SampleRate;
-            LoggerService.Log($"WaveformAnalyzer.Analyze - Muestras cargadas: {samples.Length}, SampleRate: {sampleRate}");
-        }
+        var (samples, sampleRate) = LoadAudioFile(filePath);
+        LoggerService.Log($"WaveformAnalyzer.Analyze - Muestras cargadas: {samples.Length}, SampleRate: {sampleRate}");
 
         var waveformData = GetWaveformData(samples, 1000);
         LoggerService.Log($"WaveformAnalyzer.Analyze - Waveform data completado");
@@ -54,24 +47,27 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         };
     }
 
-    private float[] LoadAudioFile(string filePath)
+    private (float[] samples, int sampleRate) LoadAudioFile(string filePath)
     {
         var (sampleProvider, waveStream) = AudioReaderFactory.CreateReader(filePath);
         using (waveStream)
         {
-            var samples = new List<float>();
+            var sampleRate = waveStream.WaveFormat.SampleRate;
+            var channels = waveStream.WaveFormat.Channels;
+            var estimatedMonoSamples = (int)(waveStream.Length / sizeof(float) / channels);
+            var samples = new List<float>(estimatedMonoSamples);
             var buffer = new float[waveStream.Length / sizeof(float)];
             int read = sampleProvider.Read(buffer, 0, buffer.Length);
 
-            for (int i = 0; i < read; i += waveStream.WaveFormat.Channels)
+            for (int i = 0; i < read; i += channels)
             {
                 float sum = 0;
-                for (int c = 0; c < waveStream.WaveFormat.Channels && i + c < read; c++)
+                for (int c = 0; c < channels && i + c < read; c++)
                     sum += buffer[i + c];
-                samples.Add(sum / waveStream.WaveFormat.Channels);
+                samples.Add(sum / channels);
             }
 
-            return samples.ToArray();
+            return (samples.ToArray(), sampleRate);
         }
     }
 
@@ -595,46 +591,5 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         return totalAvg > 0 ? Math.Min(1.0, avgOnset / totalAvg) : 0.5;
     }
 
-    private void FFT(System.Numerics.Complex[] data)
-    {
-        int n = data.Length;
-        int bits = (int)Math.Log2(n);
-
-        for (int i = 0; i < n; i++)
-        {
-            int j = BitReverse(i, bits);
-            if (j > i)
-                (data[i], data[j]) = (data[j], data[i]);
-        }
-
-        for (int len = 2; len <= n; len *= 2)
-        {
-            double angle = -2 * Math.PI / len;
-            var wLen = new System.Numerics.Complex(Math.Cos(angle), Math.Sin(angle));
-
-            for (int i = 0; i < n; i += len)
-            {
-                var w = new System.Numerics.Complex(1, 0);
-                for (int j = 0; j < len / 2; j++)
-                {
-                    var u = data[i + j];
-                    var v = data[i + j + len / 2] * w;
-                    data[i + j] = u + v;
-                    data[i + j + len / 2] = u - v;
-                    w *= wLen;
-                }
-            }
-        }
-    }
-
-    private int BitReverse(int value, int bits)
-    {
-        int result = 0;
-        for (int i = 0; i < bits; i++)
-        {
-            result = (result << 1) | (value & 1);
-            value >>= 1;
-        }
-        return result;
-    }
+    private void FFT(System.Numerics.Complex[] data) => FftHelper.FFT(data);
 }

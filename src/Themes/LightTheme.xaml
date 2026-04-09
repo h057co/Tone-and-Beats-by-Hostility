@@ -20,6 +20,14 @@
     <SolidColorBrush x:Key="WaveformBrush" Color="#3498DB"/>
     <SolidColorBrush x:Key="PlayheadBrush" Color="#E74C3C"/>
     
+    <!-- Semantic State Brushes (Audit Fix #6 - ViewModel decoupling) -->
+    <SolidColorBrush x:Key="StatusForegroundBrush" Color="#333333"/>
+    <SolidColorBrush x:Key="StatusSuccessBrush" Color="#27AE60"/>
+    <SolidColorBrush x:Key="StatusErrorBrush" Color="#E74C3C"/>
+    <SolidColorBrush x:Key="FileNameInactiveBrush" Color="#999999"/>
+    <SolidColorBrush x:Key="FileNameActiveBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="BpmModifiedBrush" Color="#E74C3C"/>
+    
     <!-- Theme Name -->
     <system:String x:Key="ThemeName" xmlns:system="clr-namespace:System;assembly=mscorlib">Light</system:String>
     

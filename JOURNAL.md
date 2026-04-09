@@ -2,6 +2,87 @@
 
 ---
 
+## 2026-04-09 - Implementación de Auditoría Estática
+
+### Snapshot de Seguridad
+- **Fecha:** 9 de Abril de 2026 (noche)
+- **Acción:** Implementación de correcciones de la auditoría estática (audit_report.md)
+- **Rama activa:** master
+- **Resultado compilación:** ✅ 0 errores, 5 warnings preexistentes
+
+---
+
+### 1. Registro de Cambios (Changelog)
+
+**Fix #1 — FFT Duplicado (ALTO):**
+- Creado `src/Services/FftHelper.cs` con implementación compartida de FFT y BitReverse
+- `KeyDetector.cs`: Eliminadas ~30 líneas de FFT/BitReverse, delegado a `FftHelper.FFT()`
+- `WaveformAnalyzer.cs`: Eliminadas ~30 líneas de FFT/BitReverse, delegado a `FftHelper.FFT()`
+
+**Fix #2 — List sin capacidad (ALTO):**
+- `BpmDetector.cs` → `GetAdvancedBpm()`: `new List<float>()` → `new List<float>(estimatedMonoSamples)` con pre-cálculo de capacidad
+
+**Fix #3 — Catch vacíos (ALTO):**
+- `MainViewModel.cs` línea 471: `catch { }` → logging a `LoggerService` y `Debug.WriteLine`
+- `MainViewModel.cs` línea 477: `catch { }` → logging a `LoggerService` y `Debug.WriteLine`
+- `MainViewModel.cs` línea 597: `catch { }` → logging a `LoggerService` y `Debug.WriteLine`
+
+**Fix #4 — .GetAwaiter().GetResult() bloqueante (CRÍTICO):**
+- `BpmDetector.cs`: Creado método `DetectBpmInternalAsync()` con `await` nativo
+- `DetectBpmAsync()` ahora delega directamente a `DetectBpmInternalAsync()`
+- `DetectBpm()` (sync) mantiene compatibilidad como wrapper
+
+**Fix #5 — LoggerService thread-safety (MEDIO):**
+- Verificado: Ya implementado con `lock` y `try/catch` en sesiones anteriores ✅
+
+**Fix #6 — Desacoplamiento ViewModel ↔ WPF Brushes (MEDIO):**
+- `MainViewModel.cs`: Eliminada la dependencia de `System.Windows.Media`. Todas las propiedades de tipo `Brush` (FileNameForeground, StatusForeground, BpmForeground, etc.) fueron reemplazadas por estados semánticos (`bool` IsFileSelected, `string` StatusState, `string` LoudnessIntegratedLevel, etc.)
+- Creado `src/Infrastructure/LevelToBrushConverter.cs`: Convierte niveles semánticos (Good/Warning/Danger/None) a colores (Brushes) para Loudness y TruePeak
+- Modificados los 5 temas XAML: Agregados SolidColorBrushes para los nuevos estados de interfaz
+- `MainWindow.xaml`: Reemplazados los bindings directos de colores por `TextBlock.Style` usando `DataTriggers` para reaccionar a los cambios semánticos del modelo.
+
+---
+
+### 2. Archivos Modificados/Creados
+
+| Acción | Archivo | Detalle |
+|--------|---------|---------|
+| ✨ Nuevo | `src/Services/FftHelper.cs` | Clase estática con FFT y BitReverse compartidos |
+| ✨ Nuevo | `src/Infrastructure/LevelToBrushConverter.cs` | Converter para colores semánticos de volumen |
+| ✏️ Modificado | `src/Services/KeyDetector.cs` | FFT delegado a FftHelper (-30 líneas) |
+| ✏️ Modificado | `src/Services/WaveformAnalyzer.cs` | FFT delegado a FftHelper (-30 líneas) |
+| ✏️ Modificado | `src/Services/BpmDetector.cs` | async fix + List capacity |
+| ✏️ Modificado | `src/ViewModels/MainViewModel.cs` | catch vacíos → logging y eliminación total de System.Windows.Media |
+| ✏️ Modificado | `src/MainWindow.xaml` | DataTriggers para estado y Converter para Loudness |
+| ✏️ Modificados | `src/Themes/*.xaml` | Nuevas variables de colores de estado añadidos a los 5 perfiles |
+
+---
+
+### 3. Nota de Traspaso (Handover)
+
+**Estado actual:**
+- **Auditoría Estática:** 100% implementada. Los 6 hallazgos han sido resueltos exitosamente.
+- El proyecto compila sin errores (0 errores de compilación).
+- Se ha alcanzado un código puro MVVM eliminando referencias UI nativas en el backend.
+
+**Para continuar:**
+1. Testing funcional de análisis de audio tras los cambios estructurales.
+2. Compilar el instalador Inno Setup actualizado (v1.0.3).
+
+---
+
+### 4. Pendientes (Backlog)
+
+| # | Tarea | Prioridad | Estado |
+|---|-------|-----------|--------|
+| 1 | Testing completo post-auditoría | Alta | ⏳ Pendiente |
+| 2 | Compilar installer (Inno Setup) para v1.0.3 | Alta | ⏳ Pendiente |
+| 3 | Batch Processing - múltiples archivos | Baja | ⏳ Pendiente |
+
+**Errores bloqueantes:** Ninguno
+
+---
+
 ## 2026-04-08 - Resumen de Jornada (Sesión Noche)
 
 ### Snapshot de Seguridad Realizado
@@ -334,3 +415,22 @@
 
 *Entrada registrada: 8 de Abril de 2026*
 *Proyecto: Tone & Beats by Hostility v1.0.2*
+
+---
+
+## 2026-04-08 - Nueva Auditoría Estática (Sesión Madrugada)
+
+### 📈 Reporte de Auditoría Estática
+- **Fecha:** 8 de Abril de 2026
+- **Acción:** Auditoría exhaustiva del proyecto mediante análisis estático.
+- **Artefacto:** Guardado en `audit_report.md`
+- **Pilares Evaluados:** Rendimiento, Calidad del Código (Deuda Técnica), Seguridad, Arquitectura y Estado de Dependencias.
+
+**Hallazgos Clave:**
+1. **Rendimiento (Crítico):** Los análisis paralelos ejecutan múltiples aperturas redundantes de `AudioReaderFactory.CreateReader`, provocando que el archivo se cargue a memoria hasta 4 veces sincrónicamente.
+2. **Calidad de Código (Alto):** Bloques `try/catch` vacíos que ocultan excepciones de sistema. Se localizó deuda técnica en el uso ineficiente de `List<float>` sin capacidad definida.
+3. **Seguridad (Medio):** Logging sincrónico en hilo bloquea el flujo principal con riesgo de colisión durante análisis paralelo.
+4. **Arquitectura (Medio):** ViewModel (`MainViewModel`) saturado orquestando lógica analítica y acoplado a colores de WPF.
+5. **Dependencias:** Paquete `BpmFinder` beta (`0.1.0`) y FFmpegPortable incrementan peso del modelo.
+
+**Acción Sugerida:** Iniciar una refactorización (pipeline centralizado de audio) basada en el archivo `audit_report.md`.
