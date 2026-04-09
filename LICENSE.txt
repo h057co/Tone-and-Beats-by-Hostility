@@ -1,40 +1,97 @@
 Tone & Beats by Hostility
-Copyright (c) 2026 Hostility Music. www.hostilitymusic.com. Todos los derechos reservados.
+Copyright (c) 2026 Luis Jiménez (Hostility) - Medellín, Colombia
+www.hostilitymusic.com - info@hostilitymusic.com
 
-=============================================================================
+================================================================================
 
-LICENCIA DE USO
+LICENCIA PRINCIPAL: CC BY-NC-ND 4.0
+Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
 
-Este software es propiedad de Hostility Music. Queda prohibida la reproducción,
-distribución, modificación o uso no autorizado de este programa sin el 
-consentimiento expreso por escrito de Hostility Music.
+Esta aplicación está protegida bajo la licencia CC BY-NC-ND 4.0.
+Para ver la licencia completa: https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-El usuario puede usar esta aplicación de forma gratuita para uso personal y/o 
-comercial, siempre que no se modifique, redistribuya o se elimine la 
-información de copyright y atribución.
+RESUMEN DE LA LICENCIA (no sustituye el texto legal):
+- Attribution (Atribución): Debes dar crédito apropiado a Hostility
+- NonCommercial (No Comercial): No puedes usar para fines comerciales
+- NoDerivatives (No Derivados): No puedes crear obras derivadas
 
-=============================================================================
+================================================================================
 
-TERMS AND CONDITIONS
+PROPIEDAD INTELECTUAL
 
-1. This software is provided "as is", without warranty of any kind, express
-   or implied, including but not limited to the warranties of merchantability,
-   fitness for a particular purpose and noninfringement.
+Todo el código fuente, recursos gráficos, documentación y archivos de esta 
+aplicación son propiedad exclusiva de Luis Jiménez (Hostility).
 
-2. In no event shall the authors or copyright holders be liable for any claim,
-   damages or other liability, whether in an action of contract, tort or 
-   otherwise, arising from, out of or in connection with the software or the 
-   use or other dealings in the software.
+El uso, descarga o instalación de esta aplicación NO otorga ningún derecho 
+de propiedad intelectual o industrial a terceros sobre el código, diseño 
+o funcionalidad de la misma.
 
-3. This software uses third-party libraries under their respective licenses.
-   See "Acerca De" in the application for a complete list of used libraries.
+================================================================================
 
-=============================================================================
+TÉRMINOS DE USO
+
+1. USO PERSONAL ✅
+   Esta aplicación puede ser usada gratuitamente para fines personales.
+
+2. DONACIONES ✅
+   Los usuarios pueden realizar donaciones voluntarias para apoyar el proyecto
+   a través de los métodos indicados en la aplicación (KoFi, QR).
+
+3. USO COMERCIAL ❌
+   Queda estrictamente prohibido el uso de esta aplicación para generar 
+   ingresos de cualquier naturaleza, incluyendo pero no limitado a:
+   - Venta o alquiler de la aplicación
+   - Licensing comercial
+   - Uso en servicios de pago
+   - Monetización de cualquier forma
+
+4. MODIFICACIONES ❌
+   No se permite crear obras derivadas, modificar el código fuente, 
+   o crear versiones alteradas de esta aplicación.
+
+5. REDISTRIBUCIÓN ❌
+   No está permitida la redistribución de esta aplicación en ningún 
+   formato sin autorización expresa y por escrito del autor.
+
+================================================================================
+
+GARANTÍAS
+
+Esta aplicación se proporciona "tal cual", sin garantías de ningún tipo,
+expresas o implícitas. El autor no garantiza que la aplicación esté libre
+de errores o que funcione sin interrupciones.
+
+El usuario asume toda la responsabilidad por el uso de esta aplicación.
+
+================================================================================
+
+LIBRERÍAS DE TERCEROS
+
+Esta aplicación utiliza librerías de terceros con sus propias licencias.
+Ver archivo LICENSES.md para detalles completos.
+
+| Librería          | Propósito                    | Licencia        |
+|-------------------|------------------------------|-----------------|
+| NAudio            | Reproducción de audio        | Ms-PL           |
+| FFMpegCore        | Análisis de audio/video     | LGPL 2.1        |
+| MediaInfo.Wrapper | Extracción de metadatos      | GPL v2/LGPL v2  |
+| TagLibSharp       | Lectura de tags              | LGPL v2.1       |
+| NWaves            | Procesamiento de señal      | MIT             |
+| BpmFinder         | Detección de BPM            | Apache 2.0      |
+
+================================================================================
 
 CONTACTO
 
-Para consultas, soporte o información adicional:
-Email: info@hostilitymusic.com
-Web: www.hostilitymusic.com
+Para consultas, reportes de errores, sugerencias o permisos especiales:
+- Email: info@hostilitymusic.com
+- Web: www.hostilitymusic.com
+- Ciudad: Medellín, Colombia
 
-=============================================================================
+================================================================================
+
+© 2026 Luis Jiménez (Hostility) - Medellín, Colombia
+Todos los derechos reservados.
+Tone & Beats by Hostility es una marca registrada.
+
+================================================================================
