@@ -60,12 +60,22 @@ public class BpmDetector : IBpmDetectorService
 
             progress?.Report(30);
 
-            if (bpmFinderBpm <= 0)
+            double advancedBpm = 0;
+            double advancedConfidence = 0;
+            
+            var advancedResult = GetAdvancedBpm(filePath);
+            advancedBpm = advancedResult.bpm;
+            advancedConfidence = advancedResult.confidence;
+            LoggerService.Log($"BpmDetector.DetectBpm - Advanced BPM result: {advancedBpm} (conf: {advancedConfidence})");
+            
+            if (bpmFinderBpm > 0)
             {
-                LoggerService.Log($"BpmDetector.DetectBpm - Usando algoritmo avanzado para: {filePath}");
-                var advancedResult = GetAdvancedBpm(filePath);
-                bpmFinderBpm = advancedResult.bpm;
-                LoggerService.Log($"BpmDetector.DetectBpm - Advanced BPM result: {bpmFinderBpm}");
+                bpmFinderBpm = SelectBestBpm(bpmFinderBpm, advancedBpm, advancedConfidence);
+                LoggerService.Log($"BpmDetector.DetectBpm - BPM after comparison: {bpmFinderBpm}");
+            }
+            else
+            {
+                bpmFinderBpm = advancedBpm;
             }
 
             progress?.Report(90);
@@ -149,6 +159,52 @@ public class BpmDetector : IBpmDetectorService
         }
 
         return bpm;
+    }
+
+    private double SelectBestBpm(double bpmFinderBpm, double advancedBpm, double advancedConfidence)
+    {
+        if (bpmFinderBpm <= 0) return advancedBpm;
+        if (advancedBpm <= 0) return bpmFinderBpm;
+
+        bool bfInDjRange = bpmFinderBpm >= 60 && bpmFinderBpm <= 180;
+        bool advInDjRange = advancedBpm >= 60 && advancedBpm <= 180;
+
+        double ratio = bpmFinderBpm / advancedBpm;
+        bool isHarmonic = IsHarmonicRatio(ratio);
+
+        if (isHarmonic)
+        {
+            if (bfInDjRange && !advInDjRange)
+            {
+                LoggerService.Log($"BpmDetector.SelectBestBpm - Using BpmFinder {bpmFinderBpm} (advanced {advancedBpm} out of DJ range)");
+                return bpmFinderBpm;
+            }
+            if (advInDjRange && !bfInDjRange)
+            {
+                LoggerService.Log($"BpmDetector.SelectBestBpm - Using advanced {advancedBpm} (BpmFinder {bpmFinderBpm} out of DJ range)");
+                return advancedBpm;
+            }
+            if (advInDjRange && bfInDjRange && advancedConfidence > 0.5)
+            {
+                LoggerService.Log($"BpmDetector.SelectBestBpm - Using advanced {advancedBpm} (harmonic match, higher confidence)");
+                return advancedBpm;
+            }
+        }
+
+        double diff = Math.Abs(bpmFinderBpm - advancedBpm);
+        if (diff < 3) return Math.Round((bpmFinderBpm + advancedBpm) / 2, 1);
+
+        return bpmFinderBpm;
+    }
+
+    private bool IsHarmonicRatio(double ratio)
+    {
+        double[] harmonicMultipliers = { 0.5, 0.67, 0.75, 1.0, 1.33, 1.5, 2.0, 3.0 };
+        foreach (var mult in harmonicMultipliers)
+        {
+            if (Math.Abs(ratio - mult) < 0.1) return true;
+        }
+        return false;
     }
 
     private double CombineBpmResults(double bpmFinderBpm, double advancedBpm, double advancedConfidence)
