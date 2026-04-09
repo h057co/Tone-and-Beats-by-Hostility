@@ -555,7 +555,60 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         double consistency = CheckBeatPeriodConsistency(onsetStrength, bestBpm, sampleRate);
         double finalConfidence = baseConfidence * (0.5 + 0.5 * consistency);
 
-        return (Math.Round(bestBpm * 10) / 10, Math.Min(1.0, finalConfidence));
+        double adjustedBpm = PreferFundamentalFrequency(bestBpm, bpmBuckets, onsetStrength, sampleRate);
+        
+        return (Math.Round(adjustedBpm * 10) / 10, Math.Min(1.0, finalConfidence));
+    }
+
+    private double PreferFundamentalFrequency(double bpm, Dictionary<double, double> bpmBuckets, double[] onsetStrength, int sampleRate)
+    {
+        if (bpm < 65 && bpmBuckets.Count > 0)
+        {
+            double[] multipliers = { 1.5, 2.0, 3.0 };
+            foreach (var mult in multipliers)
+            {
+                double potentialFundamental = bpm * mult;
+                if (potentialFundamental >= 70 && potentialFundamental <= 180)
+                {
+                    var roundedPf = Math.Round(potentialFundamental * 2) / 2;
+                    if (bpmBuckets.TryGetValue(roundedPf, out double pfWeight) && pfWeight > 0)
+                    {
+                        double pfConsistency = CheckBeatPeriodConsistency(onsetStrength, potentialFundamental, sampleRate);
+                        double bpmConsistency = CheckBeatPeriodConsistency(onsetStrength, bpm, sampleRate);
+                        
+                        if (pfConsistency > bpmConsistency * 0.85)
+                        {
+                            return potentialFundamental;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (bpm > 140)
+        {
+            double[] divisors = { 1.5, 2.0, 3.0, 4.0 };
+            foreach (var div in divisors)
+            {
+                double potentialFundamental = bpm / div;
+                if (potentialFundamental >= 60 && potentialFundamental <= 140)
+                {
+                    var roundedPf = Math.Round(potentialFundamental * 2) / 2;
+                    if (bpmBuckets.TryGetValue(roundedPf, out double pfWeight) && pfWeight > 0)
+                    {
+                        double pfConsistency = CheckBeatPeriodConsistency(onsetStrength, potentialFundamental, sampleRate);
+                        double bpmConsistency = CheckBeatPeriodConsistency(onsetStrength, bpm, sampleRate);
+                        
+                        if (pfConsistency >= bpmConsistency * 0.8)
+                        {
+                            return potentialFundamental;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return bpm;
     }
 
     private double CheckBeatPeriodConsistency(double[] onsetStrength, double bpm, int sampleRate)

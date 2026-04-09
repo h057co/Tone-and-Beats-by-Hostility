@@ -2,6 +2,34 @@
 
 ---
 
+## 2026-04-09 - Implementación Experimental: Rama `fix/bpm`
+
+### Snapshot de Seguridad
+- **Fecha:** 9 de Abril de 2026 (tarde)
+- **Acción:** Inicio de experimento en rama aislada
+- **Rama activa:** `fix/bpm`
+- **Objetivo:** Experimental - ver JOURNAL para detalles
+
+---
+
+### 🌟 Ritual de Branching - Inicio de Experimento
+
+**Objetivo del Experimento:**
+- Rama: `fix/bpm`
+- Propósito: (pendiente de definir por el usuario)
+- Duración estimada: Sesión actual
+
+**Razón del Aislamiento:**
+- Mantener `master` estable
+- Experimentación sin riesgo en código productivo
+
+**Handover Note:**
+- Commit base: `246ce11` (master)
+- Para volver a master: `git checkout master`
+- Para volver al punto estable: `git checkout 246ce11`
+
+---
+
 ## 2026-04-09 - Actualización: DJs + Productores Musicales
 
 ### Snapshot de Seguridad
