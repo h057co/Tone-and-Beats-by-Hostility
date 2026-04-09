@@ -83,8 +83,8 @@
                 
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="BpmFinder" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="Autor: bpmfinder | MIT" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="SoundTouch.Net" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="Autor: Olaf Woudenberg | LGPL-2.1" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="GitHub" FontSize="10" Foreground="{DynamicResource AccentBrush}" Cursor="Hand"/>
                     </StackPanel>
                 </Border>

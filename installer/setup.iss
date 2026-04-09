@@ -1,8 +1,8 @@
 ; Inno Setup Script for Tone & Beats by Hostility
-; Version: 1.0.3
+; Version: 1.0.4
 
 #define MyAppName "Tone & Beats by Hostility"
-#define MyAppVersion "1.0.3"
+#define MyAppVersion "1.0.4"
 #define MyAppPublisher "Hostility Music"
 #define MyAppURL "www.hostilitymusic.com"
 #define MyAppExeName "ToneAndBeatsByHostility.exe"
@@ -50,7 +50,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-Source: "..\publish-v1.0.3\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\publish-single-file\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

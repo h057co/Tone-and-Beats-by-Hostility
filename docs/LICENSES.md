@@ -30,15 +30,15 @@ Este proyecto usa las siguientes librerías de terceros. Todas las licencias per
 
 ---
 
-### BpmFinder
+### SoundTouch.Net
 | Campo | Valor |
 |-------|-------|
-| **Versión** | 0.1.0 |
-| **Licencia** | MIT |
-| **Descripción** | Detección de BPM/tempo |
-| **Repositorio** | https://github.com/bpmfinder/bpm-finder |
+| **Versión** | 2.3.2 |
+| **Licencia** | LGPL-2.1 |
+| **Descripción** | Detección de BPM/tempo (motor SoundTouch portado a C#) |
+| **Repositorio** | https://github.com/owoudenberg/soundtouch.net |
 | **Uso comercial** | ✅ Permitido |
-| **Modificación** | ✅ Permitido |
+| **Modificación** | ⚠️ Requiere liberar modificaciones a la librería |
 
 ---
 
@@ -51,18 +51,6 @@ Este proyecto usa las siguientes librerías de terceros. Todas las licencias per
 | **Repositorio** | https://github.com/MediaArea/MediaInfo |
 | **Uso comercial** | ✅ Permitido |
 | **Modificación** | ✅ Permitido (muy permisiva) |
-
----
-
-### libKeyFinder.NET
-| Campo | Valor |
-|-------|-------|
-| **Versión** | 1.0.0 |
-| **Licencia** | GPL 2.0 |
-| **Descripción** | Detección de tonalidad musical (Key) |
-| **Repositorio** | https://github.com/Restroyer/libKeyFinder.NET |
-| **Uso comercial** | ✅ Permitido |
-| **Modificación** | ⚠️ Requiere liberar modificaciones bajo GPL 2.0 |
 
 ---
 
@@ -84,9 +72,8 @@ Este proyecto usa las siguientes librerías de terceros. Todas las licencias per
 |----------|----------|--------------|-------------|
 | NAudio | Ms-PL | ✅ | ✅ |
 | TagLibSharp | LGPL 2.1 | ✅ | ⚠️ Solo librería |
-| BpmFinder | MIT | ✅ | ✅ |
+| SoundTouch.Net | LGPL 2.1 | ✅ | ⚠️ Solo librería |
 | MediaInfo.Wrapper.Core | BSD-2-Clause | ✅ | ✅ |
-| libKeyFinder.NET | GPL 2.0 | ✅ | ⚠️ GPL |
 | LiveChartsCore | MIT | ✅ | ✅ |
 
 ---
@@ -126,8 +113,7 @@ Al distribuir esta aplicación, se recomienda incluir:
 
 Todas las librerías usadas son compatibles entre sí para uso comercial:
 - **MIT, Ms-PL, BSD-2-Clause**: Permisivas, sin requisitos de distribución del código
-- **LGPL 2.1**: Solo requiere liberar modificaciones a la librería misma
-- **GPL 2.0**: Requiere liberar código modificado bajo la misma licencia
+- **LGPL 2.1** (TagLibSharp, SoundTouch.Net): Solo requiere liberar modificaciones a la librería misma
 
 ---
 
@@ -135,11 +121,11 @@ Todas las librerías usadas son compatibles entre sí para uso comercial:
 
 - [NAudio Documentation](https://github.com/naudio/NAudio)
 - [TagLibSharp Documentation](https://github.com/mono/taglib-sharp)
-- [BpmFinder Repository](https://github.com/bpmfinder/bpm-finder)
+- [SoundTouch.Net Repository](https://github.com/owoudenberg/soundtouch.net)
 - [MediaInfo Documentation](https://mediaarea.net/MediaInfo)
 - [LiveCharts Documentation](https://livecharts.dev/docs/wpf)
 - [.NET Documentation](https://docs.microsoft.com/dotnet/)
 
 ---
 
-*Documento actualizado: 6 de Abril de 2026*
+*Documento actualizado: 9 de Abril de 2026*

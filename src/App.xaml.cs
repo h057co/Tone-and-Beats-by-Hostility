@@ -23,6 +23,11 @@ public partial class App : Application
         IFilePickerService filePickerService = new FilePickerService();
         IMessageBoxService messageBoxService = new MessageBoxService();
         ILoudnessAnalyzerService loudnessAnalyzerService = new LoudnessAnalyzer();
+        IAudioAnalysisPipeline analysisPipeline = new AudioAnalysisPipeline(
+            bpmDetectorService,
+            keyDetectorService,
+            waveformAnalyzerService,
+            loudnessAnalyzerService);
 
         // Create ViewModel with injected dependencies (DIP)
         _viewModel = new MainViewModel(

@@ -14,48 +14,59 @@ public class KeyDetector : IKeyDetectorService
         return await Task.Run(() => DetectKey(filePath, progress));
     }
 
+    public async Task<(string Key, string Mode, double Confidence)> DetectKeyAsync(float[] monoSamples, int sampleRate, IProgress<int>? progress = null)
+    {
+        return await Task.Run(() => DetectKeyFromSamples(monoSamples, sampleRate, progress));
+    }
+
     public (string Key, string Mode, double Confidence) DetectKey(string filePath, IProgress<int>? progress = null)
     {
+        var (monoSamples, sampleRate) = new AudioDataProvider().LoadMono(filePath);
+        return DetectKeyFromSamples(monoSamples, sampleRate, progress);
+    }
+
+    /// <summary>
+    /// Core key detection logic operating on pre-loaded mono samples.
+    /// No file I/O occurs in this method.
+    /// </summary>
+    private (string Key, string Mode, double Confidence) DetectKeyFromSamples(float[] monoSamples, int sampleRate, IProgress<int>? progress = null)
+    {
+        const int MaxAnalysisSeconds = 30;
+
         try
         {
-            var (sampleProvider, waveStream) = AudioReaderFactory.CreateReader(filePath);
-            using (waveStream)
+            if (monoSamples.Length < sampleRate)
+                return ("Unknown", "Unknown", 0);
+
+            // Limit to MaxAnalysisSeconds from center of audio for key detection
+            int maxSamples = MaxAnalysisSeconds * sampleRate;
+            float[] analysisData;
+            if (monoSamples.Length > maxSamples)
             {
-                var sampleRate = waveStream.WaveFormat.SampleRate;
-                var channels = waveStream.WaveFormat.Channels;
-
-                var estimatedMonoSamples = (int)(waveStream.Length / sizeof(float) / channels);
-                var samples = new List<float>(estimatedMonoSamples);
-                var buffer = new float[waveStream.Length / sizeof(float)];
-                int read = sampleProvider.Read(buffer, 0, buffer.Length);
-                
-                for (int i = 0; i < read; i += channels)
-                {
-                    float sum = 0;
-                    for (int c = 0; c < channels && i + c < read; c++)
-                        sum += buffer[i + c];
-                    samples.Add(sum / channels);
-                }
-
-                if (samples.Count < sampleRate)
-                    return ("Unknown", "Unknown", 0);
-
-                progress?.Report(20);
-
-                var pcp = ComputePitchClassProfile(samples.ToArray(), sampleRate);
-                
-                progress?.Report(50);
-
-                var (keyIndex, mode, correlation) = FindBestKey(pcp);
-                
-                progress?.Report(100);
-
-                return (NoteNames[keyIndex], mode == 0 ? "Major" : "Minor", correlation);
+                int startOffset = (monoSamples.Length - maxSamples) / 2;
+                analysisData = monoSamples.AsSpan(startOffset, maxSamples).ToArray();
+                LoggerService.Log($"KeyDetector.DetectKeyFromSamples - Trimmed {monoSamples.Length} -> {maxSamples} samples (center segment)");
             }
+            else
+            {
+                analysisData = monoSamples;
+            }
+
+            progress?.Report(20);
+
+            var pcp = ComputePitchClassProfile(analysisData, sampleRate);
+            
+            progress?.Report(50);
+
+            var (keyIndex, mode, correlation) = FindBestKey(pcp);
+            
+            progress?.Report(100);
+
+            return (NoteNames[keyIndex], mode == 0 ? "Major" : "Minor", correlation);
         }
         catch (Exception ex)
         {
-            LoggerService.Log($"KeyDetector.DetectKey - Error: {ex.Message}");
+            LoggerService.Log($"KeyDetector.DetectKeyFromSamples - Error: {ex.Message}");
             return ("Error", "Error", 0);
         }
     }
