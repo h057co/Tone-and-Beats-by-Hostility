@@ -1,8 +1,6 @@
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 using System.Windows;
-using System.Windows.Media.Imaging;
+using AudioAnalyzer.Helpers;
 using AudioAnalyzer.Services;
 
 namespace AudioAnalyzer;
@@ -13,7 +11,7 @@ public partial class AboutWindow : Window
     {
         LoggerService.Log("AboutWindow - Constructor iniciado");
         InitializeComponent();
-        LoadEmbeddedImage();
+        LoadEmbeddedImages();
         LoggerService.Log("AboutWindow - Constructor completado");
     }
 
@@ -36,59 +34,23 @@ public partial class AboutWindow : Window
     }
 
     /// <summary>
-    /// Carga la imagen QR incrustada (EmbeddedResource) desde el assembly.
-    /// Esto garantiza que la imagen siempre esté disponible en todos los escenarios de build:
-    /// Debug, Release, Single-File executable e Instalador.
-    /// 
-    /// Beneficios:
-    /// - No depende de archivos externos copiados en CopyToOutputDirectory
-    /// - Funciona en single-file executables sin problemas
-    /// - Evita regresiones en futuras versiones (no se puede "perder")
-    /// - Mejora la portabilidad y confiabilidad de la aplicación
+    /// Carga todas las imágenes incrustadas (EmbeddedResources) desde el assembly.
+    /// Utiliza EmbeddedResourceHelper para centralizar la lógica de carga.
     /// </summary>
-    private void LoadEmbeddedImage()
+    private void LoadEmbeddedImages()
     {
-        try
+        var qr = EmbeddedResourceHelper.LoadImage("qrdonaciones.png");
+        if (qr != null && FindName("QrImage") is System.Windows.Controls.Image qrImg)
         {
-            LoggerService.Log("AboutWindow.LoadEmbeddedImage - Intentando cargar imagen QR incrustada");
-            
-            // Obtener el assembly actual
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "AudioAnalyzer.Assets.qrdonaciones.png";
-            
-            // Buscar el recurso incrustado
-            using (var stream = assembly.GetManifestResourceStream(resourceName))
-            {
-                if (stream == null)
-                {
-                    LoggerService.Log("AboutWindow.LoadEmbeddedImage - ERROR: Recurso no encontrado: " + resourceName);
-                    return;
-                }
-                
-                // Cargar la imagen desde el stream
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.StreamSource = stream;
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                bitmap.Freeze(); // Freeze para permitir acceso desde otros threads
-                
-                // Asignar a la imagen en XAML (asumiendo que existe un control llamado QrImage)
-                if (FindName("QrImage") is System.Windows.Controls.Image qrImage)
-                {
-                    qrImage.Source = bitmap;
-                    LoggerService.Log("AboutWindow.LoadEmbeddedImage - ✓ Imagen QR cargada exitosamente desde recurso incrustado");
-                }
-                else
-                {
-                    LoggerService.Log("AboutWindow.LoadEmbeddedImage - ERROR: Control QrImage no encontrado en XAML");
-                }
-            }
+            qrImg.Source = qr;
+            LoggerService.Log("AboutWindow.LoadEmbeddedImages - ✓ QR image loaded");
         }
-        catch (Exception ex)
+
+        var logo = EmbeddedResourceHelper.LoadImage("HOST_BLANCO.png");
+        if (logo != null && FindName("LogoImageAbout") is System.Windows.Controls.Image logoImg)
         {
-            LoggerService.Log($"AboutWindow.LoadEmbeddedImage - ERROR: {ex.Message}");
-            LoggerService.Log($"Stack trace: {ex.StackTrace}");
+            logoImg.Source = logo;
+            LoggerService.Log("AboutWindow.LoadEmbeddedImages - ✓ Logo image loaded");
         }
     }
 }

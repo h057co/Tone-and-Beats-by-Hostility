@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using AudioAnalyzer.Helpers;
 using AudioAnalyzer.ViewModels;
 using AudioAnalyzer.Themes;
 
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        LogoImage.Source = EmbeddedResourceHelper.LoadImage("HOST_BLANCO.png");
         Loaded += MainWindow_Loaded;
     }
 
@@ -55,13 +57,11 @@ public partial class MainWindow : Window
             
             if (currentTheme == "Light")
             {
-                LogoImage.Source = new System.Windows.Media.Imaging.BitmapImage(
-                    new Uri("pack://application:,,,/Assets/HOST_NEGRO.png"));
+                LogoImage.Source = EmbeddedResourceHelper.LoadImage("HOST_NEGRO.png");
             }
             else
             {
-                LogoImage.Source = new System.Windows.Media.Imaging.BitmapImage(
-                    new Uri("pack://application:,,,/Assets/HOST_BLANCO.png"));
+                LogoImage.Source = EmbeddedResourceHelper.LoadImage("HOST_BLANCO.png");
             }
         }
         catch (Exception ex)

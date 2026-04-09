@@ -37,9 +37,9 @@
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
   </ItemGroup>
 
-    <ItemGroup>
-    <Content Include="Assets\HOST_BLANCO.png" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="Assets\HOST_NEGRO.png" CopyToOutputDirectory="PreserveNewest" />
+     <ItemGroup>
+    <EmbeddedResource Include="Assets\HOST_BLANCO.png" />
+    <EmbeddedResource Include="Assets\HOST_NEGRO.png" />
     <Content Include="Assets\HOSTBLANCO.ico" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="Assets\qrdonaciones.png" />
   </ItemGroup>
@@ -57,6 +57,8 @@
   <Target Name="ValidateCriticalAssets" BeforeTargets="Build">
     <Message Text="[Asset Validation] Checking critical embedded resources..." Importance="high" />
     <Error Condition="!Exists('Assets\qrdonaciones.png')" Text="CRITICAL: Assets\qrdonaciones.png not found. This file must exist as an EmbeddedResource." />
+    <Error Condition="!Exists('Assets\HOST_BLANCO.png')" Text="CRITICAL: Assets\HOST_BLANCO.png not found. This file must exist as an EmbeddedResource." />
+    <Error Condition="!Exists('Assets\HOST_NEGRO.png')" Text="CRITICAL: Assets\HOST_NEGRO.png not found. This file must exist as an EmbeddedResource." />
     <Message Text="[Asset Validation] ✓ All critical assets present" Importance="high" />
   </Target>
 
