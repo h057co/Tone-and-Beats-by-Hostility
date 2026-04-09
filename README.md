@@ -1,7 +1,7 @@
 # Tone & Beats by Hostility
 
 **Versión:** 1.0.3  
-**Tipo:** Donationware - Aplicación de análisis de audio para DJs  
+**Tipo:** Donationware - Aplicación de análisis de audio para DJs y Productores Musicales  
 **Licencia:** [CC BY-NC-ND 4.0](LICENSE.md)
 
 ---
@@ -19,7 +19,7 @@ Esta aplicación fue diseñada y desarrollada exclusivamente por Hostility en Me
 
 ## Descripción
 
-Tone & Beats by Hostility es una potente herramienta de análisis de audio diseñada específicamente para DJs y productores musicales. La aplicación permite analizar archivos de audio y extraer información precisa sobre:
+Tone & Beats by Hostility es una potente herramienta de análisis de audio diseñada específicamente para DJs, Productores Musicales y Beatmakers. La aplicación permite analizar archivos de audio y extraer información precisa sobre:
 
 - **BPM (Tempo):** Detección automática del tempo de la canción
 - **Key (Tonalidad):** Identificación de la tonalidad musical (Camelot Wheel)
@@ -71,7 +71,7 @@ Tone & Beats by Hostility es una potente herramienta de análisis de audio dise�
 
 **Esta aplicación es Donationware.**
 
-Si esta herramienta te ha sido útil en tu trabajo como DJ, productor o entusiasta de la música, considera realizar una donación voluntaria para apoyar el desarrollo continuo del proyecto.
+Si esta herramienta te ha sido útil en tu trabajo como DJ, Productor Musical, Beatmaker o entusiasta de la música, considera realizar una donación voluntaria para apoyar el desarrollo continuo del proyecto.
 
 ### Cómo Donar
 - **KoFi:** Puedes donate a través del botón KoFi en la aplicación (Acerca de)

@@ -38,7 +38,7 @@ publish-v1.0.3/ToneAndBeatsByHostility.exe (66.04 MB)
 ## Features
 
 ### Audio Analysis
-- **BPM Detection:** Accurate tempo detection for DJ sets
+- **BPM Detection:** Accurate tempo detection for DJ sets and music production
 - **Key Detection:** Musical key detection (Camelot Wheel)
 - **Waveform Visualization:** Visual representation of audio
 - **Loudness Measurement:** LUFS, LRA, True Peak (dBTP)

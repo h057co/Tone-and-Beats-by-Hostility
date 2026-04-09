@@ -25,7 +25,7 @@
 - **Forma de onda** (Waveform) visual
 
 ### Propósito
-Herramienta para DJs, productores musicales y profesionales del audio que necesitan conocer rápidamente los metadatos técnicos de archivos de audio.
+Herramienta para DJs, Productores Musicales, Beatmakers y profesionales del audio que necesitan conocer rápidamente los metadatos técnicos de archivos de audio.
 
 ---
 
