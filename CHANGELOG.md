@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.4] - 2026-04-09
+
+### Changed
+- **BPM Detection Engine:** Complete rewrite using professional-grade dual-band transient analysis
+  - Replaced BpmFinder library with SoundTouch.Net (LGPL-2.1) as quick-estimate engine
+  - New custom algorithm: Dual-Band Transient Isolation (20-150Hz kick + 2-8kHz snare/hi-hat)
+  - Beat Grid Fitting with composite scoring (hitRate + stdDev) over 32-bar segments
+  - Autocorrelation on transient positions instead of raw audio signal
+  - Intelligent segment selection: skips intro, analyzes post-intro section
+  - Snap-to-integer rounding (0.3 BPM threshold) for clean output
+  - Half-time normalization for urban/reggaetón (170-200 BPM → 85-100 BPM convention)
+- **Performance:** BPM analysis reduced from ~1m48s to ~2-3s (IIR Butterworth filters, downsampling, parallel onset detection)
+- **Key Detection:** Optimized to analyze 30s center segment instead of full file
+- **Licenses:** Updated LICENSES.md - replaced BpmFinder (MIT) with SoundTouch.Net (LGPL-2.1), removed unused libKeyFinder.NET
+
+### Fixed
+- BPM now correctly detects trap/reggaetón/dembow half-time patterns (e.g., 152 BPM instead of ~101)
+- Removed aggressive adaptive BPM range capping that excluded tempos above 140 BPM
+
+---
+
 ## [1.0.3] - 2026-04-09
 
 ### Added

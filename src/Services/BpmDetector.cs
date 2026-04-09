@@ -1,6 +1,6 @@
 using AudioAnalyzer.Interfaces;
 using AudioAnalyzer.Services;
-using BpmFinder;
+using SoundTouch;
 using System;
 using System.IO;
 
@@ -14,7 +14,8 @@ public class BpmDetector : IBpmDetectorService
     {
         try
         {
-            return await Task.Run(async () => await DetectBpmInternalAsync(filePath, progress));
+            var (monoSamples, sampleRate) = new AudioDataProvider().LoadMono(filePath);
+            return await Task.Run(() => DetectBpmFromSamples(monoSamples, sampleRate, progress));
         }
         catch (Exception ex)
         {
@@ -23,222 +24,234 @@ public class BpmDetector : IBpmDetectorService
         }
     }
 
-    public double DetectBpm(string filePath, IProgress<int>? progress = null)
-    {
-        // Sync wrapper for backward compatibility - delegates to async implementation
-        return Task.Run(async () => await DetectBpmInternalAsync(filePath, progress)).GetAwaiter().GetResult();
-    }
-
-    private async Task<double> DetectBpmInternalAsync(string filePath, IProgress<int>? progress = null)
+    public async Task<double> DetectBpmAsync(float[] monoSamples, int sampleRate, IProgress<int>? progress = null)
     {
         try
         {
-            LoggerService.Log($"BpmDetector.DetectBpm - Iniciando para: {filePath}");
-            progress?.Report(10);
+            return await Task.Run(() => DetectBpmFromSamples(monoSamples, sampleRate, progress));
+        }
+        catch (Exception ex)
+        {
+            LoggerService.Log($"BpmDetector.DetectBpmAsync(samples) - Error: {ex.Message}");
+            return 0;
+        }
+    }
 
-            var extension = Path.GetExtension(filePath).ToLowerInvariant();
-            double bpmFinderBpm = 0;
+    public double DetectBpm(string filePath, IProgress<int>? progress = null)
+    {
+        var (monoSamples, sampleRate) = new AudioDataProvider().LoadMono(filePath);
+        return DetectBpmFromSamples(monoSamples, sampleRate, progress);
+    }
 
-            if (extension == ".mp3" || extension == ".wav")
+    /// <summary>
+    /// Core BPM detection logic operating on pre-loaded mono samples.
+    /// No file I/O occurs in this method.
+    /// </summary>
+    private double DetectBpmFromSamples(float[] monoSamples, int sampleRate, IProgress<int>? progress = null)
+    {
+        try
+        {
+            LoggerService.Log($"BpmDetector.DetectBpmFromSamples - {monoSamples.Length} samples @ {sampleRate}Hz");
+            progress?.Report(5);
+
+            if (monoSamples.Length < sampleRate * 5)
             {
-                var options = new BpmAnalysisOptions
+                LoggerService.Log("BpmDetector - Audio too short for analysis");
+                return 0;
+            }
+
+            progress?.Report(15);
+
+            // === Step 1: SoundTouch quick BPM from mono samples in memory ===
+            double soundTouchBpm = DetectWithSoundTouchFromSamples(monoSamples, sampleRate);
+            LoggerService.Log($"BpmDetector - SoundTouch quick estimate: {soundTouchBpm}");
+
+            progress?.Report(35);
+
+            // === Step 2: Select analysis segment (post-intro, up to 60s / ~32 bars) ===
+            double initialBpm = soundTouchBpm > 0 ? soundTouchBpm : 120;
+            var segment = SelectAnalysisSegment(monoSamples, sampleRate, initialBpm);
+            LoggerService.Log($"BpmDetector - Analysis segment: {segment.Length} samples ({segment.Length / (double)sampleRate:F1}s)");
+
+            progress?.Report(45);
+
+            // === Step 3: Transient-based BPM with Beat Grid Fitting ===
+            var (gridBpm, gridConfidence) = _waveformAnalyzer.DetectBpmByTransientGrid(segment, sampleRate);
+            LoggerService.Log($"BpmDetector - TransientGrid result: {gridBpm:F1} BPM (conf: {gridConfidence:F2})");
+
+            progress?.Report(80);
+
+            // === Step 4: Select final BPM ===
+            double finalBpm;
+            if (gridBpm > 0 && gridConfidence > 0.15)
+            {
+                if (soundTouchBpm > 0)
                 {
-                    MinBpm = 50,
-                    MaxBpm = 220,
-                    TrimLeadingSilence = true,
-                    PreferStableTempo = true
-                };
+                    double ratio = gridBpm / soundTouchBpm;
+                    bool harmonic = IsHarmonicRatio(ratio);
 
-                var bpmFinderResult = await BpmAnalyzer.AnalyzeFileAsync(filePath, options);
-                bpmFinderBpm = bpmFinderResult.Bpm > 0 ? Math.Round(bpmFinderResult.Bpm, 1) : 0;
-                LoggerService.Log($"BpmDetector.DetectBpm - BpmFinder result: {bpmFinderBpm}");
+                    if (harmonic || Math.Abs(gridBpm - soundTouchBpm) < 5)
+                    {
+                        finalBpm = gridBpm;
+                        LoggerService.Log($"BpmDetector - Using TransientGrid {gridBpm:F1} (harmonic match with SoundTouch {soundTouchBpm})");
+                    }
+                    else
+                    {
+                        finalBpm = gridConfidence > 0.4 ? gridBpm : soundTouchBpm;
+                        LoggerService.Log($"BpmDetector - Disagreement: Grid={gridBpm:F1}(conf={gridConfidence:F2}), ST={soundTouchBpm} -> using {finalBpm:F1}");
+                    }
+                }
+                else
+                {
+                    finalBpm = gridBpm;
+                }
+            }
+            else if (soundTouchBpm > 0)
+            {
+                finalBpm = soundTouchBpm;
+                LoggerService.Log($"BpmDetector - TransientGrid failed, using SoundTouch: {soundTouchBpm}");
             }
             else
             {
-                LoggerService.Log($"BpmDetector.DetectBpm - Formato no soportado por BpmFinder: {extension}, usando algoritmo avanzado");
+                LoggerService.Log("BpmDetector - Both methods failed");
+                return 0;
             }
 
-            progress?.Report(30);
+            // === Step 5: Normalize tempo range ===
+            finalBpm = NormalizeTempoRange(finalBpm);
 
-            double advancedBpm = 0;
-            double advancedConfidence = 0;
-            
-            var advancedResult = GetAdvancedBpm(filePath);
-            advancedBpm = advancedResult.bpm;
-            advancedConfidence = advancedResult.confidence;
-            LoggerService.Log($"BpmDetector.DetectBpm - Advanced BPM result: {advancedBpm} (conf: {advancedConfidence})");
-            
-            if (bpmFinderBpm > 0)
-            {
-                bpmFinderBpm = SelectBestBpm(bpmFinderBpm, advancedBpm, advancedConfidence);
-                LoggerService.Log($"BpmDetector.DetectBpm - BPM after comparison: {bpmFinderBpm}");
-            }
-            else
-            {
-                bpmFinderBpm = advancedBpm;
-            }
-
-            progress?.Report(90);
-
-            double finalBpm = ApplyHarmonicCorrection(bpmFinderBpm);
-            LoggerService.Log($"BpmDetector.DetectBpm - Final BPM: {finalBpm}");
+            // === Step 6: Snap to integer if within 0.3 BPM ===
+            finalBpm = SnapToInteger(finalBpm);
+            LoggerService.Log($"BpmDetector - Final BPM: {finalBpm}");
 
             progress?.Report(100);
-
             return finalBpm;
         }
         catch (Exception ex)
         {
-            LoggerService.Log($"BpmDetector.DetectBpm - Exception: {ex.Message}");
+            LoggerService.Log($"BpmDetector.DetectBpmFromSamples - Exception: {ex.Message}");
             return 0;
         }
     }
 
-    private (double bpm, double confidence) GetAdvancedBpm(string filePath)
+    /// <summary>
+    /// SoundTouch BPMDetect operating on pre-loaded mono samples.
+    /// Feeds chunks from memory — zero file I/O.
+    /// </summary>
+    private double DetectWithSoundTouchFromSamples(float[] monoSamples, int sampleRate)
     {
+        const int ChunkSize = 4096;
+
         try
         {
-            var (sampleProvider, waveStream) = AudioReaderFactory.CreateReader(filePath);
-            using (waveStream)
+            var bpmDetect = new BpmDetect(1, sampleRate);
+            int offset = 0;
+
+            while (offset < monoSamples.Length)
             {
-                var sampleRate = waveStream.WaveFormat.SampleRate;
-                var channels = waveStream.WaveFormat.Channels;
-                var estimatedMonoSamples = (int)(waveStream.Length / sizeof(float) / channels);
-                var samples = new List<float>(estimatedMonoSamples);
-                var buffer = new float[waveStream.Length / sizeof(float)];
-                int read = sampleProvider.Read(buffer, 0, buffer.Length);
-
-                for (int i = 0; i < read; i += waveStream.WaveFormat.Channels)
-                {
-                    float sum = 0;
-                    for (int c = 0; c < waveStream.WaveFormat.Channels && i + c < read; c++)
-                        sum += buffer[i + c];
-                    samples.Add(sum / waveStream.WaveFormat.Channels);
-                }
-
-                return _waveformAnalyzer.DetectBpmWithConfidence(samples.ToArray(), sampleRate);
+                int remaining = monoSamples.Length - offset;
+                int count = Math.Min(ChunkSize, remaining);
+                bpmDetect.InputSamples(monoSamples.AsSpan(offset, count), count);
+                offset += count;
             }
+
+            float bpm = bpmDetect.GetBpm();
+            return bpm > 0 ? Math.Round(bpm, 1) : 0;
         }
         catch (Exception ex)
         {
-            LoggerService.Log($"BpmDetector.GetAdvancedBpm - Error: {ex.Message}");
-            return (0, 0);
+            LoggerService.Log($"BpmDetector.SoundTouchFromSamples - Error: {ex.Message}");
+            return 0;
         }
     }
 
-    private double ApplyHarmonicCorrection(double bpm)
+    /// <summary>
+    /// Selects the optimal segment for analysis:
+    /// - Skips the intro by finding where sustained energy begins
+    /// - Takes up to 60 seconds (enough for 32 bars at any BPM > 80)
+    /// </summary>
+    private float[] SelectAnalysisSegment(float[] monoSamples, int sampleRate, double initialBpm)
     {
-        if (bpm <= 0) return bpm;
+        double barDuration = 4.0 * (60.0 / initialBpm);
+        double targetDuration = Math.Min(60.0, 32 * barDuration);
+        int targetSamples = (int)(targetDuration * sampleRate);
 
-        if (bpm > 150)
+        if (monoSamples.Length <= targetSamples)
+            return monoSamples;
+
+        int windowSamples = sampleRate / 2;
+        int numWindows = monoSamples.Length / windowSamples;
+        if (numWindows < 4) return monoSamples;
+
+        var rmsValues = new double[numWindows];
+        for (int w = 0; w < numWindows; w++)
         {
-            double[] divisors = { 2.0, 3.0, 1.5 };
-            foreach (var div in divisors)
+            double sum = 0;
+            int start = w * windowSamples;
+            for (int i = start; i < start + windowSamples && i < monoSamples.Length; i++)
+                sum += monoSamples[i] * (double)monoSamples[i];
+            rmsValues[w] = Math.Sqrt(sum / windowSamples);
+        }
+
+        var sorted = rmsValues.OrderBy(x => x).ToArray();
+        double p75 = sorted[(int)(sorted.Length * 0.75)];
+        double threshold = p75 * 0.6;
+
+        int startWindow = 0;
+        for (int w = 0; w < numWindows - 2; w++)
+        {
+            if (rmsValues[w] > threshold && rmsValues[w + 1] > threshold && rmsValues[w + 2] > threshold)
             {
-                double corrected = bpm / div;
-                if (corrected >= 60 && corrected <= 140)
-                {
-                    LoggerService.Log($"BpmDetector.ApplyHarmonicCorrection - {bpm} -> {corrected} (divided by {div})");
-                    return Math.Round(corrected * 2) / 2;
-                }
+                startWindow = w;
+                break;
             }
         }
 
-        if (bpm < 55)
+        if (startWindow == 0 && numWindows > 10)
+            startWindow = numWindows / 10;
+
+        int startSample = startWindow * windowSamples;
+
+        if (startSample + targetSamples > monoSamples.Length)
+            startSample = Math.Max(0, monoSamples.Length - targetSamples);
+
+        LoggerService.Log($"BpmDetector.SelectSegment - Start: {startSample / (double)sampleRate:F1}s, Duration: {targetDuration:F1}s (32 bars @ {initialBpm:F0} BPM)");
+
+        return monoSamples.AsSpan(startSample, Math.Min(targetSamples, monoSamples.Length - startSample)).ToArray();
+    }
+
+    private double NormalizeTempoRange(double bpm)
+    {
+        if (bpm >= 170 && bpm <= 200)
         {
-            double[] multipliers = { 2.0, 3.0 };
-            foreach (var mult in multipliers)
+            double half = bpm / 2.0;
+            if (half >= 85 && half <= 100)
             {
-                double corrected = bpm * mult;
-                if (corrected >= 60 && corrected <= 180)
-                {
-                    LoggerService.Log($"BpmDetector.ApplyHarmonicCorrection - {bpm} -> {corrected} (multiplied by {mult})");
-                    return Math.Round(corrected * 2) / 2;
-                }
+                LoggerService.Log($"BpmDetector.NormalizeTempo - {bpm} -> {half} (half-time, urban/reggaetón convention)");
+                return half;
             }
         }
-
         return bpm;
     }
 
-    private double SelectBestBpm(double bpmFinderBpm, double advancedBpm, double advancedConfidence)
+    private double SnapToInteger(double bpm)
     {
-        if (bpmFinderBpm <= 0) return advancedBpm;
-        if (advancedBpm <= 0) return bpmFinderBpm;
-
-        bool bfInDjRange = bpmFinderBpm >= 60 && bpmFinderBpm <= 180;
-        bool advInDjRange = advancedBpm >= 60 && advancedBpm <= 180;
-
-        double ratio = bpmFinderBpm / advancedBpm;
-        bool isHarmonic = IsHarmonicRatio(ratio);
-
-        if (isHarmonic)
+        double rounded = Math.Round(bpm);
+        if (Math.Abs(bpm - rounded) < 0.3)
         {
-            if (bfInDjRange && !advInDjRange)
-            {
-                LoggerService.Log($"BpmDetector.SelectBestBpm - Using BpmFinder {bpmFinderBpm} (advanced {advancedBpm} out of DJ range)");
-                return bpmFinderBpm;
-            }
-            if (advInDjRange && !bfInDjRange)
-            {
-                LoggerService.Log($"BpmDetector.SelectBestBpm - Using advanced {advancedBpm} (BpmFinder {bpmFinderBpm} out of DJ range)");
-                return advancedBpm;
-            }
-            if (advInDjRange && bfInDjRange && advancedConfidence > 0.5)
-            {
-                LoggerService.Log($"BpmDetector.SelectBestBpm - Using advanced {advancedBpm} (harmonic match, higher confidence)");
-                return advancedBpm;
-            }
+            LoggerService.Log($"BpmDetector.SnapToInteger - {bpm:F1} -> {rounded}");
+            return rounded;
         }
-
-        double diff = Math.Abs(bpmFinderBpm - advancedBpm);
-        if (diff < 3) return Math.Round((bpmFinderBpm + advancedBpm) / 2, 1);
-
-        return bpmFinderBpm;
+        return Math.Round(bpm, 1);
     }
 
     private bool IsHarmonicRatio(double ratio)
     {
-        double[] harmonicMultipliers = { 0.5, 0.67, 0.75, 1.0, 1.33, 1.5, 2.0, 3.0 };
-        foreach (var mult in harmonicMultipliers)
+        double[] harmonics = { 0.5, 0.667, 0.75, 1.0, 1.333, 1.5, 2.0, 3.0 };
+        foreach (var h in harmonics)
         {
-            if (Math.Abs(ratio - mult) < 0.1) return true;
+            if (Math.Abs(ratio - h) < 0.08) return true;
         }
         return false;
-    }
-
-    private double CombineBpmResults(double bpmFinderBpm, double advancedBpm, double advancedConfidence)
-    {
-        if (bpmFinderBpm <= 0 && advancedBpm <= 0)
-            return 0;
-
-        if (bpmFinderBpm <= 0)
-            return advancedBpm;
-
-        if (advancedBpm <= 0 || advancedConfidence < 0.3)
-            return bpmFinderBpm;
-
-        double bpmDiff = Math.Abs(bpmFinderBpm - advancedBpm);
-        double harmonicDiff = Math.Min(
-            Math.Abs(bpmFinderBpm - advancedBpm * 2),
-            Math.Abs(bpmFinderBpm * 2 - advancedBpm)
-        );
-        harmonicDiff = Math.Min(harmonicDiff, Math.Abs(bpmFinderBpm - advancedBpm / 2));
-
-        if (bpmDiff < 3)
-        {
-            return Math.Round((bpmFinderBpm + advancedBpm) / 2, 1);
-        }
-
-        if (harmonicDiff < 3 && advancedConfidence > 0.6)
-        {
-            return advancedBpm;
-        }
-
-        double bpmWeight = 0.6;
-        double advancedWeight = 0.4 * advancedConfidence;
-        double totalWeight = bpmWeight + advancedWeight;
-
-        return Math.Round((bpmFinderBpm * bpmWeight + advancedBpm * advancedWeight) / totalWeight, 1);
     }
 }

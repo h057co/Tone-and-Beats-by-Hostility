@@ -632,22 +632,46 @@ public class MainViewModel : ViewModelBase
         try
         {
             AnalysisProgress = 10;
+            StatusText = "Cargando audio...";
+            LoggerService.Log("ExecuteAnalyze - Cargando audio una sola vez con AudioDataProvider");
+
+            // === SINGLE FILE LOAD: eliminates 3x redundant I/O ===
+            var audioProvider = new AudioDataProvider();
+            var (monoSamples, sampleRate) = await Task.Run(() => audioProvider.LoadMono(FilePath));
+            LoggerService.Log($"ExecuteAnalyze - Audio loaded: {monoSamples.Length} samples @ {sampleRate}Hz");
+
+            AnalysisProgress = 20;
             StatusText = "Detectando BPM, Key y Loudness...";
             LoggerService.Log("ExecuteAnalyze - Iniciando deteccion paralela BPM, Key, Loudness y Waveform");
 
-            var bpmTask = _bpmDetectorService.DetectBpmAsync(FilePath);
-            var keyTask = _keyDetectorService.DetectKeyAsync(FilePath);
-            var waveformTask = _waveformAnalyzerService.AnalyzeAsync(FilePath, null);
+            // BPM, Key and Waveform share the SAME samples in memory (zero-copy)
+            // Loudness uses FFmpeg externally — receives filePath independently
+            var bpmTask = _bpmDetectorService.DetectBpmAsync(monoSamples, sampleRate);
+            var keyTask = _keyDetectorService.DetectKeyAsync(monoSamples, sampleRate);
+            var waveformTask = _waveformAnalyzerService.AnalyzeAsync(monoSamples, sampleRate, null);
             var loudnessTask = _loudnessAnalyzerService.AnalyzeAsync(FilePath, null);
 
-            await Task.WhenAll(bpmTask, keyTask, waveformTask, loudnessTask);
+            double bpm = 0;
+            string key = "Error";
+            string mode = "Error";
+            double keyConfidence = 0;
+            WaveformData? waveformData = null;
+            LoudnessResult loudness = new LoudnessResult();
 
-            var bpm = await bpmTask;
-            var (key, mode, confidence) = await keyTask;
-            var waveformData = await waveformTask;
-            var loudness = await loudnessTask;
+            try { bpm = await bpmTask; }
+            catch (Exception ex) { LoggerService.Log($"ExecuteAnalyze - BPM module failed: {ex.Message}"); }
 
-            LoggerService.Log($"ExecuteAnalyze - BPM detectado: {bpm}");
+            try { (key, mode, keyConfidence) = await keyTask; }
+            catch (Exception ex) { LoggerService.Log($"ExecuteAnalyze - Key module failed: {ex.Message}"); }
+
+            try { waveformData = await waveformTask; }
+            catch (Exception ex) { LoggerService.Log($"ExecuteAnalyze - Waveform module failed: {ex.Message}"); }
+
+            try { loudness = await loudnessTask; }
+            catch (Exception ex) { LoggerService.Log($"ExecuteAnalyze - Loudness module failed: {ex.Message}"); }
+
+            LoggerService.Log($"ExecuteAnalyze - Resultados: BPM={bpm}, Key={key}/{mode}, Loudness={loudness.IntegratedDisplay}");
+
             BpmText = bpm > 0 ? bpm.ToString("F1") : "--";
             BpmConfidence = bpm > 0 ? "Detected" : "";
             if (bpm > 0)
@@ -660,25 +684,25 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsBpmModified));
             }
 
-            LoggerService.Log($"ExecuteAnalyze - Key detectada: {key}, Mode: {mode}");
             KeyText = key != "Error" ? key : "--";
             ModeText = mode != "Error" ? mode : "";
-            KeyConfidence = confidence > 0 ? $"Confidence: {confidence:P0}" : "";
+            KeyConfidence = keyConfidence > 0 ? $"Confidence: {keyConfidence:P0}" : "";
+            if (key != "Error")
+            {
+                _keyIndex = Array.IndexOf(NoteNames, key);
+                _showRelativeKey = false;
+                OnPropertyChanged(nameof(KeyDisplayText));
+            }
 
-            _keyIndex = Array.IndexOf(NoteNames, key);
-            _showRelativeKey = false;
-            OnPropertyChanged(nameof(KeyDisplayText));
-
-            LoggerService.Log($"ExecuteAnalyze - Loudness: LUFS={loudness.IntegratedDisplay}, TP={loudness.TruePeakDisplay}");
             LoudnessResult = loudness;
-            IsLoudnessVisible = loudness.IsValid;
+            IsLoudnessVisible = true;
 
-            if (bpm > 0)
+            if (bpm > 0 && waveformData != null)
             {
                 LoggerService.Log("ExecuteAnalyze - Re-analizando waveform con BPM");
-                WaveformData = await _waveformAnalyzerService.AnalyzeAsync(FilePath, bpm);
+                WaveformData = await _waveformAnalyzerService.AnalyzeAsync(monoSamples, sampleRate, bpm);
             }
-            else
+            else if (waveformData != null)
             {
                 WaveformData = waveformData;
             }
