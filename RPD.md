@@ -5,13 +5,14 @@
 | Campo | Detalle |
 |-------|---------|
 | **Nombre del Proyecto** | Tone & Beats by Hostility |
-| **Versión Actual** | 1.0.2 (LUFS Module) |
-| **Fecha de Lanzamiento** | 7 de Abril de 2026 |
-| **Última Actualización** | 8 de Abril de 2026 |
-| **Desarrollador** | Luis Jimenez - Hostility Music |
+| **Versión Actual** | 1.0.3 (Donationware Release) |
+| **Fecha de Lanzamiento** | 9 de Abril de 2026 |
+| **Última Actualización** | 9 de Abril de 2026 |
+| **Desarrollador** | Luis Jiménez (Hostility) - Medellín, Colombia |
 | **Plataforma** | Windows 10/11 (x64) |
 | **Tipo** | Aplicación de escritorio WPF |
-| **Licencia** | Propietaria - Copyright © 2026 Hostility Music |
+| **Licencia** | CC BY-NC-ND 4.0 (Donationware) |
+| **Repositorio** | https://github.com/h057co/Tone-and-Beats-by-Hostility |
 
 ---
 

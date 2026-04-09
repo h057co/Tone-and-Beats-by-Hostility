@@ -1,13 +1,17 @@
 # Tone & Beats - Scripts de Construcción
 
+**Versión:** 1.0.3  
+**Fecha:** 9 de Abril de 2026
+
 ## Desarrollo
 
 ```bash
 # Restaurar paquetes y compilar
-dotnet build
+cd src
+dotnet build -c Release
 
 # Ejecutar
-dotnet run
+dotnet run -c Release
 
 # Limpiar
 dotnet clean
@@ -18,30 +22,46 @@ dotnet clean
 ### Framework-Dependent (requiere .NET 8 Runtime)
 
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained false -o ./build/framework-dependent
+dotnet publish -c Release -r win-x64 --self-contained false -o ./publish
 ```
 
 ### Single-File (self-contained, no requiere runtime)
 
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./build/single-file
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o ./publish-v1.0.3
 ```
 
-## Estructura de Builds
+## Estructura de Builds Actual
 
 ```
-build/
-├── framework-dependent/    # Requiere .NET 8 Runtime
-│   └── ToneAndBeatsByHostility.exe
-└── single-file/          # Self-contained
-    └── ToneAndBeatsByHostility.exe (~158MB)
+publish-v1.0.3/                      # Single-file (~148 MB)
+├── ToneAndBeatsByHostility.exe     # Executable
+├── D3DCompiler_47_cor3.dll
+├── PresentationNative_cor3.dll
+├── wpfgfx_cor3.dll
+└── publish/ffmpeg/                  # FFmpeg
+    ├── ffmpeg.exe
+    └── ffprobe.exe
 ```
+
+## Installer (Inno Setup)
+
+```bash
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer/setup.iss"
+```
+
+Output: `installer/ToneAndBeatsByHostility_Setup_v1.0.3.exe` (~146 MB)
 
 ## Comandos Rápidos desde la raíz
 
 ```powershell
 # Desde la carpeta raíz del proyecto
-dotnet build src/AudioAnalyzer.csproj
-dotnet run --project src/AudioAnalyzer.csproj
-dotnet publish src/AudioAnalyzer.csproj -c Release -r win-x64 --self-contained false -o ./build/framework-dependent
+dotnet build src/AudioAnalyzer.csproj -c Release
+dotnet run --project src/AudioAnalyzer.csproj -c Release
+dotnet publish src/AudioAnalyzer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ../publish-v1.0.3
 ```
+
+---
+
+*Versión 1.0.3 - Updated: 9 de Abril 2026*
+*License: CC BY-NC-ND 4.0*

@@ -1,9 +1,10 @@
 # Tone & Beats by Hostility - Documentación Técnica
 
-**Versión:** 1.0.2  
-**Fecha:** 8 de Abril de 2026  
+**Versión:** 1.0.3  
+**Fecha:** 9 de Abril de 2026  
 **Framework:** .NET 8.0 + WPF  
-**Estado:** Release
+**Estado:** Release (Donationware)
+**Licencia:** CC BY-NC-ND 4.0
 
 ---
 
@@ -361,29 +362,30 @@ O:\Test\BPM KEY\
 
 ## 12. Notas de Desarrollo
 
-### Changelog Reciente (7 Abril 2026)
+### Changelog Reciente (9 Abril 2026)
 
-- Implementado análisis paralelo de procesos
-- Agregado CornerResizeBehavior para redimensionado diagonal
-- Agregado Status al Row 4
-- Actualizado Row 6 con MaxWidth fijo
-- Actualizada ventana "Acerca de" con copyright completo
-- Creado LICENSE.txt
-- Generado instalador con Inno Setup
-- Versionado a 1.0.0
-- **FIX**: Detectado bug - BpmFinder no soporta FLAC. Implementado fallback con algoritmo avanzado para formatos no soportados.
+- v1.0.3 Release
+- iOS Themes (Light/Dark) añadidos
+- KoFi donation button + QR image en About Window
+- LRA terminology corregido (mostrando "LRA" en vez de "LUFS")
+- Single-file publish con todos los assets embebidos
+- License cambiada a CC BY-NC-ND 4.0 (Donationware)
+- GitHub repository publicado
+- Documentación completa actualizada
 
 ### Git Checkpoints
 
 | Commit | Descripción |
 |--------|-------------|
-| 37bae79 | ventana - Ajuste de redimensionado |
-| 1aa1f7a | Procesando - Mensaje de estado en waveform |
-| 861b85d | revision_codigo_pre_implementacion - Code review |
+| 837aa6f | docs: update documentation with CC BY-NC-ND 4.0 license |
+| a6c2d6c | docs: add RELEASE.md with v1.0.3 documentation |
+| 3f5b292 | fix: sync AssemblyVersion with csproj for v1.0.3 |
 
 ---
 
-*Documentación actualizada: 7 de Abril de 2026*
-*Desarrollado por: Luis Jimenez (Hostility Music)*
+*Documentación actualizada: 9 de Abril de 2026*
+*Desarrollado por: Luis Jiménez (Hostility) - Medellín, Colombia*
 *Contacto: info@hostilitymusic.com*
 *Web: www.hostilitymusic.com*
+*Licencia: CC BY-NC-ND 4.0*
+*Repositorio: https://github.com/h057co/Tone-and-Beats-by-Hostility*

@@ -1,6 +1,22 @@
 # v1.1.0 - Próximos Pasos
 
-## Estado Actual: v1.0.2 ✅ LUFS Module implementado
+## Estado Actual: v1.0.3 ✅ Release Completado
+
+**Fecha de Release:** 9 de Abril de 2026  
+**Licencia:** CC BY-NC-ND 4.0 (Donationware)  
+**Repositorio:** https://github.com/h057co/Tone-and-Beats-by-Hostility
+
+---
+
+## Features Implementados en v1.0.3 ✅
+
+| Feature | Descripción | Estado |
+|---------|-------------|--------|
+| Botón Donation | KoFi + QR donations en "Acerca de" | ✅ Completado |
+| iOS Themes | iOS Light + iOS Dark | ✅ Completado |
+| LRA Terminology | Corregido display "LRA" | ✅ Completado |
+| Single-File | Executable self-contained | ✅ Completado |
+| Documentación | README, LICENSE, CHANGELOG | ✅ Completado |
 
 ---
 
@@ -10,24 +26,22 @@
 
 | # | Feature | Descripción | Estado |
 |---|---------|-------------|--------|
-| 1 | **Botón Donation** | Agregar PayPal/donation link en "Acerca de" | ⏳ Pendiente |
-| 2 | **Batch Processing** | Procesar múltiples archivos | ⏳ Pendiente |
-| 3 | **Depuración código** | Arreglar catch vacíos, desuscribir eventos | ⏳ Pendiente |
+| 1 | **Batch Processing** | Procesar múltiples archivos | ⏳ Pendiente |
+| 2 | **Code Cleanup** | Arreglar catch vacíos, desuscribir eventos | ⏳ Pendiente |
 
 ### Prioridad Media
 
 | # | Feature | Descripción | Estado |
 |---|---------|-------------|--------|
-| 4 | **Exportar Reporte** | CSV/JSON de análisis | ⏳ Pendiente |
-| 5 | **Detección secciones** | Intro/Verse/Chorus | ⏳ Pendiente |
-| 6 | **Analytics** | Google Analytics para descargas | ⏳ Pendiente |
+| 3 | **Exportar Reporte** | CSV/JSON de análisis | ⏳ Pendiente |
+| 4 | **Detección secciones** | Intro/Verse/Chorus | ⏳ Pendiente |
 
 ### Prioridad Baja
 
 | # | Feature | Descripción | Estado |
 |---|---------|-------------|--------|
-| 7 | **Historial análisis** | Guardar análisis anteriores | ⏳ Pendiente |
-| 8 | **Testing avanzado** | Archivos grandes, casos edge | ⏳ Pendiente |
+| 5 | **Historial análisis** | Guardar análisis anteriores | ⏳ Pendiente |
+| 6 | **Testing avanzado** | Archivos grandes, casos edge | ⏳ Pendiente |
 
 ---
 
@@ -41,31 +55,33 @@
 ## Notas para Desarrollo Futuro
 
 ### Git
-- Ultimo commit: Implementado fallback BPM para FLAC
-- Para volver a v1.0.0: `git checkout <commit-anterior>`
+- Rama principal: `master`
+- Tags: `v1.0.3`, `v1.0.2`
+- Para volver a versión anterior: `git checkout v1.0.2`
 
 ### Builds
-- Release: `publish/`
-- Installer: `installer/ToneAndBeatsByHostility_Setup_v1.0.0.exe`
+- Release portable: `publish-v1.0.3/ToneAndBeatsByHostility.exe` (148 MB)
+- Installer: `installer/ToneAndBeatsByHostility_Setup_v1.0.3.exe` (146 MB)
 
 ### Documentación
-- Principal: `DOCUMENTACION.md`
-- License: `LICENSE.txt`
-- RPD: `RPD.md`
+- Principal: `README.md`
+- Licencia: `LICENSE.md` (CC BY-NC-ND 4.0)
+- Librerías: `LICENSES.md`
 
 ---
 
 ## Checklist Pre-Lanzamiento v1.1
 
-- [ ] Implementar botón de donation
+- [ ] Implementar batch processing
 - [ ] Code review: arreglar catch vacíos
 - [ ] Code review: desuscribir eventos
 - [ ] Testing con archivos grandes
 - [ ] Actualizar documentación
 - [ ] Versionar a v1.1.0
 - [ ] Compilar installer
+- [ ] Actualizar GitHub release
 
 ---
 
-*Ultima actualización: 7 de Abril 2026*
-*Hotfix v1.0.1: Bug de detección BPM en FLAC corregido*
+*Última actualización: 9 de Abril 2026*  
+*v1.0.3: Donationware, CC BY-NC-ND 4.0*

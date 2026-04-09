@@ -2,21 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+---
+
 ## [1.0.3] - 2026-04-09
 
 ### Added
-- **iOS Themes:** Two new themes (iOS Light and iOS Dark) with Apple-style colors and buttons
+- **iOS Themes:** Two new themes (iOS Light and iOS Dark) with Apple-style colors and button styling
 - **About Window Updates:** Added KoFi donation button with message "Invítame a una cosita?" and QR donations image
 - **Visual Resize Grabber:** Added triangular grabber indicator in bottom-right corner of MainWindow
+- **Documentation:** Complete set of documentation (README.md, LICENSE.md, LICENSES.md, RELEASE.md, CHANGELOG.md)
+- **GitHub Repository:** Project published to https://github.com/h057co/Tone-and-Beats-by-Hostility
 
 ### Fixed
 - **LRA Terminology:** Corrected LRA row to display "LRA" instead of "LUFS" in loudness section
 - **Version Sync:** Fixed AssemblyInfo.cs version mismatch with .csproj (1.0.2 → 1.0.3)
+- **QR Image Visibility:** Fixed single-file publish to include all embedded assets
 
 ### Changed
 - **Release Build:** Enabled Release mode optimizations (DebugSymbols=false, Optimize=true)
-- **Single-File Publish:** Changed to self-contained single-file executable for easier distribution
-- **Installer:** Updated installer to v1.0.3 with single-file app included
+- **Single-File Publish:** Changed to self-contained single-file executable (~148 MB) for easier distribution
+- **Installer:** Updated Inno Setup installer to v1.0.3 with single-file app included (~146 MB)
+- **License:** Changed to CC BY-NC-ND 4.0 (Donationware)
 
 ### Technical
 - **Static Audit Resolved:** All 6 findings from previous audit addressed
@@ -37,9 +43,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [1.0.0] - 2026-04-XX
+## [1.0.0] - 2026-04-07
 
 ### Added
 - Initial release
 - Core audio analysis features
 - WPF desktop UI
+
+---
+
+*For detailed technical documentation, see DOCUMENTACION.md*
+*For build instructions, see scripts/BUILD.md*
