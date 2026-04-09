@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-04-09 - Implementación Experimental: Rama `exp/theme`
+
+### Snapshot de Seguridad
+- **Fecha:** 9 de Abril de 2026 (noche)
+- **Acción:** Inicio de experimento en rama aislada
+- **Rama activa:** `exp/theme`
+- **Objetivo:** Implementación de sistema de temas mejorado (Light/Dark/Custom)
+
+---
+
+### 🌟 Ritual de Branching - Inicio de Experimento
+
+**Objetivo del Experimento:**
+- Rama: `exp/theme`
+- Propósito: Diseñar e implementar sistema de temas avanzado con:
+  - Tema Light mejorado
+  - Tema Dark mejorado
+  - Sistema de persistencia de tema seleccionado
+  - Transiciones suaves entre temas
+  - Paletas de colores customizables
+- Duración estimada: 2-3 sesiones
+- Estado: 🔵 EN PROGRESO
+
+**Razón del Aislamiento:**
+- Mantener `master` estable para producción (v1.0.4)
+- Experimentación sin riesgo en código productivo
+- Permite iteración rápida sin afectar compilaciones de release
+
+**Handover Note:**
+- Commit base: `7d419b1` (master - Assets embedding completado)
+- Para volver a master: `git checkout master`
+- Para volver al punto estable: `git checkout 7d419b1`
+- Estado esperado al merge: Sistema de temas totalmente funcional
+
+---
+
 ## 2026-04-09 - Implementación Experimental: Rama `fix/bpm`
 
 ### Snapshot de Seguridad
