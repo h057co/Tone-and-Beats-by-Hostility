@@ -54,7 +54,7 @@
         <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,10">
             <TextBlock Text="Tone &amp; Beats by Hostility" FontSize="24" FontWeight="Bold" 
                        Foreground="{DynamicResource TitleBrush}" HorizontalAlignment="Center"/>
-            <TextBlock Text="Versión 1.0.3" FontSize="12" 
+            <TextBlock Text="Versión 1.0.4" FontSize="12" 
                        Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
         </StackPanel>
         
@@ -129,10 +129,11 @@
                 Margin="0,0,0,15"
                 Click="KoFiButton_Click"/>
         
-        <Image Grid.Row="5" Source="/Assets/qrdonaciones.png" 
+        <Image x:Name="QrImage" Grid.Row="5" 
                Height="280" 
                HorizontalAlignment="Center" 
-               Margin="0,0,0,15"/>
+               Margin="0,0,0,15"
+               RenderOptions.BitmapScalingMode="HighQuality"/>
         
         <StackPanel Grid.Row="6" HorizontalAlignment="Center" Margin="0,0,0,15">
             <TextBlock Text="www.hostilitymusic.com" FontSize="14" 

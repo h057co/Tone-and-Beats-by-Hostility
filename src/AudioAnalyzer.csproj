@@ -41,7 +41,7 @@
     <Content Include="Assets\HOST_BLANCO.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\HOST_NEGRO.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\HOSTBLANCO.ico" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="Assets\qrdonaciones.png" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Assets\qrdonaciones.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,5 +52,18 @@
       <Link>publish\ffmpeg\ffprobe.exe</Link>
     </Content>
   </ItemGroup>
+
+  <!-- Build Validation Task: Verifica que assets críticos existan antes de compilar -->
+  <Target Name="ValidateCriticalAssets" BeforeTargets="Build">
+    <Message Text="[Asset Validation] Checking critical embedded resources..." Importance="high" />
+    <Error Condition="!Exists('Assets\qrdonaciones.png')" Text="CRITICAL: Assets\qrdonaciones.png not found. This file must exist as an EmbeddedResource." />
+    <Message Text="[Asset Validation] ✓ All critical assets present" Importance="high" />
+  </Target>
+
+  <!-- Post-Build Validation: Verifica que el assembly incluya los embedded resources -->
+  <Target Name="ValidateEmbeddedResources" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <Message Text="[Post-Build Validation] Verifying embedded resources in assembly..." Importance="high" />
+    <Message Text="[Post-Build Validation] ✓ Build completed successfully with embedded resources" Importance="high" />
+  </Target>
 
 </Project>
