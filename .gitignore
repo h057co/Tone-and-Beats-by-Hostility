@@ -48,6 +48,7 @@ publish-selfcontained/
 Output/
 installer/*.exe
 installer/*.zip
+installer/*.rar
 
 # Test assets (large audio files)
 Assets/audiotest/
