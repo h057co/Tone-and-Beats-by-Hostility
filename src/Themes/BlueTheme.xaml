@@ -13,8 +13,8 @@
     <SolidColorBrush x:Key="BorderBrush" Color="#1B263B"/>
     <SolidColorBrush x:Key="TitleBrush" Color="#00B4D8"/>
     <SolidColorBrush x:Key="KeyForegroundBrush" Color="#E070DF"/>
-    <SolidColorBrush x:Key="AnalyzeButtonBrush" Color="#00B4D8"/>
-    <SolidColorBrush x:Key="AnalyzeButtonHoverBrush" Color="#48CAE4"/>
+     <SolidColorBrush x:Key="AnalyzeButtonBrush" Color="#7B68EE"/>
+     <SolidColorBrush x:Key="AnalyzeButtonHoverBrush" Color="#9B8BFF"/>
     <SolidColorBrush x:Key="ProgressBarBackgroundBrush" Color="#0D1B2A"/>
     <SolidColorBrush x:Key="WaveformBackgroundBrush" Color="#1B263B"/>
     <SolidColorBrush x:Key="WaveformBrush" Color="#48CAE4"/>

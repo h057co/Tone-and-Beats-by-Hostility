@@ -123,8 +123,8 @@ public partial class WaveformControl : UserControl
             var waveformPolygon = new Polygon
             {
                 Points = polygonPoints,
-                Fill = new SolidColorBrush(Color.FromArgb(128, 74, 144, 217)),
-                Stroke = new SolidColorBrush(Color.FromRgb(74, 144, 217)),
+                Fill = GetThemeBrush("WaveformBrush", Color.FromRgb(74, 144, 217), 128),
+                Stroke = GetThemeBrush("WaveformBrush", Color.FromRgb(74, 144, 217)),
                 StrokeThickness = 1
             };
 
@@ -152,7 +152,7 @@ public partial class WaveformControl : UserControl
             Y1 = 0,
             X2 = x,
             Y2 = height,
-            Stroke = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+            Stroke = GetThemeBrush("PlayheadBrush", Color.FromRgb(255, 107, 107)),
             StrokeThickness = 2,
             Opacity = 1,
             IsHitTestVisible = false
@@ -274,5 +274,28 @@ public partial class WaveformControl : UserControl
         UpdatePlayheadPosition();
         
         SeekRequested?.Invoke(this, newPosition);
+    }
+
+    /// <summary>
+    /// Obtiene un color del tema actual, con fallback a color por defecto.
+    /// Permite override de alpha para transparencia.
+    /// </summary>
+    private SolidColorBrush GetThemeBrush(string resourceKey, Color fallback, byte? alphaOverride = null)
+    {
+        try
+        {
+            if (Application.Current?.Resources[resourceKey] is SolidColorBrush themeBrush)
+            {
+                var color = themeBrush.Color;
+                if (alphaOverride.HasValue)
+                    color = Color.FromArgb(alphaOverride.Value, color.R, color.G, color.B);
+                return new SolidColorBrush(color);
+            }
+        }
+        catch { }
+        
+        if (alphaOverride.HasValue)
+            return new SolidColorBrush(Color.FromArgb(alphaOverride.Value, fallback.R, fallback.G, fallback.B));
+        return new SolidColorBrush(fallback);
     }
 }

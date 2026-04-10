@@ -66,10 +66,54 @@ public static class ThemeManager
                     mainWindow.Background = themeDict["BackgroundBrush"] as System.Windows.Media.Brush;
                 }
             }
+
+            ApplyIosStyles(themeName);
         }
         catch (Exception ex)
         {
             Services.LoggerService.Log($"ThemeManager.UpdateStaticStyles error: {ex.Message}");
+        }
+    }
+
+    private static void ApplyIosStyles(string themeName)
+    {
+        var app = Application.Current;
+        if (app?.MainWindow == null) return;
+
+        bool isIos = themeName.StartsWith("iOS");
+
+        try
+        {
+            var mainWindow = app.MainWindow;
+
+            // Buscar botones por nombre y aplicar estilos iOS si corresponde
+            if (mainWindow.FindName("AnalyzeButton") is System.Windows.Controls.Button analyzeBtn)
+            {
+                if (isIos && app.Resources.Contains("IosAnalyzeButtonStyle"))
+                    analyzeBtn.Style = app.Resources["IosAnalyzeButtonStyle"] as System.Windows.Style;
+                else
+                    analyzeBtn.Style = mainWindow.Resources["AnalyzeButton"] as System.Windows.Style;
+            }
+
+            if (mainWindow.FindName("SaveMetadataButton") is System.Windows.Controls.Button saveBtn)
+            {
+                if (isIos && app.Resources.Contains("IosButtonStyle"))
+                    saveBtn.Style = app.Resources["IosButtonStyle"] as System.Windows.Style;
+                else
+                    saveBtn.Style = mainWindow.Resources["SaveMetadataButton"] as System.Windows.Style;
+            }
+
+            if (mainWindow.FindName("BrowseButton") is System.Windows.Controls.Button browseBtn)
+            {
+                if (isIos && app.Resources.Contains("IosButtonStyle"))
+                    browseBtn.Style = app.Resources["IosButtonStyle"] as System.Windows.Style;
+                else
+                    browseBtn.ClearValue(System.Windows.FrameworkElement.StyleProperty);
+            }
+        }
+        catch (Exception ex)
+        {
+            Services.LoggerService.Log($"ThemeManager.ApplyIosStyles error: {ex.Message}");
         }
     }
 

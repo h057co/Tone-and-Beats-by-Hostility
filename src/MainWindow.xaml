@@ -87,15 +87,7 @@
             <Setter Property="Margin" Value="5"/>
         </Style>
 
-        <Style x:Key="ThemeSelector" TargetType="ComboBox">
-            <Setter Property="Background" Value="{DynamicResource ResultBoxBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="MinWidth" Value="70"/>
-        </Style>
-        
+
         <infra:LevelToBrushConverter x:Key="LevelToBrushConverter"/>
     </Window.Resources>
     
@@ -160,7 +152,7 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <Button Grid.Column="1" Content="Browse" Command="{Binding BrowseCommand}" Width="80"/>
+                <Button x:Name="BrowseButton" Grid.Column="1" Content="Browse" Command="{Binding BrowseCommand}" Width="80"/>
             </Grid>
         </Border>
         
@@ -256,9 +248,9 @@
         <Border Grid.Row="7" Style="{StaticResource ResultBox}">
             <StackPanel HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="🔍 Analyze Audio" Style="{StaticResource AnalyzeButton}" 
+                    <Button x:Name="AnalyzeButton" Content="🔍 Analyze Audio" Style="{StaticResource AnalyzeButton}" 
                             Command="{Binding AnalyzeCommand}"/>
-                    <Button Content="💾 Save to Metadata" Style="{StaticResource SaveMetadataButton}"
+                    <Button x:Name="SaveMetadataButton" Content="💾 Save to Metadata" Style="{StaticResource SaveMetadataButton}"
                             Margin="10,0,0,0"
                             Command="{Binding SaveMetadataCommand}"
                             IsEnabled="{Binding IsSaveMetadataEnabled}"/>

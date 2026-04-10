@@ -55,7 +55,7 @@ public partial class MainWindow : Window
         {
             var currentTheme = ThemeManager.CurrentTheme;
             
-            if (currentTheme == "Light")
+            if (currentTheme == "Light" || currentTheme == "iOS Light")
             {
                 LogoImage.Source = EmbeddedResourceHelper.LoadImage("HOST_NEGRO.png");
             }

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Windows;
 using AudioAnalyzer.Helpers;
 using AudioAnalyzer.Services;
+using AudioAnalyzer.Themes;
 
 namespace AudioAnalyzer;
 
@@ -33,6 +34,16 @@ public partial class AboutWindow : Window
         LoggerService.Log("AboutWindow.KoFiButton_Click - Navegador abierto");
     }
 
+    private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = e.Uri.AbsoluteUri,
+            UseShellExecute = true
+        });
+        e.Handled = true;
+    }
+
     /// <summary>
     /// Carga todas las imágenes incrustadas (EmbeddedResources) desde el assembly.
     /// Utiliza EmbeddedResourceHelper para centralizar la lógica de carga.
@@ -46,7 +57,11 @@ public partial class AboutWindow : Window
             LoggerService.Log("AboutWindow.LoadEmbeddedImages - ✓ QR image loaded");
         }
 
-        var logo = EmbeddedResourceHelper.LoadImage("HOST_BLANCO.png");
+        var currentTheme = ThemeManager.CurrentTheme;
+        var logoFile = (currentTheme == "Light" || currentTheme == "iOS Light") 
+            ? "HOST_NEGRO.png" 
+            : "HOST_BLANCO.png";
+        var logo = EmbeddedResourceHelper.LoadImage(logoFile);
         if (logo != null && FindName("LogoImageAbout") is System.Windows.Controls.Image logoImg)
         {
             logoImg.Source = logo;

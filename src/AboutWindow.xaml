@@ -67,51 +67,63 @@
                 
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="NAudio" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="Autor: Mark Heath | Ms-PL" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="GitHub" FontSize="10" Foreground="{DynamicResource AccentBrush}" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
+                         <TextBlock Text="NAudio" FontWeight="Bold" FontSize="13"/>
+                         <TextBlock Text="Autor: Mark Heath | Ms-PL" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                         <TextBlock FontSize="10">
+                             <Hyperlink NavigateUri="https://github.com/naudio/NAudio" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AccentBrush}">GitHub</Hyperlink>
+                         </TextBlock>
+                     </StackPanel>
+                 </Border>
                 
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="TagLibSharp" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="Autor: mono | LGPL-2.1" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="GitHub" FontSize="10" Foreground="{DynamicResource AccentBrush}" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
+                         <TextBlock Text="TagLibSharp" FontWeight="Bold" FontSize="13"/>
+                         <TextBlock Text="Autor: mono | LGPL-2.1" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                         <TextBlock FontSize="10">
+                             <Hyperlink NavigateUri="https://github.com/mono/taglib-sharp" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AccentBrush}">GitHub</Hyperlink>
+                         </TextBlock>
+                     </StackPanel>
+                 </Border>
                 
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="SoundTouch.Net" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="Autor: Olaf Woudenberg | LGPL-2.1" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="GitHub" FontSize="10" Foreground="{DynamicResource AccentBrush}" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
+                         <TextBlock Text="SoundTouch.Net" FontWeight="Bold" FontSize="13"/>
+                         <TextBlock Text="Autor: Olaf Woudenberg | LGPL-2.1" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                         <TextBlock FontSize="10">
+                             <Hyperlink NavigateUri="https://github.com/owoudenberg/soundtouch.net" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AccentBrush}">GitHub</Hyperlink>
+                         </TextBlock>
+                     </StackPanel>
+                 </Border>
                 
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="MediaInfo.Wrapper.Core" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="Autor: MediaArea | BSD-2-Clause" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="GitHub" FontSize="10" Foreground="{DynamicResource AccentBrush}" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
+                         <TextBlock Text="MediaInfo.Wrapper.Core" FontWeight="Bold" FontSize="13"/>
+                         <TextBlock Text="Autor: MediaArea | BSD-2-Clause" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                         <TextBlock FontSize="10">
+                             <Hyperlink NavigateUri="https://github.com/MediaArea/MediaInfo" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AccentBrush}">GitHub</Hyperlink>
+                         </TextBlock>
+                     </StackPanel>
+                 </Border>
                 
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="FFMpegCore" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="Autor: indexis | LGPL-2.1" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="GitHub" FontSize="10" Foreground="{DynamicResource AccentBrush}" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
+                         <TextBlock Text="FFMpegCore" FontWeight="Bold" FontSize="13"/>
+                         <TextBlock Text="Autor: indexis | LGPL-2.1" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                         <TextBlock FontSize="10">
+                             <Hyperlink NavigateUri="https://github.com/rosenbjerg/FFMpegCore" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AccentBrush}">GitHub</Hyperlink>
+                         </TextBlock>
+                     </StackPanel>
+                 </Border>
                 
                 <Border Background="{DynamicResource ResultBoxBackgroundBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
-                        <TextBlock Text="FFmpeg" FontWeight="Bold" FontSize="13"/>
-                        <TextBlock Text="FFmpeg Team | GPL-3.0" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        <TextBlock Text="ffmpeg.org" FontSize="10" Foreground="{DynamicResource AccentBrush}" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
+                         <TextBlock Text="FFmpeg" FontWeight="Bold" FontSize="13"/>
+                         <TextBlock Text="FFmpeg Team | GPL-3.0" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                         <TextBlock FontSize="10">
+                             <Hyperlink NavigateUri="https://ffmpeg.org" RequestNavigate="Hyperlink_RequestNavigate" Foreground="{DynamicResource AccentBrush}">ffmpeg.org</Hyperlink>
+                         </TextBlock>
+                     </StackPanel>
+                 </Border>
             </StackPanel>
         </ScrollViewer>
         
