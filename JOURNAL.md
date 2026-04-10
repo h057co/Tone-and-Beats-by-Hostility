@@ -16,25 +16,61 @@
 
 **Objetivo del Experimento:**
 - Rama: `exp/theme`
-- Propósito: Diseñar e implementar sistema de temas avanzado con:
-  - Tema Light mejorado
-  - Tema Dark mejorado
-  - Sistema de persistencia de tema seleccionado
-  - Transiciones suaves entre temas
-  - Paletas de colores customizables
-- Duración estimada: 2-3 sesiones
-- Estado: 🔵 EN PROGRESO
+- Propósito: Implementación de 6 mejoras UI/UX para sistema de temas
+- Estado: 🟢 **COMPLETADO CON ÉXITO**
+
+**Mejoras Implementadas:**
+
+1. **Waveform theme-aware** ✓
+   - WaveformControl.xaml.cs: Colores hardcodeados → GetThemeBrush()
+   - Waveform Fill respeta WaveformBrush con transparencia
+   - Playhead respeta PlayheadBrush dinámicamente
+   - Commit: `dfb8c31` (parte 1)
+
+2. **Logo theme-aware completo** ✓
+   - MainWindow: Logo muestra HOST_NEGRO.png en Light + iOS Light
+   - AboutWindow: Logo ahora es theme-aware
+   - Visibilidad mejorada en temas claros
+   - Commit: `dfb8c31` (parte 2)
+
+3. **Estilos iOS activados** ✓
+   - ThemeManager: Nuevo método ApplyIosStyles()
+   - Botones en temas iOS: Corner radius 12/14px + DropShadow
+   - Transición visual clara al cambiar a iOS
+   - Commit: `dfb8c31` (parte 3)
+
+4. **Código muerto eliminado** ✓
+   - MainWindow.xaml: Removido estilo ThemeSelector sin usar
+   - Commit: `dfb8c31` (parte 4)
+
+5. **Links clickeables en AboutWindow** ✓
+   - 6 librerías con URLs funcionales (NAudio, TagLibSharp, SoundTouch, MediaInfo, FFMpegCore, FFmpeg)
+   - TextBlocks → Hyperlinks con RequestNavigate handlers
+   - Clicks abren navegadores web automáticamente
+   - Commit: `dfb8c31` (parte 5)
+
+6. **Fix Blue theme Analyze button** ✓
+   - AnalyzeButtonBrush: #00B4D8 → #7B68EE (cyan → púrpura)
+   - Botón Analyze se distingue visualmente en Blue theme
+   - Commit: `dfb8c31` (parte 6)
 
 **Razón del Aislamiento:**
 - Mantener `master` estable para producción (v1.0.4)
 - Experimentación sin riesgo en código productivo
 - Permite iteración rápida sin afectar compilaciones de release
 
+**Commit Summary:**
+- Commit: `dfb8c31` - feat(ui): implement 6 UI/UX improvements
+- Archivos: 8 modificados, 135 insertions, 49 deletions
+- Build: 0 errores, 5 warnings (pre-existentes)
+
 **Handover Note:**
 - Commit base: `7d419b1` (master - Assets embedding completado)
+- Experimento base: `3d67f4c` (registro en JOURNAL)
+- Experimento completado: `dfb8c31` (6 mejoras implementadas)
 - Para volver a master: `git checkout master`
 - Para volver al punto estable: `git checkout 7d419b1`
-- Estado esperado al merge: Sistema de temas totalmente funcional
+- Estado esperado al merge: Sistema de temas completamente mejorado + UI más visual
 
 ---
 
