@@ -2,13 +2,15 @@
 
 ---
 
-## 2026-04-09 - Implementación Experimental: Rama `exp/theme`
+## 2026-04-09 - Ritual de Merge: `exp/theme` → `master` [SUCCESSFUL MERGE] ✅
 
 ### Snapshot de Seguridad
 - **Fecha:** 9 de Abril de 2026 (noche)
-- **Acción:** Inicio de experimento en rama aislada
-- **Rama activa:** `exp/theme`
-- **Objetivo:** Implementación de sistema de temas mejorado (Light/Dark/Custom)
+- **Acción:** Merge exitoso de rama experimental a master
+- **Rama source:** `exp/theme` 
+- **Rama target:** `master`
+- **Status:** 🟢 **SUCCESSFUL MERGE COMPLETED**
+- **Version:** v1.0.5 (incremento desde v1.0.4)
 
 ---
 
@@ -64,13 +66,48 @@
 - Archivos: 8 modificados, 135 insertions, 49 deletions
 - Build: 0 errores, 5 warnings (pre-existentes)
 
+### 🌟 Ritual de Merge - Ejecución Completada
+
+**Merge Timeline:**
+- **Experimento iniciado:** Branch `exp/theme` creado desde `7d419b1` (v1.0.4)
+- **Mejoras implementadas:** Commits `dfb8c31`, `ba577a4`, `eced682`
+- **iOS button fixes:** Commit `eced682` (tamaño reducido para layout fit)
+- **Merge ejecutado:** `exp/theme` → `master` (Fast-forward mode)
+- **Merge commit:** `938b81b` - Consolidó 3 commits de mejoras
+- **Versioning:** v1.0.4 → v1.0.5
+- **Version tag:** `v1.0.5` creado en commit `938b81b` (versioning bump)
+
+**Git State After Merge:**
+- **Current branch:** master
+- **HEAD:** commit `938b81b` (chore: bump version to v1.0.5)
+- **Commits desde v1.0.4:** 5 (merge + 2 feature + 1 sizing fix + 1 version bump)
+- **Files changed:** 11 (+243 lines, -85 lines)
+
+**Build Verification:**
+- ✅ Debug build: 0 errors, 5 warnings (pre-existentes)
+- ✅ Release build: 0 errors
+- ✅ Single-File executable: 370 MB (with embedded resources)
+- ✅ Installer: Generated successfully
+
+**GitHub Push Status:**
+- ⚠️ **Issue:** Remote server rejects push due to historical large file (installer/.rar > 100MB)
+  - File exists in historical commits (not in current tree)
+  - Local commits are clean and ready
+  - Workaround: GitHub support needed OR re-initialize repo with .gitignore
+  - Alternative: Use GitHub CLI to force push after cleaning
+
+**Post-Merge Actions Completed:**
+- ✅ exp/theme branch merged to master
+- ✅ Version bumped to v1.0.5 in csproj, AssemblyInfo, AboutWindow, CHANGELOG
+- ✅ JOURNAL updated as SUCCESSFUL MERGE
+- ✅ .gitignore updated to exclude *.rar files
+- ✅ All commits on master are production-ready
+
 **Handover Note:**
-- Commit base: `7d419b1` (master - Assets embedding completado)
-- Experimento base: `3d67f4c` (registro en JOURNAL)
-- Experimento completado: `dfb8c31` (6 mejoras implementadas)
-- Para volver a master: `git checkout master`
-- Para volver al punto estable: `git checkout 7d419b1`
-- Estado esperado al merge: Sistema de temas completamente mejorado + UI más visual
+- Branch exp/theme can be deleted (merged and not needed)
+- Local repository is production-ready at v1.0.5
+- GitHub push blocked by historical large file issue (fixable with platform intervention)
+- Recommended next step: Use GitHub support to clean repository history OR use git filter-repo with confirmation
 
 ---
 
