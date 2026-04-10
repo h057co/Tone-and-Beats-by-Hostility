@@ -11,9 +11,9 @@
     <Description>Desktop application for detecting BPM and musical key in audio files</Description>
     <Company>Hostility Music</Company>
     <Copyright>Copyright 2026 Hostility Music</Copyright>
-    <Version>1.0.4</Version>
-    <FileVersion>1.0.4.0</FileVersion>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+     <Version>1.0.5</Version>
+     <FileVersion>1.0.5.0</FileVersion>
+     <AssemblyVersion>1.0.5.0</AssemblyVersion>
     <ApplicationIcon>Assets\HOSTBLANCO.ico</ApplicationIcon>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>

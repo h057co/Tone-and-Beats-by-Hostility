@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.5] - 2026-04-09
+
+### UI/UX Improvements & Theme System Enhancement
+
+#### NEW: Comprehensive UI/UX System
+- **Waveform theme-aware:** Waveform colors now dynamically respect `WaveformBrush` and `PlayheadBrush` from active theme
+- **Logo theme-aware:** HOST_NEGRO.png displays in Light/iOS Light themes for visibility; HOST_BLANCO.png in Dark/Blue/iOS Dark
+- **iOS theme styles activated:** Buttons now display with proper corner radius (8-12px) and subtle DropShadow effects
+- **Links functionality:** 6 libraries (NAudio, TagLibSharp, SoundTouch.Net, MediaInfo, FFMpegCore, FFmpeg) with working hyperlinks
+- **Blue theme fix:** Analyze button now purple (#7B68EE) to distinguish from blue buttons
+
+#### Code Quality
+- **Dead code removal:** ThemeSelector ComboBox style eliminated (not used)
+- **Dynamic resource binding:** WaveformControl uses `GetThemeBrush()` helper for theme-aware rendering
+- **iOS button optimization:** Reduced padding/sizing to prevent layout overflow while maintaining Apple-style design
+
+#### NEW Helper Classes
+- **EmbeddedResourceHelper:** Centralized image loading from embedded resources
+
+#### Testing
+- 4 comprehensive theme scenarios validated:
+  - ✅ Debug build: 0 errors
+  - ✅ Release build: 0 errors
+  - ✅ Single-File executable: 370 MB (assets embedded)
+  - ✅ Installer: 103.8 MB (all features working)
+
+---
+
 ## [1.0.4] - 2026-04-09
 
 ### Performance & Architecture Optimization
