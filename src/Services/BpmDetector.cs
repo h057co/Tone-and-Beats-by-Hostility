@@ -92,13 +92,22 @@ public class BpmDetector : IBpmDetectorService
 
                     if (harmonic || Math.Abs(gridBpm - soundTouchBpm) < 5)
                     {
-                        finalBpm = gridBpm;
-                        LoggerService.Log($"BpmDetector - Using TransientGrid {gridBpm:F1} (harmonic match with SoundTouch {soundTouchBpm})");
+                        // Manejo inteligente de tresillos (Dembow/Trap)
+                        if (Math.Abs(ratio - 1.5) < 0.08 || Math.Abs(ratio - 0.667) < 0.08)
+                        {
+                            finalBpm = (gridBpm > 140 && soundTouchBpm <= 140) ? soundTouchBpm : gridBpm;
+                            LoggerService.Log($"BpmDetector - Ratio de tresillo detectado (1.5x). Prefiriendo el tempo base: {finalBpm:F1}");
+                        }
+                        else
+                        {
+                            finalBpm = gridBpm;
+                            LoggerService.Log($"BpmDetector - Usando TransientGrid {gridBpm:F1} (coincidencia armónica con SoundTouch {soundTouchBpm})");
+                        }
                     }
                     else
                     {
                         finalBpm = gridConfidence > 0.4 ? gridBpm : soundTouchBpm;
-                        LoggerService.Log($"BpmDetector - Disagreement: Grid={gridBpm:F1}(conf={gridConfidence:F2}), ST={soundTouchBpm} -> using {finalBpm:F1}");
+                        LoggerService.Log($"BpmDetector - Desacuerdo: Grid={gridBpm:F1}(conf={gridConfidence:F2}), ST={soundTouchBpm} -> usando {finalBpm:F1}");
                     }
                 }
                 else
@@ -109,11 +118,11 @@ public class BpmDetector : IBpmDetectorService
             else if (soundTouchBpm > 0)
             {
                 finalBpm = soundTouchBpm;
-                LoggerService.Log($"BpmDetector - TransientGrid failed, using SoundTouch: {soundTouchBpm}");
+                LoggerService.Log($"BpmDetector - TransientGrid falló, usando SoundTouch: {soundTouchBpm}");
             }
             else
             {
-                LoggerService.Log("BpmDetector - Both methods failed");
+                LoggerService.Log("BpmDetector - Ambos métodos fallaron");
                 return 0;
             }
 
