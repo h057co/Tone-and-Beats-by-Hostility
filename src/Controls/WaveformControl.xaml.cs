@@ -341,7 +341,10 @@ public partial class WaveformControl : UserControl
                 return new SolidColorBrush(color);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            LoggerService.Log($"WaveformControl.GetThemeBrush: {ex.Message}");
+        }
         
         if (alphaOverride.HasValue)
             return new SolidColorBrush(Color.FromArgb(alphaOverride.Value, fallback.R, fallback.G, fallback.B));

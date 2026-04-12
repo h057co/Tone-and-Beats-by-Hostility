@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.7] - 2026-04-12 (Unreleased)
+
+### Code Quality - Spaghetti Code Cleanup
+
+#### REFACTORING: Magic Numbers → Named Constants
+- **NEW:** `BpmConstants.cs` - Centralized all BPM detection magic numbers
+- Constants: `TRESILLO_RATIO`, `HIGH_CONFIDENCE_THRESHOLD`, `TRAP_CORRECTION_MULTIPLIER`, etc.
+- Updated `BpmDetector.cs` to use `BpmConstants`
+
+#### REFACTORING: Butterworth Filter Consolidation
+- **NEW:** `DesignButterworthFilter()` method in `WaveformAnalyzer.cs`
+- Eliminated 3 duplicate filter implementations
+- `LowFrequencyEmphasis()`, `ApplyLowPassFilter()`, `ApplyHighPassFilter()` now share common code
+
+#### BUG FIX: Empty Catch Blocks
+- `WaveformControl.xaml.cs` - Now logs exceptions instead of silent swallow
+- `CornerResizeBehavior.cs` - Now logs exceptions instead of silent swallow
+
+---
+
 ## [1.0.6] - 2026-04-11
 
 ### BPM Detection - Tresillo Pattern Support

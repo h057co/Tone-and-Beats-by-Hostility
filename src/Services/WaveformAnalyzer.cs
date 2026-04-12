@@ -264,30 +264,11 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
     private float[] LowFrequencyEmphasis(float[] samples, int sampleRate)
     {
-        // 2nd-order Butterworth low-pass IIR filter at ~200Hz
-        // Replaces the previous FIR filter (2400 taps) which was O(N*2400).
-        // IIR is O(N) - approximately 2400x faster for 48kHz audio.
+        const double cutoffFreq = 200.0;
         var result = new float[samples.Length];
-
-        double cutoffFreq = 200.0;
-        double nyquist = sampleRate / 2.0;
-        double normalizedCutoff = cutoffFreq / nyquist;
-        if (normalizedCutoff >= 1.0) normalizedCutoff = 0.99;
-
-        // Butterworth 2nd-order coefficients via bilinear transform
-        double omega = Math.Tan(Math.PI * normalizedCutoff);
-        double omega2 = omega * omega;
-        double sqrt2 = Math.Sqrt(2.0);
-        double denom = 1.0 + sqrt2 * omega + omega2;
-
-        double b0 = omega2 / denom;
-        double b1 = 2.0 * omega2 / denom;
-        double b2 = omega2 / denom;
-        double a1 = 2.0 * (omega2 - 1.0) / denom;
-        double a2 = (1.0 - sqrt2 * omega + omega2) / denom;
+        var (b0, b1, b2, a1, a2) = DesignButterworthFilter(cutoffFreq, sampleRate, isHighPass: false);
 
         double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-
         for (int i = 0; i < samples.Length; i++)
         {
             double x0 = samples[i];
@@ -667,25 +648,49 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     // =========================================================================
 
     /// <summary>
-    /// 2nd-order Butterworth IIR low-pass filter.
+    /// <summary>
+    /// Designs Butterworth filter coefficients using bilinear transform.
+    /// Returns (b0, b1, b2, a1, a2) coefficients.
     /// </summary>
-    private float[] ApplyLowPassFilter(float[] samples, int sampleRate, double cutoffHz)
+    private (double b0, double b1, double b2, double a1, double a2) DesignButterworthFilter(double cutoffHz, int sampleRate, bool isHighPass = false)
     {
-        var result = new float[samples.Length];
         double nyquist = sampleRate / 2.0;
         double norm = cutoffHz / nyquist;
         if (norm >= 1.0) norm = 0.99;
+        if (isHighPass && norm <= 0.0) norm = 0.001;
 
         double omega = Math.Tan(Math.PI * norm);
         double omega2 = omega * omega;
         double sqrt2 = Math.Sqrt(2.0);
         double denom = 1.0 + sqrt2 * omega + omega2;
 
-        double b0 = omega2 / denom;
-        double b1 = 2.0 * omega2 / denom;
-        double b2 = omega2 / denom;
+        double b0, b1, b2;
+        if (isHighPass)
+        {
+            b0 = 1.0 / denom;
+            b1 = -2.0 / denom;
+            b2 = 1.0 / denom;
+        }
+        else
+        {
+            b0 = omega2 / denom;
+            b1 = 2.0 * omega2 / denom;
+            b2 = omega2 / denom;
+        }
+
         double a1 = 2.0 * (omega2 - 1.0) / denom;
         double a2 = (1.0 - sqrt2 * omega + omega2) / denom;
+
+        return (b0, b1, b2, a1, a2);
+    }
+
+    /// <summary>
+    /// 2nd-order Butterworth IIR low-pass filter.
+    /// </summary>
+    private float[] ApplyLowPassFilter(float[] samples, int sampleRate, double cutoffHz)
+    {
+        var result = new float[samples.Length];
+        var (b0, b1, b2, a1, a2) = DesignButterworthFilter(cutoffHz, sampleRate, isHighPass: false);
 
         double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
         for (int i = 0; i < samples.Length; i++)
@@ -705,21 +710,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     private float[] ApplyHighPassFilter(float[] samples, int sampleRate, double cutoffHz)
     {
         var result = new float[samples.Length];
-        double nyquist = sampleRate / 2.0;
-        double norm = cutoffHz / nyquist;
-        if (norm >= 1.0) norm = 0.99;
-        if (norm <= 0.0) norm = 0.001;
-
-        double omega = Math.Tan(Math.PI * norm);
-        double omega2 = omega * omega;
-        double sqrt2 = Math.Sqrt(2.0);
-        double denom = 1.0 + sqrt2 * omega + omega2;
-
-        double b0 = 1.0 / denom;
-        double b1 = -2.0 / denom;
-        double b2 = 1.0 / denom;
-        double a1 = 2.0 * (omega2 - 1.0) / denom;
-        double a2 = (1.0 - sqrt2 * omega + omega2) / denom;
+        var (b0, b1, b2, a1, a2) = DesignButterworthFilter(cutoffHz, sampleRate, isHighPass: true);
 
         double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
         for (int i = 0; i < samples.Length; i++)

@@ -87,7 +87,7 @@ public class BpmDetector : IBpmDetectorService
 
             // === Step 4: Select final BPM ===
             double finalBpm;
-            if (gridBpm > 0 && gridConfidence > 0.15)
+            if (gridBpm > 0 && gridConfidence > BpmConstants.MIN_CONFIDENCE_THRESHOLD)
             {
                 if (soundTouchBpm > 0)
                 {
@@ -97,10 +97,10 @@ public class BpmDetector : IBpmDetectorService
                     if (harmonic || Math.Abs(gridBpm - soundTouchBpm) < 5)
                     {
                         // Manejo inteligente de tresillos (Dembow/Trap)
-                        if (Math.Abs(ratio - 1.5) < 0.08 || Math.Abs(ratio - 0.667) < 0.08)
+                        if (Math.Abs(ratio - BpmConstants.TRESILLO_RATIO) < BpmConstants.TRESILLO_TOLERANCE || Math.Abs(ratio - BpmConstants.HALF_TIME_RATIO) < BpmConstants.TRESILLO_TOLERANCE)
                         {
                             // NUEVA REGLA: Override por altísima confianza del TransientGrid
-                            if (gridConfidence >= 0.85)
+                            if (gridConfidence >= BpmConstants.HIGH_CONFIDENCE_THRESHOLD)
                             {
                                 finalBpm = gridBpm;
                                 LoggerService.Log($"BpmDetector - Ratio de tresillo detectado. TransientGrid tiene confianza muy alta ({gridConfidence:F2}). Forzando TransientGrid: {finalBpm:F1}");
@@ -110,8 +110,8 @@ public class BpmDetector : IBpmDetectorService
                                 double maxBpm = Math.Max(gridBpm, soundTouchBpm);
                                 double minBpm = Math.Min(gridBpm, soundTouchBpm);
 
-                                // Umbral inteligente (~155 BPM)
-                                if (maxBpm > 155)
+                                // Umbral inteligente
+                                if (maxBpm > BpmConstants.SMART_THRESHOLD_BPM)
                                 {
                                     finalBpm = minBpm;
                                     LoggerService.Log($"BpmDetector - Ratio de tresillo. Max BPM ({maxBpm:F1}) > 155 (Rango Pop/Reggaeton). Prefiriendo base: {finalBpm:F1}");
@@ -143,7 +143,7 @@ public class BpmDetector : IBpmDetectorService
                     {
                         // Desacuerdo total: Solo confiamos en el Grid si está MUY seguro de sí mismo.
                         // De lo contrario, SoundTouch es mucho más estable para audio comprimido (MP3).
-                        if (gridConfidence >= 0.65)
+                        if (gridConfidence >= BpmConstants.MEDIUM_CONFIDENCE_THRESHOLD)
                         {
                             finalBpm = gridBpm;
                             LoggerService.Log($"BpmDetector - Desacuerdo superado por alta confianza: Grid={gridBpm:F1} (conf={gridConfidence:F2}) vetó a ST={soundTouchBpm:F1}");
@@ -174,10 +174,10 @@ public class BpmDetector : IBpmDetectorService
             // === HEURÍSTICA DE TRAP MASTERIZADO (Corrección del agujero 101.4 BPM) ===
             // Si el motor base decidió un tempo entre 98 y 105 (firma típica del tresillo de 150-155 BPM),
             // pero el TransientGrid estuvo detectando velocidades altísimas (> 160) en el fondo,
-            // asumimos con seguridad que es un Trap/Drill masterizado y lo forzamos a Half-time (x 0.75).
-            if (finalBpm >= 98 && finalBpm <= 105 && gridBpm >= 160)
+            // asumimos con seguridad que es un Trap/Drill masterizado y lo forzamos a Half-time.
+            if (finalBpm >= BpmConstants.TRAP_MIN_BPM && finalBpm <= BpmConstants.TRAP_MAX_BPM && gridBpm >= BpmConstants.TRAP_GRID_BPM_THRESHOLD)
             {
-                double correctedBpm = finalBpm * 0.75; // Convierte 101.33 en ~76.00
+                double correctedBpm = finalBpm * BpmConstants.TRAP_CORRECTION_MULTIPLIER;
                 LoggerService.Log($"BpmDetector - Heurística Trap Masterizado: Falso positivo {finalBpm:F1} corregido a {correctedBpm:F1} BPM (Grid sugería {gridBpm:F1})");
                 finalBpm = correctedBpm;
             }

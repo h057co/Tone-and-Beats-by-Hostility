@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using AudioAnalyzer.Services;
 
 namespace AudioAnalyzer.Infrastructure;
 
@@ -106,7 +107,10 @@ public static class CornerResizeBehavior
                 Marshal.StructureToPtr(pos, lParam, true);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            LoggerService.Log($"CornerResizeBehavior.WndProc: {ex.Message}");
+        }
     }
 
     private static int GetHitTestResult(IntPtr hwnd, int xPos, int yPos)

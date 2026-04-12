@@ -192,6 +192,8 @@ Analyzers receive (float[] samples, int sampleRate)
 
 ## 6. Analysis Algorithms
 
+**Note (2026-04-12):** Magic numbers in BPM detection have been extracted to `BpmConstants.cs` for better maintainability. Constants like `TRESILLO_RATIO`, `HIGH_CONFIDENCE_THRESHOLD`, `TRAP_CORRECTION_MULTIPLIER` are now named constants instead of hardcoded values.
+
 ### 6.1 BPM Detection (SoundTouch-based)
 
 **Library:** SoundTouch.Net v2.3.2
@@ -351,7 +353,7 @@ See `CONTRIBUTING.md` for development guidelines.
 
 ---
 
-*Documentation updated: 2026-04-12*  
+*Documentation updated: 2026-04-12 (refactoring: BpmConstants, Butterworth filter consolidation)*  
 *Developed by: Luis Jiménez (Hostility) - Medellín, Colombia*  
 *Contact: info@hostilitymusic.com*  
 *Web: www.hostilitymusic.com*  
