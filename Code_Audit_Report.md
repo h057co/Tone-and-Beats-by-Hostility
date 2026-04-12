@@ -265,7 +265,7 @@ public static class DspConstants
 | Fase 3: Empty Catch Blocks | ✅ Completada | 2026-04-12 |
 | Fase 4: Memory Leaks | ✅ Completada | 2026-04-12 |
 | Fase 5: DSP Constants | ✅ Completada | 2026-04-12 |
-| Fase 6: Pipeline Connection | ❌ Pendiente | - |
+| Fase 6: Pipeline Connection | ✅ Completada | 2026-04-12 |
 | Fase 7: Code-Behind MVVM | ✅ Completada (CycleThemeCommand, OpenUrlCommand) | 2026-04-12 |
 | Fase 8: Threading Fixes | ❌ Pendiente | - |
 
