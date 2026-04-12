@@ -57,13 +57,14 @@ public class AudioAnalysisPipeline : IAudioAnalysisPipeline
             var loudnessTask = _loudnessAnalyzer.AnalyzeAsync(filePath, loudnessProgress);
 
             double bpm = 0;
+            double altBpm = 0;
             string key = "Unknown";
             string mode = "";
             double keyConfidence = 0;
             WaveformData? waveform = null;
             LoudnessResult loudness = new();
 
-            try { bpm = await bpmTask; }
+            try { (bpm, altBpm) = await bpmTask; }
             catch (Exception ex) { LoggerService.Log($"AudioAnalysisPipeline - BPM detection failed: {ex.Message}"); }
 
             try { (key, mode, keyConfidence) = await keyTask; }

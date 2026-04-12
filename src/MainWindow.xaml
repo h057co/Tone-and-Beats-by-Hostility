@@ -244,6 +244,27 @@
             </TextBlock>
         </Border>
         
+        <!-- Row 6.5: BPM Range Selector -->
+        <Border Grid.Row="6" Style="{StaticResource ResultBox}" Padding="10,8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="BPM Range:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <ComboBox ItemsSource="{Binding AvailableBpmProfiles}" 
+                          SelectedValue="{Binding SelectedBpmProfile}" 
+                          SelectedValuePath="Key"
+                          Width="180" 
+                          Background="White"
+                          TextElement.Foreground="Black">
+                    
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Value}" Foreground="Black" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                    
+                </ComboBox>
+            </StackPanel>
+        </Border>
+        
         <!-- Row 7: Analyze Button -->
         <Border Grid.Row="7" Style="{StaticResource ResultBox}">
             <StackPanel HorizontalAlignment="Center">
@@ -292,7 +313,14 @@
                     </TextBlock>
                     <TextBlock Text="{Binding BpmConfidence}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" 
                               HorizontalAlignment="Center"/>
-                </StackPanel>
+                    <TextBlock Text="{Binding AlternativeBpmText}" 
+                              FontSize="12" 
+                              Foreground="{DynamicResource TextSecondaryBrush}" 
+                              FontStyle="Italic"
+                              HorizontalAlignment="Center" 
+                              Margin="0,2,0,0"
+                              Visibility="{Binding AlternativeBpmText, Converter={StaticResource StringToVisibilityConverter}}"/>
+                 </StackPanel>
                 
                 <!-- Key Result -->
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch">

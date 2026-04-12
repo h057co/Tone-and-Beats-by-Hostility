@@ -26,6 +26,7 @@ public class MainViewModel : ViewModelBase
     private string _positionText = "00:00";
     private string _durationText = "00:00";
     private string _bpmText = "--";
+    private string _alternativeBpmText = "";
     private string _keyText = "--";
     private string _modeText = "";
     private string _bpmConfidence = "";
@@ -50,6 +51,7 @@ public class MainViewModel : ViewModelBase
     private double _displayBpm;
     private bool _bpmAdjusted;
     private string _bpmModifierText = "";
+    private BpmRangeProfile _selectedBpmProfile = BpmRangeProfile.Auto;
     private string _audioFileType = "";
     private string _sampleRateText = "";
     private string _bitDepthText = "";
@@ -192,6 +194,27 @@ public class MainViewModel : ViewModelBase
             string suffix = _bpmModifierText;
             return $"{_displayBpm.ToString("F1")}{suffix}";
         }
+    }
+
+    public string AlternativeBpmText
+    {
+        get => _alternativeBpmText;
+        set => SetProperty(ref _alternativeBpmText, value);
+    }
+
+    public Dictionary<BpmRangeProfile, string> AvailableBpmProfiles { get; } = new Dictionary<BpmRangeProfile, string>
+    {
+        { BpmRangeProfile.Auto, "Auto (Recomendado)" },
+        { BpmRangeProfile.Low_50_100, "Low (50 - 100 BPM)" },
+        { BpmRangeProfile.Mid_75_150, "Mid (75 - 150 BPM)" },
+        { BpmRangeProfile.High_100_200, "High (100 - 200 BPM)" },
+        { BpmRangeProfile.VeryHigh_150_300, "Very High (150 - 300 BPM)" }
+    };
+
+    public BpmRangeProfile SelectedBpmProfile
+    {
+        get => _selectedBpmProfile;
+        set => SetProperty(ref _selectedBpmProfile, value);
     }
 
     /// <summary>
@@ -646,19 +669,20 @@ public class MainViewModel : ViewModelBase
 
             // BPM, Key and Waveform share the SAME samples in memory (zero-copy)
             // Loudness uses FFmpeg externally — receives filePath independently
-            var bpmTask = _bpmDetectorService.DetectBpmAsync(monoSamples, sampleRate);
+            var bpmTask = _bpmDetectorService.DetectBpmAsync(monoSamples, sampleRate, null, SelectedBpmProfile);
             var keyTask = _keyDetectorService.DetectKeyAsync(monoSamples, sampleRate);
             var waveformTask = _waveformAnalyzerService.AnalyzeAsync(monoSamples, sampleRate, null);
             var loudnessTask = _loudnessAnalyzerService.AnalyzeAsync(FilePath, null);
 
             double bpm = 0;
+            double altBpm = 0;
             string key = "Error";
             string mode = "Error";
             double keyConfidence = 0;
             WaveformData? waveformData = null;
             LoudnessResult loudness = new LoudnessResult();
 
-            try { bpm = await bpmTask; }
+            try { (bpm, altBpm) = await bpmTask; }
             catch (Exception ex) { LoggerService.Log($"ExecuteAnalyze - BPM module failed: {ex.Message}"); }
 
             try { (key, mode, keyConfidence) = await keyTask; }
@@ -673,6 +697,7 @@ public class MainViewModel : ViewModelBase
             LoggerService.Log($"ExecuteAnalyze - Resultados: BPM={bpm}, Key={key}/{mode}, Loudness={loudness.IntegratedDisplay}");
 
             BpmText = bpm > 0 ? bpm.ToString("F1") : "--";
+            AlternativeBpmText = altBpm > 0 && altBpm != bpm ? $"Alt: {altBpm:F0} BPM" : "";
             BpmConfidence = bpm > 0 ? "Detected" : "";
             if (bpm > 0)
             {

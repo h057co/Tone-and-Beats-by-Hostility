@@ -10,34 +10,34 @@ public class BpmDetector : IBpmDetectorService
 {
     private readonly WaveformAnalyzer _waveformAnalyzer = new();
 
-    public async Task<double> DetectBpmAsync(string filePath, IProgress<int>? progress = null)
+    public async Task<(double PrimaryBpm, double AlternativeBpm)> DetectBpmAsync(string filePath, IProgress<int>? progress = null, BpmRangeProfile profile = BpmRangeProfile.Auto)
     {
         try
         {
             var (monoSamples, sampleRate) = new AudioDataProvider().LoadMono(filePath);
-            return await Task.Run(() => DetectBpmFromSamples(monoSamples, sampleRate, progress));
+            return await Task.Run(() => DetectBpmFromSamples(monoSamples, sampleRate, progress, profile));
         }
         catch (Exception ex)
         {
             LoggerService.Log($"BpmDetector.DetectBpmAsync - Error: {ex.Message}");
-            return 0;
+            return (0, 0);
         }
     }
 
-    public async Task<double> DetectBpmAsync(float[] monoSamples, int sampleRate, IProgress<int>? progress = null)
+    public async Task<(double PrimaryBpm, double AlternativeBpm)> DetectBpmAsync(float[] monoSamples, int sampleRate, IProgress<int>? progress = null, BpmRangeProfile profile = BpmRangeProfile.Auto)
     {
         try
         {
-            return await Task.Run(() => DetectBpmFromSamples(monoSamples, sampleRate, progress));
+            return await Task.Run(() => DetectBpmFromSamples(monoSamples, sampleRate, progress, profile));
         }
         catch (Exception ex)
         {
             LoggerService.Log($"BpmDetector.DetectBpmAsync(samples) - Error: {ex.Message}");
-            return 0;
+            return (0, 0);
         }
     }
 
-    public double DetectBpm(string filePath, IProgress<int>? progress = null)
+    public (double PrimaryBpm, double AlternativeBpm) DetectBpm(string filePath, IProgress<int>? progress = null, BpmRangeProfile profile = BpmRangeProfile.Auto)
     {
         var (monoSamples, sampleRate) = new AudioDataProvider().LoadMono(filePath);
         return DetectBpmFromSamples(monoSamples, sampleRate, progress);
@@ -47,7 +47,7 @@ public class BpmDetector : IBpmDetectorService
     /// Core BPM detection logic operating on pre-loaded mono samples.
     /// No file I/O occurs in this method.
     /// </summary>
-    private double DetectBpmFromSamples(float[] monoSamples, int sampleRate, IProgress<int>? progress = null)
+    private (double PrimaryBpm, double AlternativeBpm) DetectBpmFromSamples(float[] monoSamples, int sampleRate, IProgress<int>? progress = null, BpmRangeProfile profile = BpmRangeProfile.Auto)
     {
         try
         {
@@ -57,18 +57,18 @@ public class BpmDetector : IBpmDetectorService
             if (monoSamples.Length < sampleRate * 5)
             {
                 LoggerService.Log("BpmDetector - Audio too short for analysis");
-                return 0;
+                return (0, 0);
             }
 
             progress?.Report(15);
 
-            // === Step 1: SoundTouch quick BPM from mono samples in memory ===
+            // === Step 1: SoundTouch quick BPM (USAR AUDIO ORIGINAL) ===
             double soundTouchBpm = DetectWithSoundTouchFromSamples(monoSamples, sampleRate);
             LoggerService.Log($"BpmDetector - SoundTouch quick estimate: {soundTouchBpm}");
 
             progress?.Report(35);
 
-            // === Step 2: Select analysis segment (post-intro, up to 60s / ~32 bars) ===
+            // === Step 2: Select analysis segment (USAR AUDIO ORIGINAL) ===
             double initialBpm = soundTouchBpm > 0 ? soundTouchBpm : 120;
             var segment = SelectAnalysisSegment(monoSamples, sampleRate, initialBpm);
             LoggerService.Log($"BpmDetector - Analysis segment: {segment.Length} samples ({segment.Length / (double)sampleRate:F1}s)");
@@ -76,7 +76,11 @@ public class BpmDetector : IBpmDetectorService
             progress?.Report(45);
 
             // === Step 3: Transient-based BPM with Beat Grid Fitting ===
-            var (gridBpm, gridConfidence) = _waveformAnalyzer.DetectBpmByTransientGrid(segment, sampleRate);
+            // AQUÍ ES DONDE APLICAMOS EL FILTRO ÚNICAMENTE PARA EL ANÁLISIS DE TRANSIENTES
+            LoggerService.Log("BpmDetector - Aplicando filtro High-Pass al segmento para el análisis de transientes...");
+            var transientSegment = ApplyTransientEnhancementFilter(segment);
+            
+            var (gridBpm, gridConfidence) = _waveformAnalyzer.DetectBpmByTransientGrid(transientSegment, sampleRate);
             LoggerService.Log($"BpmDetector - TransientGrid result: {gridBpm:F1} BPM (conf: {gridConfidence:F2})");
 
             progress?.Report(80);
@@ -95,19 +99,60 @@ public class BpmDetector : IBpmDetectorService
                         // Manejo inteligente de tresillos (Dembow/Trap)
                         if (Math.Abs(ratio - 1.5) < 0.08 || Math.Abs(ratio - 0.667) < 0.08)
                         {
-                            finalBpm = (gridBpm > 140 && soundTouchBpm <= 140) ? soundTouchBpm : gridBpm;
-                            LoggerService.Log($"BpmDetector - Ratio de tresillo detectado (1.5x). Prefiriendo el tempo base: {finalBpm:F1}");
+                            // NUEVA REGLA: Override por altísima confianza del TransientGrid
+                            if (gridConfidence >= 0.85)
+                            {
+                                finalBpm = gridBpm;
+                                LoggerService.Log($"BpmDetector - Ratio de tresillo detectado. TransientGrid tiene confianza muy alta ({gridConfidence:F2}). Forzando TransientGrid: {finalBpm:F1}");
+                            }
+                            else
+                            {
+                                double maxBpm = Math.Max(gridBpm, soundTouchBpm);
+                                double minBpm = Math.Min(gridBpm, soundTouchBpm);
+
+                                // Umbral inteligente (~155 BPM)
+                                if (maxBpm > 155)
+                                {
+                                    finalBpm = minBpm;
+                                    LoggerService.Log($"BpmDetector - Ratio de tresillo. Max BPM ({maxBpm:F1}) > 155 (Rango Pop/Reggaeton). Prefiriendo base: {finalBpm:F1}");
+                                }
+                                else
+                                {
+                                    finalBpm = maxBpm;
+                                    LoggerService.Log($"BpmDetector - Ratio de tresillo. Max BPM ({maxBpm:F1}) <= 155 (Rango Trap/Drill). Prefiriendo tempo alto: {finalBpm:F1}");
+                                }
+                            }
                         }
                         else
                         {
-                            finalBpm = gridBpm;
-                            LoggerService.Log($"BpmDetector - Usando TransientGrid {gridBpm:F1} (coincidencia armónica con SoundTouch {soundTouchBpm})");
+                            // Para el resto de armónicos (ej. el doble o la mitad), verificamos que la confianza sea decente
+                            if (gridConfidence >= 0.40)
+                            {
+                                finalBpm = gridBpm;
+                                LoggerService.Log($"BpmDetector - Usando TransientGrid {gridBpm:F1} (coincidencia armónica con SoundTouch {soundTouchBpm:F1})");
+                            }
+                            else
+                            {
+                                // Si la confianza es muy mala, el masterizado engañó al Grid. Nos quedamos con SoundTouch.
+                                finalBpm = soundTouchBpm;
+                                LoggerService.Log($"BpmDetector - Coincidencia armónica pero confianza de Grid muy baja ({gridConfidence:F2}). Rechazando Grid y usando SoundTouch: {soundTouchBpm:F1}");
+                            }
                         }
                     }
                     else
                     {
-                        finalBpm = gridConfidence > 0.4 ? gridBpm : soundTouchBpm;
-                        LoggerService.Log($"BpmDetector - Desacuerdo: Grid={gridBpm:F1}(conf={gridConfidence:F2}), ST={soundTouchBpm} -> usando {finalBpm:F1}");
+                        // Desacuerdo total: Solo confiamos en el Grid si está MUY seguro de sí mismo.
+                        // De lo contrario, SoundTouch es mucho más estable para audio comprimido (MP3).
+                        if (gridConfidence >= 0.65)
+                        {
+                            finalBpm = gridBpm;
+                            LoggerService.Log($"BpmDetector - Desacuerdo superado por alta confianza: Grid={gridBpm:F1} (conf={gridConfidence:F2}) vetó a ST={soundTouchBpm:F1}");
+                        }
+                        else
+                        {
+                            finalBpm = soundTouchBpm;
+                            LoggerService.Log($"BpmDetector - Desacuerdo con confianza baja/media: Grid={gridBpm:F1} (conf={gridConfidence:F2}). Rechazando Grid, usando ST={soundTouchBpm:F1}");
+                        }
                     }
                 }
                 else
@@ -123,24 +168,66 @@ public class BpmDetector : IBpmDetectorService
             else
             {
                 LoggerService.Log("BpmDetector - Ambos métodos fallaron");
-                return 0;
+                return (0, 0);
+            }
+
+            // === HEURÍSTICA DE TRAP MASTERIZADO (Corrección del agujero 101.4 BPM) ===
+            // Si el motor base decidió un tempo entre 98 y 105 (firma típica del tresillo de 150-155 BPM),
+            // pero el TransientGrid estuvo detectando velocidades altísimas (> 160) en el fondo,
+            // asumimos con seguridad que es un Trap/Drill masterizado y lo forzamos a Half-time (x 0.75).
+            if (finalBpm >= 98 && finalBpm <= 105 && gridBpm >= 160)
+            {
+                double correctedBpm = finalBpm * 0.75; // Convierte 101.33 en ~76.00
+                LoggerService.Log($"BpmDetector - Heurística Trap Masterizado: Falso positivo {finalBpm:F1} corregido a {correctedBpm:F1} BPM (Grid sugería {gridBpm:F1})");
+                finalBpm = correctedBpm;
             }
 
             // === Step 5: Normalize tempo range ===
-            finalBpm = NormalizeTempoRange(finalBpm);
+            finalBpm = NormalizeTempoRange(finalBpm, profile);
 
             // === Step 6: Snap to integer if within 0.3 BPM ===
             finalBpm = SnapToInteger(finalBpm);
             LoggerService.Log($"BpmDetector - Final BPM: {finalBpm}");
 
+            // === Step 7: Calculate Alternative BPM ===
+            double altBpm = CalculateAlternativeBpm(finalBpm);
+            LoggerService.Log($"BpmDetector - Resultado Final: {finalBpm} BPM (Alternativo: {altBpm} BPM)");
+
             progress?.Report(100);
-            return finalBpm;
+            return (finalBpm, altBpm);
         }
         catch (Exception ex)
         {
             LoggerService.Log($"BpmDetector.DetectBpmFromSamples - Exception: {ex.Message}");
-            return 0;
+            return (0, 0);
         }
+    }
+
+    /// <summary>
+    /// Calculate alternative BPM based on DJ conventions (Double-time, Half-time, or Tresillo).
+    /// </summary>
+    private double CalculateAlternativeBpm(double primaryBpm)
+    {
+        if (primaryBpm <= 0) return 0;
+        
+        double altBpm;
+        if (primaryBpm < 90) 
+        {
+            // Tempos bajos: sugerimos el Double-Time (ej. 76 -> 152)
+            altBpm = primaryBpm * 2.0; 
+        }
+        else if (primaryBpm >= 90 && primaryBpm <= 135) 
+        {
+            // Tempos medios: sugerimos el ratio de tresillo (ej. 101.4 -> 152.1)
+            altBpm = primaryBpm * 1.5; 
+        }
+        else 
+        {
+            // Tempos altos: sugerimos el Half-Time (ej. 152 -> 76)
+            altBpm = primaryBpm / 2.0; 
+        }
+        
+        return SnapToInteger(altBpm);
     }
 
     /// <summary>
@@ -229,17 +316,46 @@ public class BpmDetector : IBpmDetectorService
         return monoSamples.AsSpan(startSample, Math.Min(targetSamples, monoSamples.Length - startSample)).ToArray();
     }
 
-    private double NormalizeTempoRange(double bpm)
+    private double NormalizeTempoRange(double bpm, BpmRangeProfile profile)
     {
-        if (bpm >= 170 && bpm <= 200)
+        if (bpm <= 0) return 0;
+
+        // Si es Auto, usamos una regla general permisiva (60-170) 
+        // pero preferimos dejarlo como lo detectó el motor base
+        if (profile == BpmRangeProfile.Auto)
         {
-            double half = bpm / 2.0;
-            if (half >= 85 && half <= 100)
+            if (bpm > 175) return bpm / 2.0;
+            if (bpm < 55) return bpm * 2.0;
+            return bpm;
+        }
+
+        double minBpm, maxBpm;
+        switch (profile)
+        {
+            case BpmRangeProfile.Low_50_100: minBpm = 50; maxBpm = 100; break;
+            case BpmRangeProfile.Mid_75_150: minBpm = 75; maxBpm = 150; break;
+            case BpmRangeProfile.High_100_200: minBpm = 100; maxBpm = 200; break;
+            case BpmRangeProfile.VeryHigh_150_300: minBpm = 150; maxBpm = 300; break;
+            default: return bpm;
+        }
+
+        // Si ya está en el rango, lo retornamos tal cual
+        if (bpm >= minBpm && bpm <= maxBpm) return bpm;
+
+        // Si no está en el rango, probamos multiplicadores para encajarlo
+        double[] multipliers = { 2.0, 0.5, 1.5, 0.667 };
+        
+        foreach (var mult in multipliers)
+        {
+            double adjusted = bpm * mult;
+            if (adjusted >= minBpm && adjusted <= maxBpm)
             {
-                LoggerService.Log($"BpmDetector.NormalizeTempo - {bpm} -> {half} (half-time, urban/reggaetón convention)");
-                return half;
+                LoggerService.Log($"BpmDetector.Normalize - Ajustado por perfil FL Studio ({minBpm}-{maxBpm}): {bpm:F1} -> {adjusted:F1} (Multiplicador: x{mult:F3})");
+                return adjusted;
             }
         }
+
+        LoggerService.Log($"BpmDetector.Normalize - Advertencia: No se pudo encajar {bpm:F1} en el rango {minBpm}-{maxBpm}. Se devuelve original.");
         return bpm;
     }
 
@@ -262,5 +378,25 @@ public class BpmDetector : IBpmDetectorService
             if (Math.Abs(ratio - h) < 0.08) return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// Aplica un filtro pasa-altos de primer orden (pre-emphasis) para remover sub-bajos 
+    /// y resaltar los transientes agudos, crucial para archivos masterizados y MP3.
+    /// </summary>
+    private float[] ApplyTransientEnhancementFilter(float[] samples)
+    {
+        if (samples == null || samples.Length == 0) return samples;
+
+        float[] filtered = new float[samples.Length];
+        filtered[0] = samples[0];
+        
+        // Coeficiente 0.95 elimina eficazmente frecuencias por debajo de ~150Hz
+        for (int i = 1; i < samples.Length; i++)
+        {
+            filtered[i] = samples[i] - 0.95f * samples[i - 1];
+        }
+        
+        return filtered;
     }
 }
