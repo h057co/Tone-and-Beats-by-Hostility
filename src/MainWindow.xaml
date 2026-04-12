@@ -116,7 +116,7 @@
             </Grid.ColumnDefinitions>
             
             <!-- Theme Button - Right side -->
-            <Button Grid.Column="2" Content="🎨" Click="ThemeButton_Click" 
+            <Button Grid.Column="2" Content="🎨" Command="{Binding CycleThemeCommand}" 
                     HorizontalAlignment="Right"
                     Width="40" Height="40"
                     Background="Transparent" BorderThickness="0"

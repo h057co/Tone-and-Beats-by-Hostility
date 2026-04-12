@@ -7,6 +7,7 @@ using AudioAnalyzer.Infrastructure;
 using AudioAnalyzer.Interfaces;
 using AudioAnalyzer.Models;
 using AudioAnalyzer.Services;
+using AudioAnalyzer.Themes;
 
 namespace AudioAnalyzer.ViewModels;
 
@@ -47,6 +48,8 @@ public class MainViewModel : ViewModelBase
     private RelayCommand? _stopCommand;
     private RelayCommand? _saveMetadataCommand;
     private RelayCommand? _analyzeCommand;
+    private RelayCommand? _cycleThemeCommand;
+    private RelayCommand? _openUrlCommand;
     private double _originalBpm;
     private double _displayBpm;
     private bool _bpmAdjusted;
@@ -447,6 +450,35 @@ public class MainViewModel : ViewModelBase
             () => { if (!string.IsNullOrEmpty(FilePath)) ExecuteAnalyze(); },
             () => !string.IsNullOrEmpty(FilePath) && !_isAnalyzingInProgress);
         private set => _analyzeCommand = value;
+    }
+
+    public RelayCommand CycleThemeCommand
+    {
+        get => _cycleThemeCommand ??= new RelayCommand(() => ThemeManager.CycleTheme());
+        private set => _cycleThemeCommand = value;
+    }
+
+    public RelayCommand OpenUrlCommand
+    {
+        get => _openUrlCommand ??= new RelayCommand(urlObj => 
+        {
+            if (urlObj is string url && !string.IsNullOrEmpty(url))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = url,
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    LoggerService.Log($"OpenUrlCommand failed: {ex.Message}");
+                }
+            }
+        });
+        private set => _openUrlCommand = value;
     }
 
     public bool IsAnalyzingInProgress => _isAnalyzingInProgress;
@@ -967,6 +999,7 @@ public class MainViewModel : ViewModelBase
 
     public void Cleanup()
     {
+        _audioPlayerService.PlaybackStateChanged -= OnPlaybackStateChanged;
         _audioPlayerService.Dispose();
     }
 }

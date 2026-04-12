@@ -43,12 +43,6 @@ public partial class MainWindow : Window
         ViewModel?.ToggleKeyDisplay();
     }
 
-    private void ThemeButton_Click(object sender, RoutedEventArgs e)
-    {
-        ThemeManager.CycleTheme();
-        UpdateLogoForTheme();
-    }
-
     private void UpdateLogoForTheme()
     {
         try
@@ -85,12 +79,6 @@ public partial class MainWindow : Window
         {
             Services.LoggerService.Log($"MainWindow.Hyperlink_RequestNavigate - Error: {ex.Message}");
         }
-    }
-
-    private void ThemeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        // ComboBox removed - using button instead
-        // This method is kept for compatibility but not used
     }
 
     private void WaveformDisplay_SeekRequested(object? sender, double position)
@@ -165,6 +153,7 @@ public partial class MainWindow : Window
         {
             ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
         }
+        WaveformDisplay.SeekRequested -= WaveformDisplay_SeekRequested;
         base.OnClosed(e);
     }
 }

@@ -5,8 +5,8 @@ namespace AudioAnalyzer.Services;
 
 public class WaveformAnalyzer : IWaveformAnalyzerService
 {
-    private const int WindowSize = 2048;
-    private const int HopSize = 512;
+    private const int WindowSize = DspConstants.FFT_SIZE;
+    private const int HopSize = DspConstants.HOP_SIZE;
     private const double TempoChangeThreshold = 2.0;
     private const int BarsForSection = 8;
     private const int TopKCandidates = 5;
@@ -740,8 +740,8 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     /// </summary>
     public (float[] lowBand, float[] hiBand) IsolateTransientBands(float[] samples, int sampleRate)
     {
-        var lowBand = ApplyLowPassFilter(samples, sampleRate, 150.0);
-        var hiBand = ApplyBandPassFilter(samples, sampleRate, 2000.0, 8000.0);
+        var lowBand = ApplyLowPassFilter(samples, sampleRate, DspConstants.TRANSIENT_LOW_BAND);
+        var hiBand = ApplyBandPassFilter(samples, sampleRate, DspConstants.TRANSIENT_HIGH_BAND_MIN, DspConstants.TRANSIENT_HIGH_BAND_MAX);
         return (lowBand, hiBand);
     }
 
@@ -755,7 +755,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         int windowSize = Math.Max(1, sampleRate / 100);
         int hopSize = windowSize / 2;
         // Minimum 30ms between transients to avoid duplicates
-        double deadTimeSec = 0.030;
+        double deadTimeSec = DspConstants.TRANSIENT_DEAD_TIME;
 
         int numFrames = (signal.Length - windowSize) / hopSize;
         if (numFrames <= 0) return new List<(double, double)>();
@@ -823,7 +823,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         for (int i = 1; i < all.Count; i++)
         {
             var last = merged[^1];
-            if (all[i].position - last.position < 0.015)
+            if (all[i].position - last.position < DspConstants.DUPLICATE_THRESHOLD)
             {
                 // Keep the one with higher amplitude
                 if (all[i].amplitude > last.amplitude)
@@ -849,7 +849,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
         var positions = transients.Select(t => t.position).ToArray();
         var amplitudes = transients.Select(t => t.amplitude).ToArray();
-        double tolerance = 0.015; // ±15ms
+        double tolerance = DspConstants.DUPLICATE_THRESHOLD; // ±15ms
 
         // Test every 0.5 BPM increment for fine resolution
         var candidates = new List<(double bpm, double score)>();

@@ -73,7 +73,7 @@ public class KeyDetector : IKeyDetectorService
 
     private double[] ComputePitchClassProfile(float[] samples, int sampleRate)
     {
-        const int fftSize = 16384;
+        const int fftSize = DspConstants.FFT_SIZE_KEY_DETECTION;
         const int hopSize = 8192;
         const int numBins = 12;
         const double a4Freq = 440.0;
