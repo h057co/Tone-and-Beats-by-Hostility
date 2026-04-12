@@ -2,6 +2,47 @@
 
 ---
 
+## 2026-04-11 - Ritual de Merge: `fix/tresillo-bpm-detection` → `master` [SUCCESSFUL MERGE] ✅
+
+### Snapshot de Seguridad
+- **Fecha:** 11 de Abril de 2026
+- **Acción:** Merge de fix de BPM + UI mejoras a master
+- **Rama source:** `fix/tresillo-bpm-detection`
+- **Rama target:** `master`
+- **Status:** 🟢 **SUCCESSFUL MERGE COMPLETED**
+- **Version:** v1.0.6
+
+### Funcionalidades Integradas:
+
+1. **Motor BPM con detección inteligente de tresillo** ✓
+   - Fix ratio 1.5x para reggaetón/pop
+   - Override por alta confianza (0.85) en TransientGrid
+   - Umbral 0.65 para desacuerdos
+   - Heurística Trap Masterizado (corrige 101.4 → 76)
+
+2. **BPM Alternative Display** ✓
+   - CalculateAlternativeBpm() para mostrar tempo alternativo
+   - Tuple (PrimaryBpm, AlternativeBpm) en IBpmDetectorService
+   - AlternativeBpmText en ViewModel + XAML
+
+3. **BPM Range Profiles estilo FL Studio** ✓
+   - Enum BpmRangeProfile (Auto, Low_50_100, Mid_75_150, High_100_200, VeryHigh_150_300)
+   - NormalizeTempoRange con perfiles configurables
+   - ComboBox en UI con textos amigables
+
+4. **UI Improvements** ✓
+   - ComboBox BPM Range con contraste alto (Foreground negro)
+   - ItemTemplate para textos amigables
+   - Fix bug double-fire en WaveformControl
+   - Gradiente dinámico de progreso en Waveform
+
+### Commits Integrados:
+- `3e99116` - fix: resolver bug double-fire en WaveformControl y agregar gradiente de progreso dinámico
+- `feat(ui): mejorar selector de rangos BPM con textos amigables y contraste alto`
+- `fix: detectar correctamente BPM en generos con ritmo de tresillo`
+
+---
+
 ## 2026-04-09 - Ritual de Merge: `exp/theme` → `master` [SUCCESSFUL MERGE] ✅
 
 ### Snapshot de Seguridad
