@@ -37,7 +37,8 @@ public partial class App : Application
             waveformAnalyzerService,
             filePickerService,
             messageBoxService,
-            loudnessAnalyzerService);
+            loudnessAnalyzerService,
+            analysisPipeline);
 
         // Create and show MainWindow
         var mainWindow = new MainWindow
