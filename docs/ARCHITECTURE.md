@@ -111,19 +111,21 @@ The application follows the **MVVM pattern** strictly:
 
 ### Service-Oriented Design
 
-Services are injected via **Dependency Injection** (Microsoft.Extensions.DependencyInjection):
+Services are instantiated directly in `App.xaml.cs` (manual DI, not a container):
 
 ```
-MainViewModel
-├── IAudioAnalysisPipeline → AudioAnalysisPipeline
+MainViewModel (receives via constructor)
+├── IAudioPlayerService → AudioPlayerService
 ├── IBpmDetectorService → BpmDetector
 ├── IKeyDetectorService → KeyDetector
 ├── IWaveformAnalyzerService → WaveformAnalyzer
-├── ILoudnessAnalyzerService → LoudnessAnalyzer
-├── IAudioPlayerService → AudioPlayerService
 ├── IFilePickerService → FilePickerService
 ├── IMessageBoxService → MessageBoxService
-└── LoggerService (static)
+├── ILoudnessAnalyzerService → LoudnessAnalyzer
+└── MetadataWriter (direct instantiation)
+
+Note: IAudioAnalysisPipeline exists but is NOT injected into MainViewModel.
+      It is created in App.xaml.cs but unused by the current UI flow.
 ```
 
 ---
@@ -182,33 +184,47 @@ Analyzers receive (float[] samples, int sampleRate)
 | FFMpegCore | 5.1.0 | Loudness analysis (LUFS) | MIT |
 | MediaInfo.Wrapper.Core | 26.1.0 | Audio metadata extraction | BSD-2-Clause |
 | TagLibSharp | 2.3.0 | Metadata read/write | LGPL v2.1 |
-| SoundTouch.Net | 2.3.2 | Audio processing (BPM) | LGPL v2.1 |
+| SoundTouch.Net | 2.3.2 | BPM detection & audio processing | LGPL v2.1 |
+
+**Note:** BpmFinder package was removed in v1.0.4+ - BPM detection now uses SoundTouch.Net exclusively.
 
 ---
 
 ## 6. Analysis Algorithms
 
-### 6.1 BPM Detection (Hybrid)
+### 6.1 BPM Detection (SoundTouch-based)
 
-**Approach:** Multi-strategy detection with tresillo support
+**Library:** SoundTouch.Net v2.3.2
 
-1. **BpmFinder** (primary - MP3/WAV only)
-   - Energy band analysis
-   - Onset detection
-   - Autocorrelation
+**Approach:** Multi-strategy detection with tresillo support (v1.0.6)
 
-2. **Advanced Algorithm** (fallback - FLAC/OGG/M4A/etc)
-   - Pre-processing: Low-frequency emphasis + Normalization
-   - 3 onset functions: Spectral Flux, Energy Flux, Complex Domain
-   - Multi-candidate BPM with weighted voting
+1. **SoundTouch Quick BPM Estimate**
+   - Uses `SoundTouch.ProfileType.BPM` for fast estimation
+   - Applied directly to mono samples
 
-3. **Tresillo Detection (v1.0.6)**
-   - Ratio 1.5x correction for reggaetón/pop
-   - High confidence override (>0.85)
-   - Trap Masterizado heuristic
+2. **Transient-Based Analysis**
+   - High-pass filter applied to isolate transients
+   - `WaveformAnalyzer.DetectBpmByTransientGrid()` for detailed analysis
+   - Beat grid fitting for rhythmic patterns
 
-4. **Range Profiles**
-   - Auto, Low (50-100), Mid (75-150), High (100-200), VeryHigh (150-300)
+3. **Harmonic Ratio Detection (Tresillo)**
+   - Ratio 1.5x correction for reggaetón/pop patterns
+   - Ratio 0.667x correction for half-time patterns
+   - Threshold: 0.08 for ratio matching
+   - Trap Masterizado heuristic (corrects 101.4 → 76 BPM)
+
+4. **Confidence-Based Selection**
+   - High confidence override (>0.85) in TransientGrid
+   - Threshold 0.15 minimum confidence
+   - Disagreement threshold: 0.65 for BPM conflicts
+
+5. **Range Profiles**
+   - `BpmRangeProfile` enum: Auto, Low_50_100, Mid_75_150, High_100_200, VeryHigh_150_300
+   - NormalizeTempoRange() for profile-based filtering
+
+6. **Alternative BPM Display**
+   - Returns `(PrimaryBpm, AlternativeBpm)` tuple
+   - CalculateAlternativeBpm() for display purposes
 
 ### 6.2 Key Detection
 
@@ -310,7 +326,9 @@ iscc installer/setup.iss
 | Artifact | Location | Size |
 |----------|----------|------|
 | Single-file exe | `publish-v1.0.6/` | ~370 MB |
-| Installer | `installer/ToneAndBeatsByHostility_Setup_v1.0.6.exe` | ~350 MB |
+| Installer | `installer/` | (generated via Inno Setup) |
+
+**Note:** Actual installer size depends on build configuration and compression.
 
 ---
 
@@ -333,7 +351,7 @@ See `CONTRIBUTING.md` for development guidelines.
 
 ---
 
-*Documentation updated: 2026-04-11*  
+*Documentation updated: 2026-04-12*  
 *Developed by: Luis Jiménez (Hostility) - Medellín, Colombia*  
 *Contact: info@hostilitymusic.com*  
 *Web: www.hostilitymusic.com*  
