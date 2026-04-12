@@ -27,5 +27,5 @@ Los logos, icono y recursos gráficos son propiedad de **Luis Jiménez (Hostilit
 
 ---
 
-*Versión: 1.0.3*
-*Actualizado: 9 de Abril 2026*
+*Versión: 1.0.6*
+*Actualizado: 12 de Abril 2026*

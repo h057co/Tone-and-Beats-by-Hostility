@@ -65,8 +65,8 @@ src/
 ```bash
 # Run performance tests
 cd src
-dotnet build -c Debug ../BpmTest/BpmTest.csproj
-dotnet run --project ../BpmTest/BpmTest.csproj
+dotnet build -c Debug BpmTest/BpmTest.csproj
+dotnet run --project BpmTest/BpmTest.csproj
 ```
 
 ---

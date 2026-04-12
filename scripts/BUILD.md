@@ -1,7 +1,7 @@
 # Tone & Beats - Scripts de Construcción
 
 **Versión:** 1.0.6  
-**Fecha:** 11 de Abril de 2026
+**Fecha:** 12 de Abril de 2026
 
 ## Desarrollo
 
@@ -63,5 +63,5 @@ dotnet publish src/AudioAnalyzer.csproj -c Release -r win-x64 --self-contained t
 
 ---
 
-*Versión 1.0.6 - Updated: 11 de Abril 2026*
+*Versión 1.0.6 - Updated: 12 de Abril 2026*
 *License: CC BY-NC-ND 4.0*
