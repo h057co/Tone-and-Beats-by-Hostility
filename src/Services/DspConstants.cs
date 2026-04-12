@@ -23,20 +23,5 @@ public static class DspConstants
 
     // BPM Detection
     public const int BPM_RANGE_MIN = 50;
-    public const int BPM_RANGE_MAX = 250;               // Ampliado para trap rápido
-
-    // Transient detection thresholds (reducidos para audio masterizado)
-    public const double TRANSIENT_THRESHOLD_LOW = 1.6;  // Era 2.0
-    public const double TRANSIENT_THRESHOLD_HI  = 1.4;  // Era 1.8
-
-    // Beat grid fitting tolerance (aumentado para mastering drift)
-    public const double HIT_TOLERANCE_SEC = 0.025;      // Era 0.020 → 25ms
-
-    // ── Spectral Flux (NUEVO v1.0.7) ──────────────────────────────────────
-    // Usa NAudio.Dsp.FastFourierTransform — sin nuevas dependencias NuGet
-    public const int SF_FFT_SIZE  = 1024;   // ~23ms @ 44100Hz (potencia de 2)
-    public const int SF_HOP_SIZE  = 512;    // 50% overlap entre frames
-    public const int SF_FFT_M     = 10;     // log2(1024) — requerido por NAudio FFT
-    public const double SF_ONSET_THRESHOLD  = 0.15;  // Piso mínimo para considerar onset
-    public const double SF_ONSET_WINDOW_SEC = 0.050; // Ventana non-max suppression (50ms)
+    public const int BPM_RANGE_MAX = 200;
 }

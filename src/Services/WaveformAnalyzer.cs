@@ -1001,8 +1001,8 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         var previousSpectrum = new double[DspConstants.SF_FFT_SIZE / 2];
         var window = new float[DspConstants.SF_FFT_SIZE];
 
-        // Límite espectral: 11000 Hz (Ampliado para capturar subdivisión rítmica: shakers, open hats 8k-11k Hz)
-        int maxBin = (int)(11000.0 * DspConstants.SF_FFT_SIZE / sampleRate);
+        // Límite espectral: 8000 Hz (Sweet spot para retener ataques de percusión y filtrar artefactos de compresión)
+        int maxBin = (int)(8000.0 * DspConstants.SF_FFT_SIZE / sampleRate);
         if (maxBin > DspConstants.SF_FFT_SIZE / 2) maxBin = DspConstants.SF_FFT_SIZE / 2;
 
         for (int frame = 0; frame < numFrames; frame++)
