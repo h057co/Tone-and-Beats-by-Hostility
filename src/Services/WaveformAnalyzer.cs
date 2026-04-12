@@ -1,5 +1,6 @@
 using AudioAnalyzer.Interfaces;
 using AudioAnalyzer.Models;
+using NAudio.Dsp;
 
 namespace AudioAnalyzer.Services;
 
@@ -10,6 +11,13 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     private const double TempoChangeThreshold = 2.0;
     private const int BarsForSection = 8;
     private const int TopKCandidates = 5;
+
+    // Cache de transientes para BpmDetector
+    private List<(double position, double amplitude)> _lastTransients;
+    private double _lastSegmentDuration;
+
+    public List<(double position, double amplitude)> GetLastTransients()
+        => _lastTransients ?? new List<(double, double)>();
 
     public async Task<WaveformData> AnalyzeAsync(string filePath, double? globalBpm = null)
     {
@@ -951,7 +959,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
                 }
 
                 deviations.Add(minDist);
-                if (minDist < 0.020) hits++; // 20ms tolerance for a "hit"
+                                if (minDist < DspConstants.HIT_TOLERANCE_SEC) hits++;  // 25ms tolerance for a "hit"
             }
 
             // Calculate standard deviation
@@ -972,22 +980,233 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     }
 
     /// <summary>
+    /// Calcula el Spectral Flux Onset Strength Envelope usando NAudio FFT.
+    ///
+    /// DIFERENCIA CLAVE vs DetectTransients():
+    ///   DetectTransients  → busca peaks de AMPLITUD absoluta
+    ///                        → falla en audio masterizado (peaks aplastados)
+    ///   SpectralFlux      → mide CAMBIOS de energía espectral frame a frame
+    ///                        → robusto a compresión: un beat comprimido sigue
+    ///                          generando un cambio espectral medible
+    ///
+    /// Equivalente C# de librosa.onset.onset_strength() usando infraestructura
+    /// NAudio que ya existe en el proyecto.
+    /// </summary>
+    private double[] ComputeSpectralFluxOnsets(float[] samples, int sampleRate)
+    {
+        int numFrames = (samples.Length - DspConstants.SF_FFT_SIZE) / DspConstants.SF_HOP_SIZE + 1;
+        if (numFrames <= 0) return Array.Empty<double>();
+
+        var onsetStrength = new double[numFrames];
+        var previousSpectrum = new double[DspConstants.SF_FFT_SIZE / 2];
+        var window = new float[DspConstants.SF_FFT_SIZE];
+
+        // Límite espectral: 8000 Hz (Sweet spot para retener ataques de percusión y filtrar artefactos de compresión)
+        int maxBin = (int)(8000.0 * DspConstants.SF_FFT_SIZE / sampleRate);
+        if (maxBin > DspConstants.SF_FFT_SIZE / 2) maxBin = DspConstants.SF_FFT_SIZE / 2;
+
+        for (int frame = 0; frame < numFrames; frame++)
+        {
+            int start = frame * DspConstants.SF_HOP_SIZE;
+            
+            // Aplicar ventana de Hann
+            for (int i = 0; i < DspConstants.SF_FFT_SIZE; i++)
+            {
+                if (start + i < samples.Length)
+                {
+                    double multiplier = 0.5 * (1 - Math.Cos(2 * Math.PI * i / (DspConstants.SF_FFT_SIZE - 1)));
+                    window[i] = (float)(samples[start + i] * multiplier);
+                }
+                else
+                {
+                    window[i] = 0;
+                }
+            }
+
+            var complex = new System.Numerics.Complex[DspConstants.SF_FFT_SIZE];
+            for (int i = 0; i < DspConstants.SF_FFT_SIZE; i++)
+                complex[i] = new System.Numerics.Complex(window[i], 0);
+
+            FftHelper.FFT(complex);
+
+            double flux = 0;
+            // Calcular flujo espectral solo hasta maxBin (Band-Limited)
+            for (int i = 0; i < maxBin; i++)
+            {
+                double magnitude = System.Numerics.Complex.Abs(complex[i]);
+                double diff = magnitude - previousSpectrum[i];
+                if (diff > 0) flux += diff;
+                previousSpectrum[i] = magnitude;
+            }
+
+            onsetStrength[frame] = flux;
+        }
+
+        // Normalización global al rango [0,1]
+        double maxFlux = 0;
+        for (int i = 0; i < numFrames; i++)
+            if (onsetStrength[i] > maxFlux) maxFlux = onsetStrength[i];
+
+        if (maxFlux > 0)
+        {
+            for (int i = 0; i < numFrames; i++)
+                onsetStrength[i] /= maxFlux;
+        }
+
+        return onsetStrength;
+    }
+
+    /// <summary>
+    /// Extrae picos locales del onset strength envelope.
+    /// Non-maximum suppression con ventana de tiempo configurable.
+    /// Equivalente conceptual a la detección de transientes, pero sobre
+    /// la curva de flux normalizada en lugar de la amplitud cruda.
+    /// </summary>
+    private List<(double position, double amplitude)> PickOnsetPeaks(double[] onsetStrength, int sampleRate)
+    {
+        var peaks = new List<(double position, double amplitude)>();
+        if (onsetStrength.Length == 0) return peaks;
+
+        int windowFrames = (int)(DspConstants.SF_ONSET_WINDOW_SEC * sampleRate / DspConstants.SF_HOP_SIZE);
+        if (windowFrames < 1) windowFrames = 1;
+
+        for (int i = 0; i < onsetStrength.Length; i++)
+        {
+            double currentValue = onsetStrength[i];
+            bool isPeak = true;
+            
+            int start = Math.Max(0, i - windowFrames);
+            int end = Math.Min(onsetStrength.Length - 1, i + windowFrames);
+            
+            double sum = 0;
+            int count = 0;
+
+            // Evaluar Non-Maximum Suppression y calcular promedio local simultáneamente
+            for (int j = start; j <= end; j++)
+            {
+                sum += onsetStrength[j];
+                count++;
+                
+                if (j != i && onsetStrength[j] >= currentValue)
+                {
+                    isPeak = false;
+                }
+            }
+
+            if (isPeak)
+            {
+                // Umbral Adaptativo: Superar el promedio local + un piso de ruido mínimo de 0.05
+                double localAverage = count > 0 ? sum / count : 0;
+                double adaptiveThreshold = (localAverage * 1.5) + 0.05;
+
+                if (currentValue > adaptiveThreshold)
+                {
+                    double timeInSeconds = (i * DspConstants.SF_HOP_SIZE) / (double)sampleRate;
+                    peaks.Add((timeInSeconds, currentValue));
+                }
+            }
+        }
+
+        return peaks;
+    }
+
+    /// <summary>
+    /// Pipeline BPM completo basado en Spectral Flux.
+    ///
+    /// Arquitectura: nuevo origen de onsets + pipeline existente reutilizado
+    ///
+    ///   ComputeSpectralFluxOnsets()  [NUEVO]  → onsets robustos a mastering
+    ///         ↓
+    ///   PickOnsetPeaks()             [NUEVO]  → extrae peaks de la curva
+    ///         ↓
+    ///   MergeTransients()            [existente] → deduplica
+    ///         ↓
+    ///   AutocorrelateTransients()    [existente] → candidatos BPM
+    ///         ↓
+    ///   ScoreBeatGrid()              [existente] → scoring final
+    ///
+    /// Retorna la misma firma que DetectBpmByTransientGrid() para
+    /// poder intercambiarse o combinarse en BpmDetector.
+    /// </summary>
+    public (double bpm, double confidence, List<(double bpm, double score)> allCandidates)
+        DetectBpmBySpectralFlux(float[] monoSamples, int sampleRate)
+    {
+        var empty = new List<(double bpm, double score)>();
+        if (monoSamples.Length < sampleRate * 5) return (0, 0, empty);
+
+        double segmentDuration = monoSamples.Length / (double)sampleRate;
+
+        // Paso 1: Calcular onset strength via Spectral Flux
+        var rawOnsets = ComputeSpectralFluxOnsets(monoSamples, sampleRate);
+        if (rawOnsets.Length == 0) return (0, 0, empty);
+
+        // Paso 2: Extraer picos locales (onset events)
+        var sfOnsets = PickOnsetPeaks(rawOnsets, sampleRate);
+
+        LoggerService.Log($"[SpectralFlux] Raw frames: {rawOnsets.Length}, Onset peaks: {sfOnsets.Count}");
+
+        if (sfOnsets.Count < 15) return (0, 0, empty);
+
+        // Paso 3: Merge para eliminar duplicados muy cercanos
+        // Pasamos sfOnsets en ambas bandas — MergeTransients deduplica por tiempo
+        var merged = MergeTransients(sfOnsets, new List<(double, double)>());
+
+        // Paso 4: Autocorrelación para encontrar candidatos BPM
+        var candidates = AutocorrelateTransients(
+            merged,
+            DspConstants.BPM_RANGE_MIN,
+            DspConstants.BPM_RANGE_MAX);
+
+        if (candidates.Count == 0) return (0, 0, empty);
+
+        // Paso 5: Grid fitting sobre los top candidatos
+        double bestBpm       = 0;
+        double bestComposite = double.MinValue;
+        double bestHitRate   = 0;
+        var allCandidates    = new List<(double bpm, double score)>();
+
+        foreach (var candidate in candidates.Take(10))
+        {
+            var (stdDev, hitRate, _) = ScoreBeatGrid(merged, candidate.bpm, segmentDuration);
+            double composite = (hitRate * 1.3) - (stdDev * 1.5);
+
+            allCandidates.Add((candidate.bpm, composite));
+
+            LoggerService.Log($"[SpectralFlux] Candidato {candidate.bpm:F1} BPM: " +
+                $"hitRate={hitRate:F2}, stdDev={stdDev:F4}, composite={composite:F3}");
+
+            if (composite > bestComposite)
+            {
+                bestComposite = composite;
+                bestHitRate   = hitRate;
+                bestBpm       = candidate.bpm;
+            }
+        }
+
+        double confidence = Math.Min(1.0, bestHitRate);
+        LoggerService.Log($"[SpectralFlux] Mejor: {bestBpm:F1} BPM (conf: {confidence:F2}, " +
+            $"composite: {bestComposite:F3})");
+
+        return (bestBpm, confidence, allCandidates);
+    }
+
+    /// <summary>
     /// Full transient-based BPM detection pipeline:
     /// Dual-band filtering → transient detection → autocorrelation → beat grid fitting.
     /// Returns (bpm, confidence).
     /// </summary>
-    public (double bpm, double confidence) DetectBpmByTransientGrid(float[] monoSamples, int sampleRate)
+    public (double bpm, double confidence, List<(double bpm, double score)> allCandidates) DetectBpmByTransientGrid(float[] monoSamples, int sampleRate)
     {
-        if (monoSamples.Length < sampleRate * 5) return (0, 0);
+        if (monoSamples.Length < sampleRate * 5) return (0, 0, new List<(double, double)>());
 
         double segmentDuration = monoSamples.Length / (double)sampleRate;
 
         // Step 1: Dual-band isolation
         var (lowBand, hiBand) = IsolateTransientBands(monoSamples, sampleRate);
 
-        // Step 2: Detect transients in each band
-        var lowTransients = DetectTransients(lowBand, sampleRate, 2.0);
-        var hiTransients = DetectTransients(hiBand, sampleRate, 1.8);
+        // Step 2: Detect transients in each band (usando thresholds reducidos para audio masterizado)
+        var lowTransients = DetectTransients(lowBand, sampleRate, DspConstants.TRANSIENT_THRESHOLD_LOW);
+        var hiTransients = DetectTransients(hiBand, sampleRate, DspConstants.TRANSIENT_THRESHOLD_HI);
 
         LoggerService.Log($"WaveformAnalyzer.TransientGrid - Low-band transients: {lowTransients.Count}, Hi-band transients: {hiTransients.Count}");
 
@@ -995,15 +1214,19 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         var allTransients = MergeTransients(lowTransients, hiTransients);
         LoggerService.Log($"WaveformAnalyzer.TransientGrid - Merged transients: {allTransients.Count}");
 
+        // Cache transients para BpmDetector
+        _lastTransients = allTransients;
+        _lastSegmentDuration = segmentDuration;
+
         if (allTransients.Count < 15)
         {
             LoggerService.Log("WaveformAnalyzer.TransientGrid - Too few transients, falling back");
-            return (0, 0);
+            return (0, 0, new List<(double, double)>());
         }
 
         // Step 4: Autocorrelation on transient positions → top candidates
         var candidates = AutocorrelateTransients(allTransients, 50, 200);
-        if (candidates.Count == 0) return (0, 0);
+        if (candidates.Count == 0) return (0, 0, new List<(double, double)>());
 
         LoggerService.Log($"WaveformAnalyzer.TransientGrid - Top candidates: {string.Join(", ", candidates.Take(5).Select(c => $"{c.bpm:F1}({c.score:F2})"))}");
 
@@ -1019,10 +1242,8 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         {
             var (stdDev, hitRate, _) = ScoreBeatGrid(allTransients, candidate.bpm, segmentDuration);
 
-            // Composite score: hitRate weighted heavily, penalize high stdDev
-            // hitRate range: 0-1, stdDev range: ~0.01-0.1
-            // A candidate with hitRate=0.38 should always beat hitRate=0.15 regardless of stdDev
-            double composite = hitRate - (stdDev * 2.0);
+            // Composite score: mas peso a hitRate (critico en audio masterizado)
+            double composite = (hitRate * 1.3) - (stdDev * 1.5);
 
             LoggerService.Log($"WaveformAnalyzer.GridFit - BPM {candidate.bpm:F1}: stdDev={stdDev:F4}, hitRate={hitRate:F2}, composite={composite:F3}");
 
@@ -1038,6 +1259,17 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         double confidence = Math.Min(1.0, bestHitRate);
         LoggerService.Log($"WaveformAnalyzer.TransientGrid - Best: {bestBpm:F1} BPM (stdDev={bestStdDev:F4}, hitRate={bestHitRate:F2}, composite={bestComposite:F3})");
 
-        return (bestBpm, confidence);
+        // Construir lista de todos los candidatos evaluados para BpmDetector
+        var allCandidatesResult = candidates
+            .Take(5)
+            .Select(c =>
+            {
+                var (sd, hr, _) = ScoreBeatGrid(allTransients, c.bpm, segmentDuration);
+                double comp = (hr * 1.3) - (sd * 1.5);
+                return (bpm: c.bpm, score: comp);
+            })
+            .ToList();
+
+        return (bestBpm, confidence, allCandidatesResult);
     }
 }
