@@ -263,10 +263,10 @@ public static class DspConstants
 | Fase 1: BpmConstants | ✅ Completada | 2026-04-12 |
 | Fase 2: Butterworth Filter | ✅ Completada | 2026-04-12 |
 | Fase 3: Empty Catch Blocks | ✅ Completada | 2026-04-12 |
-| Fase 4: Memory Leaks | ❌ Pendiente | - |
-| Fase 5: DSP Constants | ❌ Parcial (BpmConstants hecho) | - |
+| Fase 4: Memory Leaks | ✅ Completada | 2026-04-12 |
+| Fase 5: DSP Constants | ✅ Completada | 2026-04-12 |
 | Fase 6: Pipeline Connection | ❌ Pendiente | - |
-| Fase 7: Code-Behind MVVM | ❌ Pendiente | - |
+| Fase 7: Code-Behind MVVM | ✅ Completada (CycleThemeCommand, OpenUrlCommand) | 2026-04-12 |
 | Fase 8: Threading Fixes | ❌ Pendiente | - |
 
 ### Esfuerzo de Corrección Estimado (Restante)
@@ -285,10 +285,9 @@ public static class DspConstants
 
 ## 7. RECOMENDACIONES INMEDIATAS
 
-1. **Fase 4 (Memory Leaks)** - Resolver antes de próxima sesión
-2. **Fase 5 (DSP Constants)** - Ya parcialmente hecho con BpmConstants
-3. **Fase 6 (Pipeline)** - Conectar AudioAnalysisPipeline existente
-4. **Fase 7 (MVVM)** - Mover lógica de AboutWindow.xaml.cs a ViewModel
+1. **Fase 6 (Pipeline)** - Conectar AudioAnalysisPipeline existente (Pendiente)
+2. **Fase 8 (Threading)** - Fix Interlocked para _isAnalyzingInProgress flag
+3. **Nota:** Fases 1-5 y 7 completadas ✅
 
 ---
 
