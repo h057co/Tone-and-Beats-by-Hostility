@@ -1,6 +1,6 @@
 # Tone & Beats by Hostility
 
-**Versión:** 1.0.3  
+**Versión:** 1.0.6  
 **Tipo:** Donationware - Aplicación de análisis de audio para DJs y Productores Musicales  
 **Licencia:** [CC BY-NC-ND 4.0](LICENSE.md)
 
@@ -56,7 +56,7 @@ Tone & Beats by Hostility es una potente herramienta de análisis de audio dise�
 ## Instalación
 
 ### Instalador (Recomendado)
-1. Descarga `ToneAndBeatsByHostility_Setup_v1.0.3.exe` desde la sección de Releases
+1. Descarga `ToneAndBeatsByHostility_Setup_v1.0.6.exe` desde la sección de Releases
 2. Ejecuta el instalador
 3. Sigue las instrucciones del asistente
 4. Opcional: Crea acceso directo en escritorio
@@ -101,12 +101,12 @@ Esta aplicación utiliza librerías de terceros con sus propias licencias. Ver a
 
 | Librería | Propósito | Licencia |
 |----------|-----------|----------|
-| NAudio | Reproducción de audio | Ms-PL |
-| FFMpegCore | Análisis de audio/video | LGPL 2.1 |
-| MediaInfo.Wrapper.Core | Extracción de metadatos | GPL v2/LGPL v2 |
-| TagLibSharp | Lectura de tags | LGPL v2.1 |
-| NWaves | Procesamiento de señal | MIT |
-| BpmFinder | Detección de BPM | Apache 2.0 |
+| NAudio | Reproducción y análisis de audio | Ms-PL |
+| NAudio.Vorbis | Soporte para formato OGG | Ms-PL |
+| FFMpegCore | Análisis loudness (LUFS) | MIT |
+| MediaInfo.Wrapper.Core | Extracción de metadatos | BSD-2-Clause |
+| TagLibSharp | Lectura/escritura de tags | LGPL v2.1 |
+| SoundTouch.Net | Procesamiento de audio (BPM) | LGPL v2.1 |
 
 ---
 
@@ -126,25 +126,55 @@ Esta aplicación utiliza librerías de terceros con sus propias licencias. Ver a
 
 ```
 src/
+├── App.xaml / App.xaml.cs           # Punto de entrada WPF
 ├── MainWindow.xaml / .cs            # Interfaz principal
-├── AboutWindow.xaml / .cs           # Acerca de
-├── App.xaml / .cs                   # Aplicación
+├── AboutWindow.xaml / .cs            # Acerca de
+├── Controls/                         # Controles personalizados
+│   └── WaveformControl.xaml / .cs   # Visualizador de forma de onda
 ├── Services/                         # Lógica de negocio
-│   ├── BpmDetector.cs              # Detección BPM
-│   ├── KeyDetector.cs              # Detección Key
-│   ├── WaveformAnalyzer.cs         # Waveform
-│   ├── LoudnessAnalyzer.cs         # Análisis LUFS/LRA
-│   └── AudioPlayerService.cs       # Reproducción
-├── ViewModels/                      # MVVM
+│   ├── AudioAnalysisPipeline.cs     # Orquestación de análisis
+│   ├── AudioDataProvider.cs         # Carga centralizada de audio
+│   ├── AudioPlayerService.cs        # Reproducción
+│   ├── AudioReaderFactory.cs        # Factory de formatos
+│   ├── BpmDetector.cs               # Detección BPM híbrida
+│   ├── FftHelper.cs                 # Utilidades FFT compartidas
+│   ├── KeyDetector.cs               # Detección de tonalidad
+│   ├── LoudnessAnalyzer.cs          # Análisis LUFS/LRA
+│   ├── WaveformAnalyzer.cs          # Análisis de forma de onda
+│   └── LoggerService.cs             # Sistema de logging
+├── ViewModels/                       # MVVM
 │   └── MainViewModel.cs
-├── Themes/                         # Temas
+├── Models/                           # Modelos de datos
+│   ├── AudioFileInfo.cs
+│   ├── LoudnessResult.cs
+│   └── WaveformData.cs
+├── Themes/                          # Temas visuales
 │   ├── DarkTheme.xaml
 │   ├── LightTheme.xaml
 │   ├── BlueTheme.xaml
 │   ├── IosLightTheme.xaml
 │   └── IosDarkTheme.xaml
-└── Infrastructure/                  # Utilidades
-    └── ThemeManager.cs
+├── Infrastructure/                   # Utilidades
+│   ├── BoolToVisibilityConverter.cs
+│   ├── CornerResizeBehavior.cs
+│   ├── FilePickerService.cs
+│   ├── LevelToBrushConverter.cs
+│   ├── MessageBoxService.cs
+│   ├── StringToVisibilityConverter.cs
+│   └── ViewModelBase.cs
+├── Interfaces/                      # Contratos de servicios
+│   ├── IAudioAnalysisPipeline.cs
+│   ├── IAudioPlayerService.cs
+│   ├── IBpmDetectorService.cs
+│   ├── IFilePickerService.cs
+│   ├── IKeyDetectorService.cs
+│   ├── ILoudnessAnalyzerService.cs
+│   ├── IMessageBoxService.cs
+│   └── IWaveformAnalyzerService.cs
+├── Commands/                        # Comandos MVVM
+│   └── RelayCommand.cs
+└── Helpers/                         # Helpers
+    └── EmbeddedResourceHelper.cs
 ```
 
 ---

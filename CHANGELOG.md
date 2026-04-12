@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.6] - 2026-04-11
+
+### BPM Detection - Tresillo Pattern Support
+
+#### NEW: Intelligent Tresillo Detection
+- **Tresillo ratio fix (1.5x):** Automatic detection and correction for reggaetón/pop rhythms
+- **High confidence override:** BPM override when confidence > 0.85 in TransientGrid
+- **Disagreement threshold:** 0.65 threshold for BPM conflicts
+- **Trap Masterizado heuristic:** Corrects 101.4 BPM → 76 BPM for trap music
+
+#### NEW: BPM Alternative Display
+- **Alternative BPM:** CalculateAlternativeBpm() shows possible alternate tempo
+- **Tuple result:** IBpmDetectorService returns (PrimaryBpm, AlternativeBpm)
+- **UI integration:** AlternativeBpmText in ViewModel + XAML bindings
+
+#### NEW: BPM Range Profiles (FL Studio Style)
+- **BpmRangeProfile enum:** Auto, Low_50_100, Mid_75_150, High_100_200, VeryHigh_150_300
+- **NormalizeTempoRange:** Configurable BPM range profiles
+- **ComboBox UI:** User-friendly text labels for each profile
+
+#### UI Improvements
+- **BPM Range ComboBox:** High contrast (black foreground) for readability
+- **ItemTemplate:** User-friendly text labels
+- **Waveform double-fire fix:** Resolved event firing issue
+- **Dynamic progress gradient:** Waveform shows real-time progress during playback
+
+#### NEW: Test Project
+- **BpmTest/:** New test project for BPM detection validation
+
+---
+
 ## [1.0.5] - 2026-04-09
 
 ### UI/UX Improvements & Theme System Enhancement
@@ -135,5 +166,5 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-*For detailed technical documentation, see DOCUMENTACION.md*
+*For detailed technical documentation, see docs/ARCHITECTURE.md*
 *For build instructions, see scripts/BUILD.md*

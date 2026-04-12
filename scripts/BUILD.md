@@ -1,7 +1,7 @@
 # Tone & Beats - Scripts de Construcción
 
-**Versión:** 1.0.3  
-**Fecha:** 9 de Abril de 2026
+**Versión:** 1.0.6  
+**Fecha:** 11 de Abril de 2026
 
 ## Desarrollo
 
@@ -28,18 +28,18 @@ dotnet publish -c Release -r win-x64 --self-contained false -o ./publish
 ### Single-File (self-contained, no requiere runtime)
 
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o ./publish-v1.0.3
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o ./publish-v1.0.6
 ```
 
 ## Estructura de Builds Actual
 
 ```
-publish-v1.0.3/                      # Single-file (~148 MB)
+publish-v1.0.6/                      # Single-file (~370 MB)
 ├── ToneAndBeatsByHostility.exe     # Executable
 ├── D3DCompiler_47_cor3.dll
 ├── PresentationNative_cor3.dll
 ├── wpfgfx_cor3.dll
-└── publish/ffmpeg/                  # FFmpeg
+└── ffmpeg/                         # FFmpeg
     ├── ffmpeg.exe
     └── ffprobe.exe
 ```
@@ -50,7 +50,7 @@ publish-v1.0.3/                      # Single-file (~148 MB)
 & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer/setup.iss"
 ```
 
-Output: `installer/ToneAndBeatsByHostility_Setup_v1.0.3.exe` (~146 MB)
+Output: `installer/ToneAndBeatsByHostility_Setup_v1.0.6.exe`
 
 ## Comandos Rápidos desde la raíz
 
@@ -58,10 +58,10 @@ Output: `installer/ToneAndBeatsByHostility_Setup_v1.0.3.exe` (~146 MB)
 # Desde la carpeta raíz del proyecto
 dotnet build src/AudioAnalyzer.csproj -c Release
 dotnet run --project src/AudioAnalyzer.csproj -c Release
-dotnet publish src/AudioAnalyzer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ../publish-v1.0.3
+dotnet publish src/AudioAnalyzer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ../publish-v1.0.6
 ```
 
 ---
 
-*Versión 1.0.3 - Updated: 9 de Abril 2026*
+*Versión 1.0.6 - Updated: 11 de Abril 2026*
 *License: CC BY-NC-ND 4.0*
