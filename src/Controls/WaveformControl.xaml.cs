@@ -12,6 +12,11 @@ public partial class WaveformControl : UserControl
     private WaveformData? _waveformData;
     private double _duration;
     private double _currentPosition;
+    private LinearGradientBrush? _waveformBrush;
+    private GradientStop? _activeStopEnd;
+    private GradientStop? _inactiveStopStart;
+    private double _totalDuration = 1.0; // Evita división por cero
+    private Polygon? _waveformPolygon;
 
     public static readonly DependencyProperty PositionProperty =
         DependencyProperty.Register("Position", typeof(double), typeof(WaveformControl),
@@ -32,7 +37,47 @@ public partial class WaveformControl : UserControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        InitializeWaveformBrush();
         DrawWaveform();
+    }
+
+    private void InitializeWaveformBrush()
+    {
+        Color activeColor = Colors.DeepSkyBlue;
+        Color inactiveColor = Colors.DarkGray;
+
+        if (Application.Current.Resources["AccentColor"] is Color resActive) activeColor = resActive;
+        else if (Application.Current.Resources["AccentBrush"] is SolidColorBrush resActiveBrush) activeColor = resActiveBrush.Color;
+
+        if (Application.Current.Resources["TextSecondaryBrush"] is SolidColorBrush resInactiveBrush) inactiveColor = resInactiveBrush.Color;
+        else inactiveColor = Color.FromArgb(100, 150, 150, 150);
+
+        _activeStopEnd = new GradientStop(activeColor, 0.0);
+        _inactiveStopStart = new GradientStop(inactiveColor, 0.0);
+
+        _waveformBrush = new LinearGradientBrush
+        {
+            StartPoint = new Point(0, 0.5),
+            EndPoint = new Point(1, 0.5),
+            GradientStops = new GradientStopCollection
+            {
+                new GradientStop(activeColor, 0.0),
+                _activeStopEnd,
+                _inactiveStopStart,
+                new GradientStop(inactiveColor, 1.0)
+            }
+        };
+    }
+
+    private void UpdateWaveformProgress(double currentPosition)
+    {
+        if (_totalDuration <= 0 || _waveformBrush == null) return;
+
+        double progress = currentPosition / _totalDuration;
+        progress = Math.Max(0.0, Math.Min(1.0, progress));
+
+        _activeStopEnd.Offset = progress;
+        _inactiveStopStart.Offset = progress;
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -48,6 +93,7 @@ public partial class WaveformControl : UserControl
         if (d is WaveformControl control)
         {
             control.UpdatePlayheadPosition();
+            control.UpdateWaveformProgress(control.Position);
         }
     }
 
@@ -55,6 +101,7 @@ public partial class WaveformControl : UserControl
     {
         _waveformData = data;
         _duration = data.Duration;
+        _totalDuration = data.Duration;
         
         Dispatcher.BeginInvoke(() =>
         {
@@ -120,15 +167,15 @@ public partial class WaveformControl : UserControl
 
             polygonPoints.Add(polygonPoints[0]);
 
-            var waveformPolygon = new Polygon
+            _waveformPolygon = new Polygon
             {
                 Points = polygonPoints,
-                Fill = GetThemeBrush("WaveformBrush", Color.FromRgb(74, 144, 217), 128),
+                Fill = (Brush)_waveformBrush ?? GetThemeBrush("WaveformBrush", Color.FromRgb(74, 144, 217), 128),
                 Stroke = GetThemeBrush("WaveformBrush", Color.FromRgb(74, 144, 217)),
                 StrokeThickness = 1
             };
 
-            WaveformCanvas.Children.Add(waveformPolygon);
+            WaveformCanvas.Children.Add(_waveformPolygon);
 
             // Draw playhead
             DrawPlayhead(width, height);
@@ -242,6 +289,7 @@ public partial class WaveformControl : UserControl
         _isDragging = true;
         HandleSeek(e.GetPosition(WaveformCanvas).X);
         WaveformCanvas.CaptureMouse();
+        e.Handled = true;
     }
 
     private void WaveformCanvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -256,9 +304,10 @@ public partial class WaveformControl : UserControl
     {
         if (_isDragging)
         {
-            HandleSeek(e.GetPosition(WaveformCanvas).X);
+            // Solo limpiamos el estado, NO llamamos a HandleSeek de nuevo
             _isDragging = false;
             WaveformCanvas.ReleaseMouseCapture();
+            e.Handled = true;
         }
     }
 

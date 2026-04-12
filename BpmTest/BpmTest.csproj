@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>BpmTest</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="SoundTouch.Net" Version="2.3.2" />
+    <PackageReference Include="MediaInfo.Wrapper.Core" Version="26.1.0" />
+    <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../src/Services/AudioDataProvider.cs" Link="Services/%(Filename)%(Extension)" />
+    <Compile Include="../src/Services/AudioReaderFactory.cs" Link="Services/%(Filename)%(Extension)" />
+    <Compile Include="../src/Services/BpmDetector.cs" Link="Services/%(Filename)%(Extension)" />
+    <Compile Include="../src/Services/FftHelper.cs" Link="Services/%(Filename)%(Extension)" />
+    <Compile Include="../src/Services/LoggerService.cs" Link="Services/%(Filename)%(Extension)" />
+    <Compile Include="../src/Services/WaveformAnalyzer.cs" Link="Services/%(Filename)%(Extension)" />
+    <Compile Include="../src/Interfaces/IBpmDetectorService.cs" Link="Interfaces/%(Filename)%(Extension)" />
+    <Compile Include="../src/Interfaces/IWaveformAnalyzerService.cs" Link="Interfaces/%(Filename)%(Extension)" />
+    <Compile Include="../src/Models/WaveformData.cs" Link="Models/%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

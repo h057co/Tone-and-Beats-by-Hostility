@@ -44,14 +44,15 @@
     <EmbeddedResource Include="Assets\qrdonaciones.png" />
   </ItemGroup>
 
-  <ItemGroup>
+   <!-- FFmpeg files excluded in development build - only needed for Loudness analysis -->
+   <!-- <ItemGroup>
     <Content Include="..\publish\ffmpeg\ffmpeg.exe" CopyToOutputDirectory="PreserveNewest">
       <Link>publish\ffmpeg\ffmpeg.exe</Link>
     </Content>
     <Content Include="..\publish\ffmpeg\ffprobe.exe" CopyToOutputDirectory="PreserveNewest">
       <Link>publish\ffmpeg\ffprobe.exe</Link>
     </Content>
-  </ItemGroup>
+  </ItemGroup> -->
 
   <!-- Build Validation Task: Verifica que assets críticos existan antes de compilar -->
   <Target Name="ValidateCriticalAssets" BeforeTargets="Build">
