@@ -1,9 +1,9 @@
 # Tone & Beats by Hostility - Documentación Técnica
 
-**Versión:** 1.0.11  
+**Versión:** 1.0.12  
 **Fecha:** 13 de Abril de 2026  
 **Framework:** .NET 8.0 + WPF  
-**Estado:** Release (Donationware)
+**Estado:** Release (Donationware) - Final
 **Licencia:** CC BY-NC-ND 4.0
 
 ---
@@ -392,6 +392,25 @@ O:\Test\BPM KEY\
 - License cambiada a CC BY-NC-ND 4.0 (Donationware)
 - GitHub repository publicado
 - Documentación completa actualizada
+
+### Versión 1.0.12 - Final Release (13 Abril 2026)
+
+**Refactorización Completa del Sistema de Temas:**
+- ✅ Eliminado hardcoding de botones específicos en ThemeManager
+- ✅ Evento `ThemeChanged` agregado para notificación dinámica de cambios
+- ✅ Estilos completos de botones con esquinas redondeadas en todos los temas
+- ✅ ComboBox de BPM Range con alto contraste y estilos mejorados
+- ✅ Brushes específicos para ComboBox acorde a cada paleta de colores
+- ✅ LogoImage dinámico que cambia entre negro (Light/iOS Light) y blanco (Dark/Blue/iOS Dark)
+- ✅ Template completo de ComboBox con Popup funcional para dropdown
+- ✅ Sistema de suscripción a eventos de tema para actualización dinámica
+
+**Temas Mejorados:**
+- Dark Theme: Colores oscuros con acentos azul/púrpura
+- Light Theme: Fondo blanco con logo negro y texto oscuro
+- Blue Theme: Fondo azul marino con acentos cian
+- iOS Light: Paleta Apple Light con contraste optimizado
+- iOS Dark: Paleta Apple Dark con contraste optimizado
 
 ### Git Checkpoints
 

@@ -28,6 +28,11 @@
     <SolidColorBrush x:Key="FileNameActiveBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="BpmModifiedBrush" Color="#FF453A"/>
     
+    <!-- ComboBox Specific Brushes -->
+    <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="#1C1C1E"/>
+    <SolidColorBrush x:Key="ComboBoxForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#0A84FF"/>
+    
     <!-- iOS Button Style -->
     <Style x:Key="IosButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
@@ -46,11 +51,11 @@
                         <Border.Effect>
                             <DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="1" Opacity="0.2"/>
                         </Border.Effect>
-                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                     </Border>
-                 </ControlTemplate>
-             </Setter.Value>
-         </Setter>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
@@ -80,11 +85,11 @@
                         <Border.Effect>
                             <DropShadowEffect Color="#BF5AF2" BlurRadius="8" ShadowDepth="2" Opacity="0.4"/>
                         </Border.Effect>
-                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                     </Border>
-                 </ControlTemplate>
-             </Setter.Value>
-         </Setter>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource AnalyzeButtonHoverBrush}"/>

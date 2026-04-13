@@ -99,7 +99,113 @@
             <Setter Property="Padding" Value="15"/>
             <Setter Property="Margin" Value="5"/>
         </Style>
-
+        
+        <!-- ComboBox ToggleButton Template -->
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <Border x:Name="Border" Grid.ColumnSpan="2" 
+                        Background="{DynamicResource ComboBoxBackgroundBrush}" 
+                        BorderBrush="{DynamicResource ComboBoxBorderBrush}"
+                        BorderThickness="1" CornerRadius="4"/>
+                <Border Grid.Column="0" Background="Transparent" Margin="1"/>
+                <Path x:Name="Arrow" Grid.Column="1" 
+                      Fill="{DynamicResource ComboBoxForegroundBrush}" 
+                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                      Data="M 0 0 L 4 4 L 8 0 Z"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        
+        <!-- ComboBox Style with High Contrast -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton" 
+                                         Template="{StaticResource ComboBoxToggleButton}"
+                                         IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
+                                         Focusable="False"
+                                         ClickMode="Press"/>
+                            <ContentPresenter Name="ContentSite" 
+                                            IsHitTestVisible="False"
+                                            Content="{TemplateBinding SelectionBoxItem}" 
+                                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Left"
+                                            Margin="8,3,24,3"/>
+                            <Popup Name="Popup" 
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" 
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid Name="DropDown" 
+                                      SnapsToDevicePixels="True"
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" 
+                                            Background="{DynamicResource ComboBoxBackgroundBrush}" 
+                                            BorderBrush="{DynamicResource ComboBoxBorderBrush}"
+                                            BorderThickness="1" CornerRadius="4"
+                                            Margin="0,1,0,0">
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.3" Color="Black"/>
+                                        </Border.Effect>
+                                    </Border>
+                                    <ScrollViewer Margin="1,2" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- ComboBoxItem Style -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" 
+                                Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <infra:LevelToBrushConverter x:Key="LevelToBrushConverter"/>
     </Window.Resources>
@@ -383,25 +489,26 @@
         </Border>
         
         <!-- Row 7: BPM Range Selector -->
-        <Border Grid.Row="7" Style="{StaticResource ResultBox}" Padding="10,8">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="BPM Range:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                <ComboBox ItemsSource="{Binding AvailableBpmProfiles}" 
-                          SelectedValue="{Binding SelectedBpmProfile}" 
-                          SelectedValuePath="Key"
-                          Width="180" 
-                          Background="{DynamicResource ResultBoxBackgroundBrush}"
-                          Foreground="{DynamicResource ForegroundBrush}">
-                    
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Value}" Foreground="{DynamicResource ForegroundBrush}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                    
-                </ComboBox>
-            </StackPanel>
-        </Border>
+         <Border Grid.Row="7" Style="{StaticResource ResultBox}" Padding="10,8">
+             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                 <TextBlock Text="BPM Range:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                 <ComboBox ItemsSource="{Binding AvailableBpmProfiles}" 
+                           SelectedValue="{Binding SelectedBpmProfile}" 
+                           SelectedValuePath="Key"
+                           Width="180"
+                           Background="{DynamicResource ComboBoxBackgroundBrush}"
+                           Foreground="{DynamicResource ComboBoxForegroundBrush}"
+                           BorderBrush="{DynamicResource ComboBoxBorderBrush}">
+                     
+                     <ComboBox.ItemTemplate>
+                         <DataTemplate>
+                             <TextBlock Text="{Binding Value}" Foreground="{DynamicResource ComboBoxForegroundBrush}" />
+                         </DataTemplate>
+                     </ComboBox.ItemTemplate>
+                     
+                 </ComboBox>
+             </StackPanel>
+         </Border>
         
         <!-- Row 8: Analyze Button -->
         <Border Grid.Row="8" Style="{StaticResource ResultBox}">

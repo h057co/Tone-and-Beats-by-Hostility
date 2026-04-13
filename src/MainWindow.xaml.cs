@@ -60,7 +60,13 @@ public partial class MainWindow : Window
             WaveformDisplay.SeekRequested += WaveformDisplay_SeekRequested;
         }
 
+        ThemeManager.ThemeChanged += OnThemeChanged;
         UpdateLogoForTheme();
+    }
+
+    private void OnThemeChanged(object? sender, ThemeChangedEventArgs e)
+    {
+        Dispatcher.BeginInvoke(() => UpdateLogoForTheme());
     }
 
     private void AboutButton_Click(object sender, RoutedEventArgs e)
@@ -207,6 +213,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        ThemeManager.ThemeChanged -= OnThemeChanged;
         if (ViewModel != null)
         {
             ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
