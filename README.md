@@ -1,6 +1,6 @@
 # Tone & Beats by Hostility
 
-**Versión:** 1.0.10  
+**Versión:** 1.0.11  
 **Tipo:** Donationware - Aplicación de análisis de audio para DJs y Productores Musicales  
 **Licencia:** [CC BY-NC-ND 4.0](LICENSE.md)
 
