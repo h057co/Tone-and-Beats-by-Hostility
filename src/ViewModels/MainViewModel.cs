@@ -279,7 +279,6 @@ public class MainViewModel : ViewModelBase
         {
             SetProperty(ref _loudnessResult, value);
             OnPropertyChanged(nameof(LoudnessIntegratedDisplay));
-            OnPropertyChanged(nameof(LoudnessShortTermDisplay));
             OnPropertyChanged(nameof(LoudnessLraDisplay));
             OnPropertyChanged(nameof(LoudnessTruePeakDisplay));
             OnPropertyChanged(nameof(LoudnessIntegratedLevel));
@@ -294,7 +293,6 @@ public class MainViewModel : ViewModelBase
     }
 
     public string LoudnessIntegratedDisplay => _loudnessResult?.IntegratedDisplay ?? "--";
-    public string LoudnessShortTermDisplay => _loudnessResult?.ShortTermDisplay ?? "--";
     public string LoudnessLraDisplay => _loudnessResult?.LraDisplay ?? "--";
     public string LoudnessTruePeakDisplay => _loudnessResult?.TruePeakDisplay ?? "--";
 

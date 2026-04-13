@@ -444,8 +444,8 @@
                 <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                     <TextBlock Text="True Peak" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding LoudnessTruePeakDisplay}" FontSize="20" FontWeight="Bold" 
-                              Foreground="{Binding LoudnessTruePeakLevel, Converter={StaticResource LevelToBrushConverter}}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="dBTP" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                               Foreground="{Binding LoudnessTruePeakLevel, Converter={StaticResource LevelToBrushConverter}}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="dBFS" FontSize="9" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </Border>

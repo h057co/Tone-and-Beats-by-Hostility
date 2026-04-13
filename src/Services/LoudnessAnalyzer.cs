@@ -56,7 +56,7 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
 
             progress?.Report(100);
 
-            LoggerService.Log("LoudnessAnalyzer - Resultado: LUFS=" + result.IntegratedLufs + ", LRA=" + result.ShortTermLufs + ", TP=" + result.TruePeak);
+            LoggerService.Log("LoudnessAnalyzer - Resultado: LUFS=" + result.IntegratedLufs + ", LRA=" + result.LoudnessRange + ", TP=" + result.TruePeak);
         }
         catch (Exception ex)
         {
@@ -162,15 +162,15 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
             // loudnorm format (JSON)
             result.IntegratedLufs = ExtractValue(output, "input_i");
             result.TruePeak = ExtractValue(output, "input_tp");
-            result.ShortTermLufs = ExtractValue(output, "input_lra");
+            result.LoudnessRange = ExtractValue(output, "input_lra");
 
-            LoggerService.Log("LoudnessAnalyzer - input_i (Integrated): " + result.IntegratedLufs + " LUFS");
-            LoggerService.Log("LoudnessAnalyzer - input_tp (True Peak): " + result.TruePeak + " dBTP");
-            LoggerService.Log("LoudnessAnalyzer - input_lra (LRA): " + result.ShortTermLufs + " LUFS");
+            LoggerService.Log("LoudnessAnalyzer - input_i (Integrated LUFS): " + result.IntegratedLufs + " LUFS");
+            LoggerService.Log("LoudnessAnalyzer - input_tp (True Peak): " + result.TruePeak + " dBFS");
+            LoggerService.Log("LoudnessAnalyzer - input_lra (Loudness Range): " + result.LoudnessRange + " LU");
 
-            if (result.ShortTermLufs == 0)
+            if (result.LoudnessRange == 0)
             {
-                result.ShortTermLufs = result.IntegratedLufs;
+                LoggerService.Log("LoudnessAnalyzer - LRA not calculated, using default");
             }
         }
         catch (Exception ex)
