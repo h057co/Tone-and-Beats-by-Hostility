@@ -139,12 +139,21 @@ public partial class MainWindow : Window
 
     private void BpmText_LeftClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        ViewModel?.ModifyBpmDivide();
+        ViewModel?.CycleBpmAdjustment();
     }
 
+    // Handler eliminado: la función de click derecho fue reemplazada
+    // por el ciclo de un solo click (CycleBpmAdjustment).
+    // Se mantiene el método vacío para compatibilidad con cualquier
+    // referencia XAML residual que no haya sido actualizada.
     private void BpmText_RightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        ViewModel?.ModifyBpmMultiply();
+        // No-op: ver BpmText_LeftClick para el ciclo de ajuste BPM
+    }
+
+    private void BpmSwap_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        ViewModel?.SwapBpmValues();
     }
 
     protected override void OnClosed(EventArgs e)
