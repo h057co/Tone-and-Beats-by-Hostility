@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using AudioAnalyzer.Models;
 using AudioAnalyzer.Services;
 
@@ -15,8 +16,9 @@ public partial class WaveformControl : UserControl
     private LinearGradientBrush? _waveformBrush;
     private GradientStop? _activeStopEnd;
     private GradientStop? _inactiveStopStart;
-    private double _totalDuration = 1.0; // Evita división por cero
+    private double _totalDuration = 1.0;
     private Polygon? _waveformPolygon;
+    private Line? _playheadLine;
 
     public static readonly DependencyProperty PositionProperty =
         DependencyProperty.Register("Position", typeof(double), typeof(WaveformControl),
@@ -76,15 +78,15 @@ public partial class WaveformControl : UserControl
         double progress = currentPosition / _totalDuration;
         progress = Math.Max(0.0, Math.Min(1.0, progress));
 
-        _activeStopEnd.Offset = progress;
-        _inactiveStopStart.Offset = progress;
+        _activeStopEnd!.Offset = progress;
+        _inactiveStopStart!.Offset = progress;
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (_waveformData != null)
+        if (_waveformData != null && WaveformCanvas != null)
         {
-            DrawWaveform();
+            Dispatcher.BeginInvoke(DrawWaveform, DispatcherPriority.Loaded);
         }
     }
 
@@ -117,30 +119,30 @@ public partial class WaveformControl : UserControl
         {
             WaveformCanvas.Children.Clear();
         }
+        _waveformPolygon = null;
+        _playheadLine = null;
     }
 
     private void DrawWaveform()
     {
-        if (_waveformData == null) return;
+        if (_waveformData == null || WaveformCanvas == null) return;
 
         try
         {
-            // Get dimensions safely
-            double width = 600;
-            double height = 80;
+            double width = WaveformCanvas.ActualWidth;
+            double height = WaveformCanvas.ActualHeight;
 
-            if (RootGrid != null)
+            if (width <= 0 || height <= 0) return;
+
+            double playheadProportion = 0;
+            if (_duration > 0 && _playheadLine != null)
             {
-                width = RootGrid.ActualWidth > 0 ? RootGrid.ActualWidth : 600;
-                
-                // Get height from the first child (Border)
-                if (RootGrid.Children.Count > 0 && RootGrid.Children[0] is Border border)
-                {
-                    height = border.ActualHeight > 0 ? border.ActualHeight : 80;
-                }
+                playheadProportion = _currentPosition / _duration;
             }
 
             WaveformCanvas.Children.Clear();
+            _waveformPolygon = null;
+            _playheadLine = null;
 
             var points = _waveformData.WaveformPoints;
             if (points == null || points.Count == 0) return;
@@ -149,7 +151,6 @@ public partial class WaveformControl : UserControl
             double centerY = height / 2;
             double xStep = width / Math.Max(points.Count - 1, 1);
 
-            // Top line
             for (int i = 0; i < points.Count; i++)
             {
                 double x = i * xStep;
@@ -157,7 +158,6 @@ public partial class WaveformControl : UserControl
                 polygonPoints.Add(new Point(x, y));
             }
 
-            // Bottom line (reverse)
             for (int i = points.Count - 1; i >= 0; i--)
             {
                 double x = i * xStep;
@@ -177,8 +177,21 @@ public partial class WaveformControl : UserControl
 
             WaveformCanvas.Children.Add(_waveformPolygon);
 
-            // Draw playhead
-            DrawPlayhead(width, height);
+            if (_duration > 0)
+            {
+                _playheadLine = new Line
+                {
+                    X1 = playheadProportion * width,
+                    X2 = playheadProportion * width,
+                    Y1 = 0,
+                    Y2 = height,
+                    Stroke = GetThemeBrush("PlayheadBrush", Color.FromRgb(255, 107, 107)),
+                    StrokeThickness = 2,
+                    Opacity = 1,
+                    IsHitTestVisible = false
+                };
+                WaveformCanvas.Children.Add(_playheadLine);
+            }
         }
         catch (System.Exception)
         {
@@ -186,66 +199,28 @@ public partial class WaveformControl : UserControl
         }
     }
 
-    private void DrawPlayhead(double width, double height)
-    {
-        if (_duration <= 0 || _currentPosition < 0) return;
-
-        double x = (_currentPosition / _duration) * width;
-        x = Math.Max(0, Math.Min(x, width));
-        
-        var playheadLine = new Line
-        {
-            X1 = x,
-            Y1 = 0,
-            X2 = x,
-            Y2 = height,
-            Stroke = GetThemeBrush("PlayheadBrush", Color.FromRgb(255, 107, 107)),
-            StrokeThickness = 2,
-            Opacity = 1,
-            IsHitTestVisible = false
-        };
-
-        WaveformCanvas.Children.Add(playheadLine);
-    }
-
     private void UpdatePlayheadPosition()
     {
-        if (_waveformData == null || _duration <= 0) return;
+        if (_waveformData == null || _duration <= 0 || WaveformCanvas == null) return;
 
-        // Clamp position to valid range
         _currentPosition = Math.Max(0, Math.Min(_duration, Position));
 
         try
         {
-            double width = 600;
-            double height = 80;
+            double width = WaveformCanvas.ActualWidth;
+            double height = WaveformCanvas.ActualHeight;
 
-            if (RootGrid != null)
-            {
-                width = RootGrid.ActualWidth > 0 ? RootGrid.ActualWidth : 600;
-                
-                if (RootGrid.Children.Count > 0 && RootGrid.Children[0] is Border border)
-                {
-                    height = border.ActualHeight > 0 ? border.ActualHeight : 80;
-                }
-            }
+            if (width <= 0 || height <= 0) return;
 
-            // Remove old playhead lines
-            var linesToRemove = new List<UIElement>();
-            foreach (object child in WaveformCanvas.Children)
+            if (_playheadLine != null)
             {
-                if (child is Line line && line.StrokeThickness == 2)
-                {
-                    linesToRemove.Add(line);
-                }
+                double x = (_currentPosition / _duration) * width;
+                x = Math.Max(0, Math.Min(x, width));
+                _playheadLine.X1 = x;
+                _playheadLine.X2 = x;
+                _playheadLine.Y1 = 0;
+                _playheadLine.Y2 = height;
             }
-            foreach (var line in linesToRemove)
-            {
-                WaveformCanvas.Children.Remove(line);
-            }
-
-            // Add new playhead
-            DrawPlayhead(width, height);
         }
         catch (System.Exception)
         {
@@ -304,7 +279,6 @@ public partial class WaveformControl : UserControl
     {
         if (_isDragging)
         {
-            // Solo limpiamos el estado, NO llamamos a HandleSeek de nuevo
             _isDragging = false;
             WaveformCanvas.ReleaseMouseCapture();
             e.Handled = true;
@@ -325,10 +299,6 @@ public partial class WaveformControl : UserControl
         SeekRequested?.Invoke(this, newPosition);
     }
 
-    /// <summary>
-    /// Obtiene un color del tema actual, con fallback a color por defecto.
-    /// Permite override de alpha para transparencia.
-    /// </summary>
     private SolidColorBrush GetThemeBrush(string resourceKey, Color fallback, byte? alphaOverride = null)
     {
         try
