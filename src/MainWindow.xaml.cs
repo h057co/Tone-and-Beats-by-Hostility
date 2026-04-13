@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using AudioAnalyzer.Helpers;
 using AudioAnalyzer.ViewModels;
 using AudioAnalyzer.Themes;
@@ -16,6 +18,48 @@ public partial class MainWindow : Window
         InitializeComponent();
         LogoImage.Source = EmbeddedResourceHelper.LoadImage("HOST_BLANCO.png");
         Loaded += MainWindow_Loaded;
+    }
+
+    // Proporción exacta (Ancho / Alto)
+    private readonly double _aspectRatio = 400.0 / 900.0;
+
+    private void Window_SourceInitialized(object? sender, EventArgs e)
+    {
+        IntPtr hwnd = new WindowInteropHelper(this).Handle;
+        HwndSource source = HwndSource.FromHwnd(hwnd);
+        source?.AddHook(WindowPosChangingHook);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct WINDOWPOS
+    {
+        public IntPtr hwnd;
+        public IntPtr hwndInsertAfter;
+        public int x;
+        public int y;
+        public int cx; // Ancho
+        public int cy; // Alto
+        public int flags;
+    }
+
+    private const int WM_WINDOWPOSCHANGING = 0x0046;
+
+    private IntPtr WindowPosChangingHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == WM_WINDOWPOSCHANGING)
+        {
+            WINDOWPOS windowPos = (WINDOWPOS)Marshal.PtrToStructure(lParam, typeof(WINDOWPOS))!;
+
+            // Solo aplicar proporción fija cuando NO está maximizada
+            // Cuando está maximizada, permitir que llene la pantalla completa (sin letterboxing)
+            if (WindowState != WindowState.Maximized && (windowPos.flags & 0x0001) == 0)
+            {
+                // BLOQUEO ABSOLUTO: El ancho (cx) SIEMPRE será proporcional al alto (cy)
+                windowPos.cx = (int)(windowPos.cy * _aspectRatio);
+                Marshal.StructureToPtr(windowPos, lParam, true);
+            }
+        }
+        return IntPtr.Zero;
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -154,6 +198,28 @@ public partial class MainWindow : Window
     private void BpmSwap_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         ViewModel?.SwapBpmValues();
+    }
+
+    private void Window_StateChanged(object sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+        {
+            var screenHeight = SystemParameters.WorkArea.Height;
+            var screenWidth = SystemParameters.PrimaryScreenWidth;
+            
+            double targetWidth = screenHeight * _aspectRatio;
+            
+            Width = targetWidth;
+            Height = screenHeight;
+            Left = (screenWidth - targetWidth) / 2;
+            Top = 0;
+        }
+        else if (WindowState == WindowState.Normal)
+        {
+            Width = 400;
+            Height = 900;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
     }
 
     protected override void OnClosed(EventArgs e)

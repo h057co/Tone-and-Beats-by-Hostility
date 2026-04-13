@@ -8,8 +8,10 @@
         xmlns:infra="clr-namespace:AudioAnalyzer.Infrastructure"
         mc:Ignorable="d"
         Title="Tone &amp; Beats by Hostility" 
-        Width="400" Height="950" MinWidth="350" MinHeight="700"
+        Width="400" Height="900" MinWidth="350" MinHeight="700" 
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen" 
+        SourceInitialized="Window_SourceInitialized"
+        StateChanged="Window_StateChanged"
         Background="{DynamicResource BackgroundBrush}"
         AllowDrop="True"
         DragEnter="Window_DragEnter"
@@ -92,8 +94,8 @@
     </Window.Resources>
     
     <Grid>
-        <Viewbox Stretch="Uniform">
-    <Grid Margin="0" Width="400" Height="950">
+        <Viewbox Stretch="Uniform" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Grid Margin="0" Width="400" Height="900">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -283,8 +285,8 @@
             </StackPanel>
         </Border>
         
-        <!-- Row 9: Results (BPM/Key) - Estructura unificada centrada -->
-        <Border Grid.Row="9" Style="{StaticResource ResultBox}" Padding="15,15">
+        <!-- Row 9: Results (BPM/Key) - Altura fija con filas explícitas -->
+        <Border Grid.Row="9" Style="{StaticResource ResultBox}" Padding="15,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -292,51 +294,53 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- ========== BPM Column (Izquierda) ========== -->
-                <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    
-                    <!-- Header BPM -->
-                    <TextBlock Text="BPM" FontSize="12"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Margin="0,0,0,2"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                    <!-- Valor BPM -->
-                    <TextBlock Text="{Binding BpmDisplayText}" FontSize="32" FontWeight="Bold"
-                              HorizontalAlignment="Center" TextAlignment="Center"
-                              MouseLeftButtonDown="BpmText_LeftClick"
-                              Cursor="Hand"
-                              ToolTip="Click: ×2 → ÷2 → reset">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="{DynamicResource TitleBrush}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsBpmModified}" Value="True">
-                                        <Setter Property="Foreground" Value="{DynamicResource BpmModifiedBrush}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                <!-- ========== BPM Column ========== -->
+                <!-- Header BPM (Row 0) -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="BPM" FontSize="12"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
 
-                    <TextBlock Text="{Binding BpmConfidence}" FontSize="9"
-                              Foreground="{DynamicResource TextSecondaryBrush}"
-                              HorizontalAlignment="Center" TextAlignment="Center"/>
+                <!-- Valor BPM (Row 1) -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding BpmDisplayText}" FontSize="32" FontWeight="Bold"
+                          HorizontalAlignment="Center" TextAlignment="Center"
+                          MouseLeftButtonDown="BpmText_LeftClick" Cursor="Hand"
+                          ToolTip="Click: ×2 → ÷2 → reset">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource TitleBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsBpmModified}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource BpmModifiedBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
-                    <TextBlock Text="{Binding AlternativeBpmText}"
-                              FontSize="10" FontStyle="Italic"
-                              Foreground="{DynamicResource TextSecondaryBrush}"
-                              HorizontalAlignment="Center" TextAlignment="Center"
-                              Margin="0,2,0,0"
-                              MouseLeftButtonDown="BpmSwap_Click"
-                              Cursor="Hand"
-                              ToolTip="Click para intercambiar BPM"
-                              Visibility="{Binding AlternativeBpmText, Converter={StaticResource StringToVisibilityConverter}}"/>
-                </StackPanel>
+                <!-- Confidence BPM (Row 2) -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding BpmConfidence}" FontSize="9"
+                          HorizontalAlignment="Center" TextAlignment="Center"
+                          Foreground="{DynamicResource TextSecondaryBrush}"/>
 
-                <!-- ========== CENTRO: Swap Button (centrado en el ROW) ========== -->
-                <Button Grid.Column="1" Width="24" Height="24"
-                        VerticalAlignment="Center"
+                <!-- Alternative BPM (Row 3) - espacio siempre reservado -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding AlternativeBpmText}" FontSize="10" FontStyle="Italic"
+                          HorizontalAlignment="Center" TextAlignment="Center"
+                          Margin="0,2,0,0"
+                          MouseLeftButtonDown="BpmSwap_Click" Cursor="Hand"
+                          ToolTip="Click para intercambiar BPM"
+                          Visibility="{Binding AlternativeBpmText, Converter={StaticResource StringToVisibilityConverter}}"
+                          Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                <!-- ========== Swap Button (centro) ========== -->
+                <Button Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" 
+                        VerticalAlignment="Center" Width="24" Height="24"
                         ToolTip="Intercambiar BPM principal con alternativo"
                         Click="BpmSwap_Click"
                         Cursor="Hand"
@@ -368,53 +372,52 @@
                     </Viewbox>
                 </Button>
 
-                <!-- ========== KEY Column (Derecha) ========== -->
-                <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    
-                    <!-- Header KEY -->
-                    <TextBlock Text="KEY" FontSize="12"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Margin="0,0,0,2"/>
+                <!-- ========== KEY Column ========== -->
+                <!-- Header KEY (Row 0) -->
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="KEY" FontSize="12"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
 
-                    <!-- Valor KEY -->
-                    <TextBlock Text="{Binding KeyDisplayText}" FontSize="32" FontWeight="Bold"
-                              Foreground="{DynamicResource KeyForegroundBrush}"
-                              HorizontalAlignment="Center" TextAlignment="Center"
-                              MouseLeftButtonDown="KeyText_Click"
-                              Cursor="Hand"
-                              ToolTip="Click para ver tonalidad relativa"/>
+                <!-- Valor KEY (Row 1) -->
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding KeyDisplayText}" FontSize="32" FontWeight="Bold"
+                          Foreground="{DynamicResource KeyForegroundBrush}"
+                          HorizontalAlignment="Center" TextAlignment="Center"
+                          MouseLeftButtonDown="KeyText_Click" Cursor="Hand"
+                          ToolTip="Click para ver tonalidad relativa"/>
 
-                    <TextBlock Text="{Binding KeyConfidence}" FontSize="9"
-                              Foreground="{DynamicResource TextSecondaryBrush}"
-                              HorizontalAlignment="Center" TextAlignment="Center"/>
-                </StackPanel>
+                <!-- Confidence KEY (Row 2) -->
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding KeyConfidence}" FontSize="9"
+                          HorizontalAlignment="Center" TextAlignment="Center"
+                          Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                <!-- Placeholder vacío (Row 3) para paridad -->
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="" FontSize="10"/>
             </Grid>
         </Border>
         
-        <!-- Row 10: Link + About -->
-        <Grid Grid.Row="10" Margin="0,5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            
-            <!-- Hostility Link - Left -->
-            <TextBlock Grid.Column="0" FontSize="10" VerticalAlignment="Center">
+        <!-- Row 10: Footer - Centrado vertical -->
+        <StackPanel Grid.Row="10" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center" 
+                    Margin="0,2">
+
+            <!-- Link - Primer línea -->
+            <TextBlock FontSize="10" HorizontalAlignment="Center">
                 <Hyperlink NavigateUri="https://www.hostilitymusic.com" 
                            Foreground="{DynamicResource TextSecondaryBrush}"
                            RequestNavigate="Hyperlink_RequestNavigate">
                     www.hostilitymusic.com
                 </Hyperlink>
             </TextBlock>
-            
-            <!-- About Button - Right -->
-            <Button Grid.Column="2" Content="Acerca De" Click="AboutButton_Click" 
+
+            <!-- About - Segunda línea (salto de línea) -->
+            <Button Content="Acerca De" Click="AboutButton_Click" 
+                    HorizontalAlignment="Center"
                     Background="Transparent" BorderThickness="0"
                     Foreground="{DynamicResource TextSecondaryBrush}"
-                    FontSize="10" Cursor="Hand"/>
-        </Grid>
+                    FontSize="10" Cursor="Hand" 
+                    Margin="0,2,0,0"/>
+        </StackPanel>
         </Grid>
         </Viewbox>
         
