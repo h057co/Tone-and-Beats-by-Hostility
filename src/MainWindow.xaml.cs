@@ -1,8 +1,6 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using AudioAnalyzer.Helpers;
 using AudioAnalyzer.ViewModels;
 using AudioAnalyzer.Themes;
@@ -19,9 +17,6 @@ public partial class MainWindow : Window
         LogoImage.Source = EmbeddedResourceHelper.LoadImage("HOST_BLANCO.png");
         Loaded += MainWindow_Loaded;
     }
-
-    // Proporción exacta (Ancho / Alto)
-    private readonly double _aspectRatio = 400.0 / 900.0;
 
     private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
@@ -55,41 +50,6 @@ public partial class MainWindow : Window
     private void Close_Click(object sender, RoutedEventArgs e)
     {
         Close();
-    }
-
-    private void Window_SourceInitialized(object? sender, EventArgs e)
-    {
-        // Hook removed - free scaling enabled
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct WINDOWPOS
-    {
-        public IntPtr hwnd;
-        public IntPtr hwndInsertAfter;
-        public int x;
-        public int y;
-        public int cx; // Ancho
-        public int cy; // Alto
-        public int flags;
-    }
-
-    private const int WM_WINDOWPOSCHANGING = 0x0046;
-
-    private IntPtr WindowPosChangingHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-    {
-        // ESCALADO LIBRE - Sin restricción de proporción
-        // Comented out to allow free resizing:
-        // if (msg == WM_WINDOWPOSCHANGING)
-        // {
-        //     WINDOWPOS windowPos = (WINDOWPOS)Marshal.PtrToStructure(lParam, typeof(WINDOWPOS))!;
-        //     if (WindowState != WindowState.Maximized && (windowPos.flags & 0x0001) == 0)
-        //     {
-        //         windowPos.cx = (int)(windowPos.cy * _aspectRatio);
-        //         Marshal.StructureToPtr(windowPos, lParam, true);
-        //     }
-        // }
-        return IntPtr.Zero;
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -214,15 +174,6 @@ public partial class MainWindow : Window
     private void BpmText_LeftClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         ViewModel?.CycleBpmAdjustment();
-    }
-
-    // Handler eliminado: la función de click derecho fue reemplazada
-    // por el ciclo de un solo click (CycleBpmAdjustment).
-    // Se mantiene el método vacío para compatibilidad con cualquier
-    // referencia XAML residual que no haya sido actualizada.
-    private void BpmText_RightClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // No-op: ver BpmText_LeftClick para el ciclo de ajuste BPM
     }
 
     private void BpmSwap_Click(object sender, System.Windows.RoutedEventArgs e)

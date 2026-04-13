@@ -100,6 +100,7 @@ public partial class WaveformControl : UserControl
     private void RebuildGradient()
     {
         if (_waveformFillPaint == null) return;
+        if (SkiaCanvas.CanvasSize.Width <= 0) return;
 
         _waveformFillPaint.Shader = SKShader.CreateLinearGradient(
             new SKPoint(0, 0),
@@ -314,9 +315,9 @@ public partial class WaveformControl : UserControl
 
     private void HandleSeek(double x)
     {
-        if (_duration <= 0 || SkiaCanvas.CanvasSize.Width <= 0) return;
+        if (_duration <= 0 || SkiaCanvas.ActualWidth <= 0) return;
 
-        double newPosition = (x / SkiaCanvas.CanvasSize.Width) * _duration;
+        double newPosition = (x / SkiaCanvas.ActualWidth) * _duration;
         newPosition = Math.Max(0, Math.Min(_duration, newPosition));
 
         _currentPosition = newPosition;

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using TagLib;
 
 namespace AudioAnalyzer.Services;
@@ -31,7 +32,13 @@ public class MetadataWriter
             }
             else
             {
-                file.Tag.Comment += $"; {keyComment}";
+                // Reemplazar entry existente de Key en lugar de acumular duplicados
+                var parts = file.Tag.Comment.Split(';')
+                    .Select(p => p.Trim())
+                    .Where(p => !p.StartsWith("Key:"))
+                    .ToList();
+                parts.Add(keyComment);
+                file.Tag.Comment = string.Join("; ", parts);
             }
             
             file.Save();

@@ -5,6 +5,7 @@ namespace AudioAnalyzer.Services;
 public static class LoggerService
 {
     private static readonly object _lock = new object();
+    private static StreamWriter? _writer;
 
     private static readonly string LogFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -17,12 +18,15 @@ public static class LoggerService
         {
             try
             {
-                var directory = Path.GetDirectoryName(LogFilePath);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                    Directory.CreateDirectory(directory);
+                if (_writer == null)
+                {
+                    var directory = Path.GetDirectoryName(LogFilePath);
+                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                        Directory.CreateDirectory(directory);
+                    _writer = new StreamWriter(LogFilePath, append: true) { AutoFlush = true };
+                }
 
-                var logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}";
-                File.AppendAllText(LogFilePath, logEntry + Environment.NewLine);
+                _writer.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}");
             }
             catch (Exception ex)
             {

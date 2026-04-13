@@ -42,8 +42,11 @@ public class LoudnessAnalyzer : ILoudnessAnalyzerService
             if (process == null)
                 throw new Exception("No se pudo iniciar FFmpeg");
 
-            var output = process.StandardError.ReadToEnd() + process.StandardOutput.ReadToEnd();
+            // Leer stderr y stdout en paralelo para evitar deadlock por buffer lleno
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
             process.WaitForExit(180000);
+            var output = stderrTask.Result + stdoutTask.Result;
 
             LoggerService.Log("LoudnessAnalyzer - FFmpeg exit code: " + process.ExitCode);
 

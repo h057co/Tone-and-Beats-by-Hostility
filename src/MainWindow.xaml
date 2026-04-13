@@ -140,6 +140,7 @@
                         <Button Content="─" Width="32" Height="24" 
                                 WindowChrome.IsHitTestVisibleInChrome="True"
                                 Click="Minimize_Click" 
+                                AutomationProperties.Name="Minimize"
                                 FontSize="10" Cursor="Hand">
                             <Button.Style>
                                 <Style TargetType="Button">
@@ -167,6 +168,7 @@
                         <Button x:Name="MaximizeButton" Content="□" Width="32" Height="24" 
                                 WindowChrome.IsHitTestVisibleInChrome="True"
                                 Click="Maximize_Click" 
+                                AutomationProperties.Name="Maximize"
                                 FontSize="10" Cursor="Hand">
                             <Button.Style>
                                 <Style TargetType="Button">
@@ -194,6 +196,7 @@
                         <Button Content="×" Width="32" Height="24" 
                                 WindowChrome.IsHitTestVisibleInChrome="True"
                                 Click="Close_Click" 
+                                AutomationProperties.Name="Close"
                                 FontSize="12" Cursor="Hand">
                             <Button.Style>
                                 <Style TargetType="Button">
@@ -387,12 +390,12 @@
                           SelectedValue="{Binding SelectedBpmProfile}" 
                           SelectedValuePath="Key"
                           Width="180" 
-                          Background="White"
-                          TextElement.Foreground="Black">
+                          Background="{DynamicResource ResultBoxBackgroundBrush}"
+                          Foreground="{DynamicResource ForegroundBrush}">
                     
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Value}" Foreground="Black" />
+                            <TextBlock Text="{Binding Value}" Foreground="{DynamicResource ForegroundBrush}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                     

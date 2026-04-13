@@ -54,7 +54,7 @@
         <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,10">
             <TextBlock Text="Tone &amp; Beats by Hostility" FontSize="24" FontWeight="Bold" 
                        Foreground="{DynamicResource TitleBrush}" HorizontalAlignment="Center"/>
-             <TextBlock Text="Versión 1.0.10" FontSize="12" 
+             <TextBlock Text="Versión 1.0.11" FontSize="12" 
                         Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
         </StackPanel>
         
@@ -148,8 +148,11 @@
                RenderOptions.BitmapScalingMode="HighQuality"/>
         
         <StackPanel Grid.Row="6" HorizontalAlignment="Center" Margin="0,0,0,15">
-            <TextBlock Text="www.hostilitymusic.com" FontSize="14" 
-                       Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" Cursor="Hand"/>
+            <TextBlock FontSize="14" HorizontalAlignment="Center">
+                <Hyperlink NavigateUri="https://www.hostilitymusic.com" 
+                           RequestNavigate="Hyperlink_RequestNavigate"
+                           Foreground="{DynamicResource AccentBrush}">www.hostilitymusic.com</Hyperlink>
+            </TextBlock>
             <TextBlock Text="info@hostilitymusic.com" FontSize="12" 
                        Foreground="{DynamicResource TextSecondaryBrush}" 
                        HorizontalAlignment="Center" Margin="0,8,0,0"/>

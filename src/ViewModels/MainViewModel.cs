@@ -295,7 +295,7 @@ public class MainViewModel : ViewModelBase
 
     public string LoudnessIntegratedDisplay => _loudnessResult?.IntegratedDisplay ?? "--";
     public string LoudnessShortTermDisplay => _loudnessResult?.ShortTermDisplay ?? "--";
-    public string LoudnessLraDisplay => _loudnessResult?.ShortTermDisplay ?? "--";
+    public string LoudnessLraDisplay => _loudnessResult?.LraDisplay ?? "--";
     public string LoudnessTruePeakDisplay => _loudnessResult?.TruePeakDisplay ?? "--";
 
     /// <summary>
@@ -469,7 +469,7 @@ public class MainViewModel : ViewModelBase
     public RelayCommand AnalyzeCommand 
     {
         get => _analyzeCommand ??= new RelayCommand(
-            () => { if (!string.IsNullOrEmpty(FilePath)) ExecuteAnalyze(); },
+            async () => { if (!string.IsNullOrEmpty(FilePath)) await ExecuteAnalyzeAsync(); },
             () => !string.IsNullOrEmpty(FilePath) && !_isAnalyzingInProgress);
         private set => _analyzeCommand = value;
     }
@@ -605,12 +605,7 @@ public class MainViewModel : ViewModelBase
                 BitrateText = audioInfo.BitrateDisplay;
                 BitrateModeText = audioInfo.BitrateModeDisplay;
 
-                OnPropertyChanged(nameof(AudioFileType));
-                OnPropertyChanged(nameof(SampleRateText));
-                OnPropertyChanged(nameof(BitDepthText));
-                OnPropertyChanged(nameof(ChannelsText));
-                OnPropertyChanged(nameof(BitrateText));
-                OnPropertyChanged(nameof(BitrateModeText));
+                // SetProperty ya notifica - solo AudioInfoSummary necesita notificación manual (es calculated)
                 OnPropertyChanged(nameof(AudioInfoSummary));
 
                 StatusText = $"Audio: {audioInfo.FileType} | {audioInfo.SampleRateDisplay} | {audioInfo.BitDepthDisplay} | {audioInfo.BitrateDisplay} | {audioInfo.BitrateModeDisplay} | {audioInfo.ChannelsDisplay}";
@@ -627,12 +622,6 @@ public class MainViewModel : ViewModelBase
                 BitrateText = "";
                 BitrateModeText = "";
 
-                OnPropertyChanged(nameof(AudioFileType));
-                OnPropertyChanged(nameof(SampleRateText));
-                OnPropertyChanged(nameof(BitDepthText));
-                OnPropertyChanged(nameof(ChannelsText));
-                OnPropertyChanged(nameof(BitrateText));
-                OnPropertyChanged(nameof(BitrateModeText));
                 OnPropertyChanged(nameof(AudioInfoSummary));
             }
 
@@ -687,7 +676,7 @@ public class MainViewModel : ViewModelBase
         UpdatePositionDisplay();
     }
 
-    private async void ExecuteAnalyze()
+    private async Task ExecuteAnalyzeAsync()
     {
         if (string.IsNullOrEmpty(FilePath)) return;
 
@@ -776,7 +765,7 @@ public class MainViewModel : ViewModelBase
                 var nextFile = _pendingFilePath;
                 _pendingFilePath = null;
                 LoadAudioFile(nextFile);
-                ExecuteAnalyze();
+                await ExecuteAnalyzeAsync();
             }
         }
     }
@@ -824,7 +813,7 @@ public class MainViewModel : ViewModelBase
 
     private void OnPlaybackStateChanged(object? sender, NAudio.Wave.PlaybackState state)
     {
-        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
         {
             switch (state)
             {
@@ -848,9 +837,10 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    public void ExecuteAnalyzeCommand()
+    public async void ExecuteAnalyzeCommand()
     {
-        ExecuteAnalyze();
+        try { await ExecuteAnalyzeAsync(); }
+        catch (Exception ex) { LoggerService.Log($"ExecuteAnalyzeCommand - Unhandled: {ex.Message}"); }
     }
 
     private void UpdatePositionDisplay()

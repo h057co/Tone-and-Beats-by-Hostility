@@ -13,5 +13,6 @@ public class LoudnessResult
 
     public string IntegratedDisplay => IsValid ? $"{IntegratedLufs:F1}" : "--";
     public string ShortTermDisplay => ShortTermLufs > 0 && ShortTermLufs < 50 ? $"{ShortTermLufs:F1}" : "--";
+    public string LraDisplay => ShortTermLufs > 0 && ShortTermLufs < 50 ? $"{ShortTermLufs:F1} LU" : "--";
     public string TruePeakDisplay => TruePeak != 0 ? $"{TruePeak:F1} dBTP" : "--";
 }
