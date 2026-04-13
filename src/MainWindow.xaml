@@ -8,16 +8,14 @@
         xmlns:infra="clr-namespace:AudioAnalyzer.Infrastructure"
         mc:Ignorable="d"
         Title="Tone &amp; Beats by Hostility" 
-        Width="400" Height="900" MinWidth="350" MinHeight="700" 
+        Width="400" Height="900"
         ResizeMode="CanResize" WindowStartupLocation="CenterScreen" 
-        SourceInitialized="Window_SourceInitialized"
-        StateChanged="Window_StateChanged"
+        WindowStyle="SingleBorderWindow"
         Background="{DynamicResource BackgroundBrush}"
         AllowDrop="True"
         DragEnter="Window_DragEnter"
         DragLeave="Window_DragLeave"
         Drop="Window_Drop"
-        infra:CornerResizeBehavior.EnableOnlyCornerResize="True"
         DataContext="{Binding}">
     
     <Window.Resources>
@@ -94,21 +92,23 @@
     </Window.Resources>
     
     <Grid>
-        <Viewbox Stretch="Uniform" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center">
-    <Grid Margin="0" Width="400" Height="900">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="120"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <Grid Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
         
         <!-- Row 0: Title centered with floating Theme Button -->
         <Grid Grid.Row="0" Margin="0,5,0,5">
@@ -170,8 +170,8 @@
         </Border>
         
         <!-- Row 3: Waveform (with playhead) -->
-        <Border Grid.Row="3" Style="{StaticResource ResultBox}" Padding="5">
-            <controls:WaveformControl x:Name="WaveformDisplay"/>
+        <Border Grid.Row="3" Style="{StaticResource ResultBox}" Padding="5" MinHeight="80">
+            <controls:WaveformControl x:Name="WaveformDisplay" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         </Border>
         
         <!-- Row 4: Loudness (NEW) -->
@@ -418,8 +418,7 @@
                     FontSize="10" Cursor="Hand" 
                     Margin="0,2,0,0"/>
         </StackPanel>
-        </Grid>
-        </Viewbox>
+    </Grid>
         
         <!-- Visual Resize Grabber (Bottom Right) -->
         <Path Data="M 12 0 L 12 12 L 0 12 Z" 
