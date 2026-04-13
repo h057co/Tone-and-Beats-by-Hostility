@@ -45,10 +45,18 @@ publish/
 publish-single/
 publish-single-file/
 publish-selfcontained/
+publish-v1.0.3-fd/
 Output/
 installer/*.exe
 installer/*.zip
 installer/*.rar
 
+# Backups
+backups/
+build/
+
 # Test assets (large audio files)
 Assets/audiotest/
+
+# Obsidian vault (local only)
+.obsidian/
