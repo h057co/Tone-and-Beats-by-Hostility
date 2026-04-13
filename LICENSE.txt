@@ -1,0 +1,18 @@
+TONE & BEATS BY HOSTILITY
+Version 1.0.11
+Copyright 2026 Hostility Music. All rights reserved.
+
+LICENSE AGREEMENT
+
+This software is provided as-is for personal and commercial use.
+
+DEPENDENCIES:
+- NAudio (Ms-PL License) - https://github.com/naudio/NAudio
+- TagLibSharp (LGPL-2.1) - https://github.com/mono/taglib-sharp
+- SoundTouch.Net (LGPL-2.1) - https://github.com/owoudenberg/soundtouch.net
+- MediaInfo.Wrapper.Core (BSD-2-Clause) - https://github.com/MediaArea/MediaInfo
+- FFMpegCore (LGPL-2.1) - https://github.com/rosenbjerg/FFMpegCore
+- FFmpeg (GPL-3.0) - https://ffmpeg.org
+- SkiaSharp (MIT) - https://github.com/mono/SkiaSharp
+
+For full license details, visit www.hostilitymusic.com
