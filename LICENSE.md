@@ -122,12 +122,13 @@ Esta aplicación utiliza las siguientes librerías de código abierto. Todos los
 | Librería | Versión | Propósito | Licencia |
 |----------|---------|-----------|----------|
 | NAudio | 2.2.1 | Reproducción y análisis de audio | Microsoft Public License (Ms-PL) |
-| FFMpegCore | 5.1.0 | Análisis de audio y video | LGPL 2.1 |
+| FFMpegCore | 5.1.0 | Análisis de audio avanzado | LGPL 2.1 |
 | MediaInfo.Wrapper.Core | 26.1.0 | Extracción de metadatos de audio | GPL v2 / LGPL v2 |
-| TagLibSharp | 2.3.0 | Lectura y escritura de tags | LGPL v2.1 |
-| NAudio.Vorbis | 1.5.0 | Soporte para formato OGG | Microsoft Public License (Ms-PL) |
-| NWaves | latest | Procesamiento de señal de audio | MIT |
-| BpmFinder | 0.1.0 | Detección de BPM | Apache 2.0 |
+| TagLibSharp | 2.3.0 | Lectura y escritura de tags de audio | LGPL v2.1 |
+| NAudio.Vorbis | 1.5.0 | Soporte para formato OGG Vorbis | Microsoft Public License (Ms-PL) |
+| SkiaSharp | 2.88.8 | Renderizado gráfico 2D para waveform | MIT |
+| SkiaSharp.Views.WPF | 2.88.8 | Integración WPF para SkiaSharp | MIT |
+| SoundTouch.Net | 2.3.2 | Detección de tempo y análisis de BPM | LGPL 2.1 |
 
 Para los términos completos de cada licencia, consulta los repositorios oficiales de cada proyecto.
 
@@ -137,5 +138,26 @@ Para los términos completos de cada licencia, consulta los repositorios oficial
 
 ---
 
+## Información de Versión
+
+**Aplicación:** Tone & Beats by Hostility  
+**Versión:** 1.0.12  
+**Fecha de Lanzamiento:** 13 de Abril de 2026  
+**Framework:** .NET 8.0 + WPF  
+**Plataforma:** Windows 10+ (64-bit)  
+**Licencia:** CC BY-NC-ND 4.0  
+**Estado:** Release - Donationware  
+
+### Última Actualización (v1.0.12)
+- Refactorización completa del sistema de temas
+- Mejora de contraste en ComboBox BPM Range
+- Logo dinámico acorde al tema seleccionado
+- Evento `ThemeChanged` para actualizaciones en tiempo real
+- Eliminación de hardcoding en gestión de temas
+
+---
+
 © 2026 Luis Jiménez (Hostility) - Medellín, Colombia  
-www.hostilitymusic.com
+**Contacto:** info@hostilitymusic.com  
+**Sitio Web:** www.hostilitymusic.com  
+**Repositorio:** https://github.com/h057co/Tone-and-Beats-by-Hostility

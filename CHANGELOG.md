@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.12] - 2026-04-13 (Final Release)
+
+### Theme System Refactoring - Complete Redesign
+
+#### UI/UX Improvements
+- **ComboBox BPM Range:** Complete template with Popup dropdown, high contrast for all themes
+- **Dynamic Logo:** Automatic switching between black (Light/iOS Light) and white (Dark/Blue/iOS Dark)
+- **High Contrast ComboBox:** Theme-specific color brushes for optimal readability
+- **Button Styles:** Unified design across all themes with rounded corners and shadows
+
+#### Theme System Refactoring
+- **ThemeManager.cs:** Eliminated hardcoding, added `ThemeChanged` event for dynamic updates
+- **Event-Driven Architecture:** Components subscribe to theme changes instead of hardcoding behavior
+- **Complete Button Styles:** DarkTheme, LightTheme, BlueTheme now include iOS-style button templates
+- **Color Consistency:** All brushes centralized (ButtonBrush, ComboBoxBrush, BorderBrush, etc.)
+
+#### Color Brushes per Theme
+| Theme | ComboBox Bg | ComboBox Text | ComboBox Border |
+|-------|------------|---------------|-----------------| 
+| Dark | #1E1E2E | #E0E0E0 | #4A90D9 |
+| Light | #FFFFFF | #2D2D2D | #3498DB |
+| Blue | #1B263B | #B3E5FC | #00B4D8 |
+| iOS Light | #FFFFFF | #000000 | #007AFF |
+| iOS Dark | #1C1C1E | #FFFFFF | #0A84FF |
+
+#### Code Quality
+- **Scalability:** No more button-name hardcoding - completely extensible
+- **Maintainability:** Event system allows UI components to react to theme changes
+- **Documentation:** XML comments on all public ThemeManager methods
+- **Git Commits:** 2 commits (refactor + installer)
+
+---
+
 ## [1.0.11] - 2026-04-13 (Release)
 
 ### Window Chrome - Borderless + Custom Title Bar
