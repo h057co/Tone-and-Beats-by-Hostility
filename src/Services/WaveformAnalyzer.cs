@@ -857,7 +857,6 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
         var positions = transients.Select(t => t.position).ToArray();
         var amplitudes = transients.Select(t => t.amplitude).ToArray();
-        double tolerance = DspConstants.DUPLICATE_THRESHOLD; // ±15ms
 
         // Test every 0.5 BPM increment for fine resolution
         var candidates = new List<(double bpm, double score)>();
@@ -865,6 +864,9 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         for (double bpm = minBpm; bpm <= maxBpm; bpm += 0.5)
         {
             double period = 60.0 / bpm;
+            // Tolerancia proporcional al período: 4% del beat, mínimo 15ms
+            // Elimina sesgo hacia BPMs altos donde 15ms fijo es muy generoso
+            double dynamicTolerance = Math.Max(0.015, period * 0.04);
             double totalScore = 0;
             int hits = 0;
 
@@ -885,7 +887,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
                     double fractional = beatIndex - Math.Round(beatIndex);
                     double deviation = Math.Abs(fractional * period);
 
-                    if (deviation < tolerance)
+                    if (deviation < dynamicTolerance)
                     {
                         score += amplitudes[i]; // weight by amplitude
                         hitCount++;
@@ -1183,6 +1185,24 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
             }
         }
 
+        // Preferir fundamental sobre sub-armónico:
+        // Si el mejor BPM < 90, verificar si existe candidato ~2x con score razonable.
+        // En música real, el tempo completo (152) es más probable que su mitad (76).
+        if (bestBpm > 0 && bestBpm < 90)
+        {
+            double doubleBpm = bestBpm * 2.0;
+            var doubleCandidate = allCandidates.FirstOrDefault(
+                c => Math.Abs(c.bpm - doubleBpm) < 3.0);
+            
+            if (doubleCandidate.bpm > 0 && doubleCandidate.score > bestComposite * 0.35)
+            {
+                LoggerService.Log($"[SpectralFlux] Preferencia fundamental: {bestBpm:F1} → {doubleCandidate.bpm:F1} BPM " +
+                    $"(sub-score={doubleCandidate.score:F3} vs best={bestComposite:F3})");
+                bestBpm = doubleCandidate.bpm;
+                bestHitRate = Math.Min(1.0, bestHitRate * 0.9);
+            }
+        }
+
         double confidence = Math.Min(1.0, bestHitRate);
         LoggerService.Log($"[SpectralFlux] Mejor: {bestBpm:F1} BPM (conf: {confidence:F2}, " +
             $"composite: {bestComposite:F3})");
@@ -1230,13 +1250,15 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
         LoggerService.Log($"WaveformAnalyzer.TransientGrid - Top candidates: {string.Join(", ", candidates.Take(5).Select(c => $"{c.bpm:F1}({c.score:F2})"))}");
 
-        // Step 5: Beat Grid Fitting for top candidates
+        // Step 5: Beat Grid Fitting for top candidates + Saturation Guard
         // Use a composite score: hitRate is primary (more transients aligned = correct BPM),
         // stdDev is secondary (precision of alignment).
         double bestBpm = 0;
         double bestComposite = -1;
         double bestHitRate = 0;
         double bestStdDev = double.MaxValue;
+        
+        var top5Evaluations = new List<(double bpm, double hitRate, double stdDev, double composite)>();
 
         foreach (var candidate in candidates.Take(5))
         {
@@ -1244,6 +1266,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
             // Composite score: mas peso a hitRate (critico en audio masterizado)
             double composite = (hitRate * 1.3) - (stdDev * 1.5);
+            top5Evaluations.Add((candidate.bpm, hitRate, stdDev, composite));
 
             LoggerService.Log($"WaveformAnalyzer.GridFit - BPM {candidate.bpm:F1}: stdDev={stdDev:F4}, hitRate={hitRate:F2}, composite={composite:F3}");
 
@@ -1255,6 +1278,13 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
                 bestBpm = candidate.bpm;
             }
         }
+
+        // NOTA: La guardia de Grid es compleja porque audio1/audio10 (válido) y audio6/audio11 (ruido)
+        // tienen patrones muy similares de candidatos (todos en 185-200 con hitRate 0.85+).
+        // No se puede usar solo hitRate + rango como criterio sin regresiones.
+        // El verdadero diferenciador está en SpectralFlux: archivos válidos tienen SF > 0.3,
+        // archivos con ruido Grid tienen SF < 0.25. Pero ese dato no está disponible aquí.
+        // Por ahora, NO aplicamos una guardia en Grid. El problema se resuelve en VoteThreeSources.
 
         double confidence = Math.Min(1.0, bestHitRate);
         LoggerService.Log($"WaveformAnalyzer.TransientGrid - Best: {bestBpm:F1} BPM (stdDev={bestStdDev:F4}, hitRate={bestHitRate:F2}, composite={bestComposite:F3})");

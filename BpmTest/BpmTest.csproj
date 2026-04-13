@@ -20,6 +20,8 @@
     <Compile Include="../src/Services/AudioDataProvider.cs" Link="Services/%(Filename)%(Extension)" />
     <Compile Include="../src/Services/AudioReaderFactory.cs" Link="Services/%(Filename)%(Extension)" />
     <Compile Include="../src/Services/BpmDetector.cs" Link="Services/%(Filename)%(Extension)" />
+    <Compile Include="../src/Services/BpmConstants.cs" Link="Services/%(Filename)%(Extension)" />
+    <Compile Include="../src/Services/DspConstants.cs" Link="Services/%(Filename)%(Extension)" />
     <Compile Include="../src/Services/FftHelper.cs" Link="Services/%(Filename)%(Extension)" />
     <Compile Include="../src/Services/LoggerService.cs" Link="Services/%(Filename)%(Extension)" />
     <Compile Include="../src/Services/WaveformAnalyzer.cs" Link="Services/%(Filename)%(Extension)" />

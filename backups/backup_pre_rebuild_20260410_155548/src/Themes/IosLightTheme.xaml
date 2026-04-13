@@ -1,0 +1,98 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- iOS Light Theme - Apple Style -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#F2F2F7"/>
+    <SolidColorBrush x:Key="ForegroundBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#007AFF"/>
+    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#007AFF"/>
+    <SolidColorBrush x:Key="ButtonHoverBrush" Color="#0056CC"/>
+    <SolidColorBrush x:Key="ButtonDisabledBrush" Color="#C7C7CC"/>
+    <SolidColorBrush x:Key="ResultBoxBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#8E8E93"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="#C6C6C8"/>
+    <SolidColorBrush x:Key="TitleBrush" Color="#007AFF"/>
+    <SolidColorBrush x:Key="KeyForegroundBrush" Color="#AF52DE"/>
+    <SolidColorBrush x:Key="AnalyzeButtonBrush" Color="#AF52DE"/>
+    <SolidColorBrush x:Key="AnalyzeButtonHoverBrush" Color="#9B44C7"/>
+    <SolidColorBrush x:Key="ProgressBarBackgroundBrush" Color="#E5E5EA"/>
+    <SolidColorBrush x:Key="WaveformBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="WaveformBrush" Color="#007AFF"/>
+    <SolidColorBrush x:Key="PlayheadBrush" Color="#FF3B30"/>
+    
+    <!-- Semantic State Brushes (Audit Fix #6 - ViewModel decoupling) -->
+    <SolidColorBrush x:Key="StatusForegroundBrush" Color="#8E8E93"/>
+    <SolidColorBrush x:Key="StatusSuccessBrush" Color="#34C759"/>
+    <SolidColorBrush x:Key="StatusErrorBrush" Color="#FF3B30"/>
+    <SolidColorBrush x:Key="FileNameInactiveBrush" Color="#8E8E93"/>
+    <SolidColorBrush x:Key="FileNameActiveBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="BpmModifiedBrush" Color="#FF3B30"/>
+    
+    <!-- iOS Button Style -->
+    <Style x:Key="IosButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="1" Opacity="0.12"/>
+                        </Border.Effect>
+                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     </Border>
+                 </ControlTemplate>
+             </Setter.Value>
+         </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Background" Value="{DynamicResource ButtonDisabledBrush}"/>
+                <Setter Property="Foreground" Value="#AEAEB2"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <!-- iOS Analyze Button Style -->
+    <Style x:Key="IosAnalyzeButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource AnalyzeButtonBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="15,8"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                            CornerRadius="10"
+                            Padding="{TemplateBinding Padding}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#AF52DE" BlurRadius="8" ShadowDepth="2" Opacity="0.3"/>
+                        </Border.Effect>
+                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                     </Border>
+                 </ControlTemplate>
+             </Setter.Value>
+         </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource AnalyzeButtonHoverBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <!-- Theme Name -->
+    <system:String x:Key="ThemeName" xmlns:system="clr-namespace:System;assembly=mscorlib">iOS Light</system:String>
+    
+</ResourceDictionary>

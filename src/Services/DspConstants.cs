@@ -21,6 +21,18 @@ public static class DspConstants
     public const double ENERGY_THRESHOLD_LOW = 0.5;
     public const double ENERGY_THRESHOLD_HIGH = 0.2;
 
+    // Transient Detection Thresholds (increased to reduce half-time false positives)
+    public const double TRANSIENT_THRESHOLD_LOW = 1.0;      // was 0.5
+    public const double TRANSIENT_THRESHOLD_HI = 0.4;       // was 0.2
+
+    // Beat Grid Scoring
+    public const double HIT_TOLERANCE_SEC = 0.025;  // 25ms tolerance for a "hit"
+
+    // SpectralFlux Configuration
+    public const int SF_FFT_SIZE = 2048;
+    public const int SF_HOP_SIZE = 512;
+    public const double SF_ONSET_WINDOW_SEC = 0.030;
+
     // BPM Detection
     public const int BPM_RANGE_MIN = 50;
     public const int BPM_RANGE_MAX = 200;

@@ -1,0 +1,220 @@
+{
+  "main": {
+    "id": "ac534ff990e0bb7c",
+    "type": "split",
+    "children": [
+      {
+        "id": "3a48ac11f61960ac",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6aa349b86add63cb",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/BPM_DETECTION_REPORT.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "BPM_DETECTION_REPORT"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "d3e7b7f7e1c406f5",
+    "type": "split",
+    "children": [
+      {
+        "id": "586d0b26b5cbbdbc",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0429fba7a65e315d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de archivos"
+            }
+          },
+          {
+            "id": "4e79c72f688cb757",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Buscar"
+            }
+          },
+          {
+            "id": "817071d9635af3fb",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "cfc943124bdbc703",
+    "type": "split",
+    "children": [
+      {
+        "id": "0bb72dc98ea85173",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c5ab87b5284e5113",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "docs/BPM_DETECTION_REPORT.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Enlaces entrantes de BPM_DETECTION_REPORT"
+            }
+          },
+          {
+            "id": "78fcb7a70aa5b999",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "docs/BPM_DETECTION_REPORT.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Enlaces salientes de BPM_DETECTION_REPORT"
+            }
+          },
+          {
+            "id": "bf8217454a6060ac",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "d52b76fa540ecf4b",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas las propiedades"
+            }
+          },
+          {
+            "id": "8f676ba708c2f152",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/BPM_DETECTION_REPORT.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Esquema de BPM_DETECTION_REPORT"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Crear nueva base": false
+    }
+  },
+  "active": "0429fba7a65e315d",
+  "lastOpenFiles": [
+    "BpmTest/bin/Release/net8.0-windows/SoundTouch.Net.dll",
+    "temp_log.txt",
+    "RESUMEN_EJECUTIVO_BPM.txt",
+    "INSTRUCCIONES_EJECUCION_TEST.md",
+    "RESULTADOS_TEST_BPM.csv",
+    "REPORTE_TECNICO_BPM_DETECTION.md",
+    "BpmTest/bin/Release/net8.0-windows/BpmTest.pdb",
+    "BpmTest/obj/Release/net8.0-windows/ref/BpmTest.dll",
+    "BpmTest/bin/Release/net8.0-windows/BpmTest.dll",
+    "BpmTest/bin/Release/net8.0-windows/BpmTest.runtimeconfig.json",
+    "BpmTest/obj/Release/net8.0-windows/BpmTest.genruntimeconfig.cache",
+    "BpmTest/bin/Release/net8.0-windows/BpmTest.deps.json",
+    "BpmTest/bin/Release/net8.0-windows/BpmTest.exe",
+    "REPORTE_V1.0.9_GUARDIA_DE_PULSO.md",
+    "RESUMEN_EJECUCION_V3.md",
+    "REPORTE_V1.0.8_BANDLIMITED_ADAPTIVE.md",
+    "REPORTE_V1.0.7_SPECTRALFLUX.md",
+    "docs/GRID_DETECTION_CONFIGURATION.md",
+    "docs/ARCHITECTURE.md",
+    "RELEASE_NOTES_v1.0.5.md",
+    "CONTRIBUTING.md",
+    "docs/BPM_DETECTION_REPORT.md",
+    "Code_Audit_Report.md",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSES.md",
+    "src/Assets/qrdonaciones.png",
+    "src/Assets/Icono.jpg",
+    "src/Assets/HOST_NEGRO.png",
+    "src/Assets/HOST_BLANCO.png",
+    "DOCUMENTACION.md"
+  ]
+}

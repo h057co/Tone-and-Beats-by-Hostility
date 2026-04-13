@@ -1,0 +1,128 @@
+=== BPM DETECTION TEST ===
+
+--- Audio1 MP3 ---
+File: audio1 bpm 98,256 .mp3
+Expected: 98,256 BPM
+Detected: 98,0 BPM | Alt: 147,0 BPM
+Error: 0,3 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio2 FLAC ---
+File: audio2 bpm 90.flac
+Expected: 90 BPM
+Detected: 60,0 BPM | Alt: 120,0 BPM
+Error: 30,0 BPM | Accuracy: 67%
+[ GRACEFUL ]
+
+--- Audio4 WAV ---
+File: audio4 bpm 79.wav
+Expected: 79 BPM
+Detected: 79,0 BPM | Alt: 158,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio5 M4A ---
+File: audio5 bpm 76,665.m4a
+Expected: 76,665 BPM
+Detected: 153,4 BPM | Alt: 77,0 BPM
+Error: 76,7 BPM | Accuracy: -0%
+[ GRACEFUL ]
+
+--- Audio6 OGG ---
+File: audio6 bpm 74.ogg
+Expected: 74 BPM
+Detected: 75,0 BPM | Alt: 150,0 BPM
+Error: 1,0 BPM | Accuracy: 99%
+[ WARN ]
+
+--- Audio8 AIFF ---
+File: audio8 bpm 90.aiff
+Expected: 90 BPM
+Detected: 90,0 BPM | Alt: 135,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio9 MP3 ---
+File: audio9 bpm 110.mp3
+Expected: 110 BPM
+Detected: 55,0 BPM | Alt: 110,0 BPM
+Error: 55,0 BPM | Accuracy: 50%
+[ GRACEFUL ]
+
+--- Audio10 MP3 ---
+File: audio10 bpm 112 .mp3
+Expected: 112 BPM
+Detected: 112,0 BPM | Alt: 168,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio11 MP3 ---
+File: audio11 bpm 82.mp3
+Expected: 82 BPM
+Detected: 82,0 BPM | Alt: 164,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio12 MP3 ---
+File: audio12 bpm 98.mp3
+Expected: 98 BPM
+Detected: 98,0 BPM | Alt: 147,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio13 MP3 ---
+File: audio13 bpm 102.mp3
+Expected: 102 BPM
+Detected: 102,0 BPM | Alt: 153,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio14 MP3 ---
+File: audio14 bpm 128.mp3
+Expected: 128 BPM
+Detected: 128,0 BPM | Alt: 192,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio15 MP3 ---
+File: audio15 bpm 130.mp3
+Expected: 130 BPM
+Detected: 130,0 BPM | Alt: 195,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio16 MP3 ---
+File: audio16 bpm 100.mp3
+Expected: 100 BPM
+Detected: 100,0 BPM | Alt: 150,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Audio17 MP3 ---
+File: audio 17 bpm 90.mp3
+Expected: 90 BPM
+Detected: 90,0 BPM | Alt: 135,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+
+--- Master 152 MP3 ---
+File: master bpm 152.mp3
+Expected: 152 BPM
+Detected: 124,0 BPM | Alt: 186,0 BPM
+Error: 28,0 BPM | Accuracy: 82%
+[ GRACEFUL ]
+
+--- Sin Master 152 MP3 ---
+File: sin master bpm 152.mp3
+Expected: 152 BPM
+Detected: 76,0 BPM | Alt: 152,0 BPM
+Error: 76,0 BPM | Accuracy: 50%
+[ GRACEFUL ]
+
+--- Reggaeton ---
+File: Ta Buena Rancha bpm 108.mp3
+Expected: 108 BPM
+Detected: 108,0 BPM | Alt: 162,0 BPM
+Error: 0,0 BPM | Accuracy: 100%
+[ OK ]
+

@@ -118,11 +118,72 @@ public class BpmDetector : IBpmDetectorService
             double finalBpm = VoteThreeSources(
                 soundTouchBpm,
                 gridBpm,    gridConfidence,
-                sfBpm,      sfConfidence);
+                sfBpm,      sfConfidence,
+                allGridCandidates);
 
             LoggerService.Log($"[Decision] Final antes de post-processing: {finalBpm:F1} BPM " +
                 $"(ST:{soundTouchBpm:F1}, Grid:{gridBpm:F1} [{gridConfidence:F2}], " +
                 $"SF:{sfBpm:F1} [{sfConfidence:F2}])");
+
+            // ── Rescate mitad-SF: cuando Grid=0, ST=0 y SF reporta armónico alto ──
+            // Si SF fue la única fuente y reportó un BPM > 150 con baja confianza,
+            // buscar entre sus candidatos uno cercano a SF/2 (el fundamental probable).
+            // Caso: audio11 → SF=170/0.20, candidato 83.5 ≈ 170/2=85.
+            if (finalBpm > 150 && gridBpm <= 0 && soundTouchBpm <= 0 && sfConfidence < 0.30)
+            {
+                double halfSf = finalBpm / 2.0;
+                var halfCandidate = allSfCandidates
+                    .FirstOrDefault(c => Math.Abs(c.bpm - halfSf) < 3.0);
+
+                if (halfCandidate.bpm > 0)
+                {
+                    LoggerService.Log($"[Rescue] SF={finalBpm:F1} baja conf, Grid=0, ST=0. " +
+                        $"Candidato mitad encontrado: {halfCandidate.bpm:F1} BPM (≈{halfSf:F1}/2)");
+                    finalBpm = halfCandidate.bpm;
+                }
+            }
+
+            // ── Fallback: DetectBpmAdvanced cuando todas las fuentes fallan ──
+            // Usa 3 métodos independientes: spectral flux, energy flux, complex domain onset.
+            // El complex domain es especialmente bueno para baladas (detecta cambios de fase
+            // incluso cuando la amplitud es suave). Aplica low-pass 200Hz (opuesto al high-pass
+            // del pipeline principal) preservando el bajo que lleva el pulso en baladas.
+            // Solo se ejecuta cuando finalBpm <= 0 para no afectar archivos que ya funcionan.
+            if (finalBpm <= 0)
+            {
+                LoggerService.Log("[Fallback] Todas las fuentes fallaron. Intentando DetectBpmAdvanced...");
+                var (advBpm, advConf) = _waveformAnalyzer.DetectBpmWithConfidence(segment, sampleRate);
+                if (advBpm > 0 && advConf > 0.15)
+                {
+                    finalBpm = advBpm;
+                    LoggerService.Log($"[Fallback] DetectBpmAdvanced rescató: {finalBpm:F1} BPM (conf: {advConf:F2})");
+                    
+                    // Cross-validation con candidatos SF del pipeline principal:
+                    // Si Advanced retorna un BPM < 70 (sub-armónico probable de una balada),
+                    // buscar en candidatos SF del pipeline principal alguno en rango 70-100
+                    // que pueda ser el tempo fundamental real.
+                    // Caso: audio11 → Advanced=64.5, SF candidato 83.5 ≈ 82 BPM real.
+                    if (finalBpm < 70 && allSfCandidates != null && allSfCandidates.Count > 0)
+                    {
+                        var sfCandidateInRange = allSfCandidates
+                            .Where(c => c.bpm >= 70 && c.bpm <= 100)
+                            .OrderByDescending(c => c.score)
+                            .FirstOrDefault();
+                        
+                        if (sfCandidateInRange.bpm > 0)
+                        {
+                            LoggerService.Log($"[Fallback] Cross-validation: Advanced={finalBpm:F1} < 70, " +
+                                $"SF candidato en rango 70-100: {sfCandidateInRange.bpm:F1} (score={sfCandidateInRange.score:F3}). " +
+                                $"Prefiriendo SF candidato.");
+                            finalBpm = sfCandidateInRange.bpm;
+                        }
+                    }
+                }
+                else
+                {
+                    LoggerService.Log($"[Fallback] DetectBpmAdvanced no pudo detectar (bpm={advBpm:F1}, conf={advConf:F2})");
+                }
+            }
 
             // === HEURISTICA DE TRAP MASTERIZADO (Correccion del agujero 101.4 BPM) ===
             // Si el motor base decidió un tempo entre 98 y 105 (firma tipica del tresillo de 150-155 BPM),
@@ -467,9 +528,26 @@ public class BpmDetector : IBpmDetectorService
     private double VoteThreeSources(
         double stBpm,
         double gridBpm,  double gridConf,
-        double sfBpm,    double sfConf)
+        double sfBpm,    double sfConf,
+        List<(double bpm, double score)> allGridCandidates = null)
     {
         const double AGREEMENT_TOL = 5.0; // BPM — margen para considerar acuerdo
+
+        // Guardia de Grid ruido: si los top-5 candidatos de Grid están TODOS en rango 185-200
+        // Y SF es débil (< 0.25), Grid probablemente es ruido saturado. Descartar.
+        // Casos: audio6 (SF=0.04), audio11 (SF=0.20), audio5 (SF=0.56 - no aplica)
+        if (gridBpm > 0 && allGridCandidates != null && allGridCandidates.Count >= 5 && sfConf < 0.25)
+        {
+            bool allAtCeiling = allGridCandidates.Take(5).All(c => c.bpm >= 185 && c.bpm <= 200);
+            if (allAtCeiling)
+            {
+                LoggerService.Log($"[Vote] GRID NOISE GUARD: Candidatos {allGridCandidates.Take(5).Min(c => c.bpm):F0}-" +
+                    $"{allGridCandidates.Take(5).Max(c => c.bpm):F0} en rango techo, SF conf {sfConf:F2} < 0.25. " +
+                    $"Descartando Grid.");
+                gridBpm = 0;
+                gridConf = 0;
+            }
+        }
 
         bool gridVsSf = gridBpm > 0 && sfBpm > 0 && Math.Abs(gridBpm - sfBpm) < AGREEMENT_TOL;
         bool stVsSf   = stBpm > 0   && sfBpm > 0 && Math.Abs(stBpm - sfBpm) < AGREEMENT_TOL;
@@ -479,6 +557,33 @@ public class BpmDetector : IBpmDetectorService
         if (gridVsSf)
         {
             double winner = gridConf >= sfConf ? gridBpm : sfBpm;
+            
+            // Validar contra SoundTouch: si ST reportó un valor diferente y válido,
+            // verificar si el consenso Grid+SF es un armónico de ST.
+            // En 5 de 7 FAILs del baseline, Grid+SF consensuaban en un armónico
+            // incorrecto mientras ST tenía el BPM correcto.
+            if (stBpm > 0 && Math.Abs(stBpm - winner) > AGREEMENT_TOL)
+            {
+                double ratio = winner / stBpm;
+                bool isHarmonic = Math.Abs(ratio - 0.5) < 0.06 || Math.Abs(ratio - 2.0) < 0.06 ||
+                                  Math.Abs(ratio - 1.5) < 0.06 || Math.Abs(ratio - 0.667) < 0.06 ||
+                                  Math.Abs(ratio - 1.333) < 0.06 || Math.Abs(ratio - 0.75) < 0.06;
+                
+                if (isHarmonic)
+                {
+                    LoggerService.Log($"[Vote] CONSENSO Grid+SF={winner:F1} es armónico de ST={stBpm:F1} (ratio={ratio:F3}). Prefiriendo ST.");
+                    return stBpm;
+                }
+                
+                // Si no es armónico pero Grid+SF tienen baja confianza, preferir ST
+                double maxConf = Math.Max(gridConf, sfConf);
+                if (maxConf < 0.6)
+                {
+                    LoggerService.Log($"[Vote] CONSENSO Grid+SF={winner:F1} baja confianza ({maxConf:F2}), ST={stBpm:F1} diferente. Prefiriendo ST.");
+                    return stBpm;
+                }
+            }
+            
             LoggerService.Log($"[Vote] CONSENSO Grid+SF → {winner:F1} BPM (grid conf:{gridConf:F2}, sf conf:{sfConf:F2})");
             return winner;
         }
@@ -523,7 +628,39 @@ public class BpmDetector : IBpmDetectorService
             }
         }
 
-        // ── Caso 4: Sin consenso — prioridad por confianza ───────────────────
+        // ── Caso 4: Detección de half-time falso (Grid/SF reportan ~0.5x de ST) ──
+        // Ej: ST=110, Grid=55, SF=55 → Significa que Grid/SF están detectando 
+        //     un pulso más lento que el real. Usar ST como base.
+        if (stBpm > 0 && gridBpm > 0 && Math.Abs(gridBpm - stBpm * 0.5) < 3.0)
+        {
+            LoggerService.Log($"[Vote] HALF-TIME GUARD: Grid detectó {gridBpm:F1} (~0.5x ST). Usando ST base → {stBpm:F1} BPM");
+            return stBpm;
+        }
+        if (stBpm > 0 && sfBpm > 0 && Math.Abs(sfBpm - stBpm * 0.5) < 3.0 && sfConf < 0.7)
+        {
+            LoggerService.Log($"[Vote] HALF-TIME GUARD: SF detectó {sfBpm:F1} (~0.5x ST, conf={sfConf:F2}). Usando ST base → {stBpm:F1} BPM");
+            return stBpm;
+        }
+
+        // ── Caso 4.5: Guardia ST/2 — SoundTouch detectó double-time ─────────
+        // Caso típico: ST=153.4 (double del real 76.7), SF=57.5 (sub-armónico).
+        // Ninguna fuente reporta el fundamental, pero ST/2 lo es.
+        if (stBpm > 140 && sfBpm > 0 && sfBpm < 90)
+        {
+            double stHalf = stBpm / 2.0;
+            if (Math.Abs(sfBpm - stHalf) > AGREEMENT_TOL && stHalf >= 60 && stHalf <= 120)
+            {
+                double sfToStHalf = sfBpm / stHalf;
+                if (sfToStHalf < 0.85) // SF es sub-armónico de ST/2
+                {
+                    LoggerService.Log($"[Vote] ST/2 GUARD: SF={sfBpm:F1} es sub-armónico de ST/2={stHalf:F1} " +
+                        $"(ratio={sfToStHalf:F3}). Prefiriendo ST/2.");
+                    return stHalf;
+                }
+            }
+        }
+
+        // ── Caso 5: Sin consenso — prioridad por confianza ───────────────────
         if (sfBpm > 0 && sfConf > 0.25)
         {
             LoggerService.Log($"[Vote] SF gana por confianza ({sfConf:F2}) → {sfBpm:F1} BPM");
