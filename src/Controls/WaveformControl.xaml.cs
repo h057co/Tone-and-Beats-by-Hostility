@@ -1,8 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
-using System.Windows.Threading;
+using System.Windows.Input;
+using SkiaSharp;
+using SkiaSharp.Views.Desktop;
+using SkiaSharp.Views.WPF;
 using AudioAnalyzer.Models;
 using AudioAnalyzer.Services;
 
@@ -13,12 +14,28 @@ public partial class WaveformControl : UserControl
     private WaveformData? _waveformData;
     private double _duration;
     private double _currentPosition;
-    private LinearGradientBrush? _waveformBrush;
-    private GradientStop? _activeStopEnd;
-    private GradientStop? _inactiveStopStart;
     private double _totalDuration = 1.0;
-    private Polygon? _waveformPolygon;
-    private Line? _playheadLine;
+
+    // Puntos normalizados [0..1] - se calculan una vez al cargar datos
+    private float[]? _normUpper;
+    private float[]? _normLower;
+
+    // SkiaSharp paints (reutilizados, no recreados cada frame)
+    private SKPaint? _waveformFillPaint;
+    private SKPaint? _waveformStrokePaint;
+    private SKPaint? _playheadPaint;
+
+    // Estado del gradiente animado
+    private float _activeOffset;
+    private float _inactiveOffset;
+
+    // Colores del tema
+    private SKColor _activeColor = SKColors.DeepSkyBlue;
+    private SKColor _inactiveColor = new SKColor(100, 100, 100);
+
+    // Debounce para resize
+    private System.Windows.Threading.DispatcherTimer? _resizeDebounceTimer;
+    private const int ResizeDebounceMs = 30;
 
     public static readonly DependencyProperty PositionProperty =
         DependencyProperty.Register("Position", typeof(double), typeof(WaveformControl),
@@ -39,64 +56,103 @@ public partial class WaveformControl : UserControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        InitializeWaveformBrush();
-        DrawWaveform();
+        InitializePaints();
+        UpdateTimeline();
     }
 
-    private void InitializeWaveformBrush()
+    private void InitializePaints()
     {
-        Color activeColor = Colors.DeepSkyBlue;
-        Color inactiveColor = Colors.DarkGray;
-
-        if (Application.Current.Resources["AccentColor"] is Color resActive) activeColor = resActive;
-        else if (Application.Current.Resources["AccentBrush"] is SolidColorBrush resActiveBrush) activeColor = resActiveBrush.Color;
-
-        if (Application.Current.Resources["TextSecondaryBrush"] is SolidColorBrush resInactiveBrush) inactiveColor = resInactiveBrush.Color;
-        else inactiveColor = Color.FromArgb(100, 150, 150, 150);
-
-        _activeStopEnd = new GradientStop(activeColor, 0.0);
-        _inactiveStopStart = new GradientStop(inactiveColor, 0.0);
-
-        _waveformBrush = new LinearGradientBrush
+        try
         {
-            StartPoint = new Point(0, 0.5),
-            EndPoint = new Point(1, 0.5),
-            GradientStops = new GradientStopCollection
-            {
-                new GradientStop(activeColor, 0.0),
-                _activeStopEnd,
-                _inactiveStopStart,
-                new GradientStop(inactiveColor, 1.0)
-            }
+            if (Application.Current.Resources["AccentBrush"] is System.Windows.Media.SolidColorBrush accentBrush)
+                _activeColor = accentBrush.Color.ToSkColor();
+
+            if (Application.Current.Resources["TextSecondaryBrush"] is System.Windows.Media.SolidColorBrush textBrush)
+                _inactiveColor = new SKColor(textBrush.Color.R, textBrush.Color.G, textBrush.Color.B, 100);
+        }
+        catch { }
+
+        _waveformFillPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            IsAntialias = true,
         };
+
+        _waveformStrokePaint = new SKPaint
+        {
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = 1,
+            Color = _activeColor,
+            IsAntialias = true,
+        };
+
+        _playheadPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = 2,
+            Color = new SKColor(255, 107, 107),
+            IsAntialias = true,
+        };
+
+        RebuildGradient();
     }
 
-    private void UpdateWaveformProgress(double currentPosition)
+    private void RebuildGradient()
     {
-        if (_totalDuration <= 0 || _waveformBrush == null) return;
+        if (_waveformFillPaint == null) return;
 
-        double progress = currentPosition / _totalDuration;
-        progress = Math.Max(0.0, Math.Min(1.0, progress));
-
-        _activeStopEnd!.Offset = progress;
-        _inactiveStopStart!.Offset = progress;
+        _waveformFillPaint.Shader = SKShader.CreateLinearGradient(
+            new SKPoint(0, 0),
+            new SKPoint(SkiaCanvas.CanvasSize.Width, 0),
+            new[] { _activeColor, _activeColor, _inactiveColor, _inactiveColor },
+            new[] { 0f, _activeOffset, _inactiveOffset, 1f },
+            SKShaderTileMode.Clamp);
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (_waveformData != null && WaveformCanvas != null)
+        if (_waveformData == null || SkiaCanvas == null) return;
+
+        if (_resizeDebounceTimer == null)
         {
-            Dispatcher.BeginInvoke(DrawWaveform, DispatcherPriority.Loaded);
+            _resizeDebounceTimer = new System.Windows.Threading.DispatcherTimer(
+                System.Windows.Threading.DispatcherPriority.Render)
+            {
+                Interval = TimeSpan.FromMilliseconds(ResizeDebounceMs)
+            };
+            _resizeDebounceTimer.Tick += (_, _) =>
+            {
+                _resizeDebounceTimer.Stop();
+                RebuildGradient();
+                SkiaCanvas.InvalidateVisual();
+            };
         }
+
+        _resizeDebounceTimer.Stop();
+        _resizeDebounceTimer.Start();
     }
 
     private static void OnPositionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is WaveformControl control)
         {
-            control.UpdatePlayheadPosition();
-            control.UpdateWaveformProgress(control.Position);
+            control._currentPosition = control.Position;
+            control.UpdateProgress();
         }
+    }
+
+    private void UpdateProgress()
+    {
+        if (_totalDuration <= 0) return;
+
+        float progress = (float)(_currentPosition / _totalDuration);
+        progress = Math.Max(0f, Math.Min(1f, progress));
+
+        _activeOffset = progress;
+        _inactiveOffset = progress;
+
+        RebuildGradient();
+        SkiaCanvas?.InvalidateVisual();
     }
 
     public void SetWaveformData(WaveformData data)
@@ -104,127 +160,100 @@ public partial class WaveformControl : UserControl
         _waveformData = data;
         _duration = data.Duration;
         _totalDuration = data.Duration;
-        
+        _currentPosition = 0;
+
+        CacheNormalizedPoints();
+
         Dispatcher.BeginInvoke(() =>
         {
-            DrawWaveform();
+            UpdateProgress();
             UpdateTimeline();
+            SkiaCanvas.InvalidateVisual();
         });
+    }
+
+    private void CacheNormalizedPoints()
+    {
+        if (_waveformData == null)
+        {
+            _normUpper = null;
+            _normLower = null;
+            return;
+        }
+
+        var points = _waveformData.WaveformPoints;
+        if (points == null || points.Count == 0)
+        {
+            _normUpper = null;
+            _normLower = null;
+            return;
+        }
+
+        int count = points.Count;
+        _normUpper = new float[count];
+        _normLower = new float[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            // upper: max sample → top (0.05), lower: min sample → bottom (0.95)
+            _normUpper[i] = (float)(0.5 - (points[i][1] * 0.45));
+            _normLower[i] = (float)(0.5 - (points[i][0] * 0.45));
+        }
     }
 
     public void Clear()
     {
         _waveformData = null;
-        if (WaveformCanvas != null)
-        {
-            WaveformCanvas.Children.Clear();
-        }
-        _waveformPolygon = null;
-        _playheadLine = null;
+        _normUpper = null;
+        _normLower = null;
+        _currentPosition = 0;
+        _activeOffset = 0;
+        _inactiveOffset = 0;
+        SkiaCanvas?.InvalidateVisual();
     }
 
-    private void DrawWaveform()
+    private void SkiaCanvas_PaintSurface(object? sender, SKPaintSurfaceEventArgs e)
     {
-        if (_waveformData == null || WaveformCanvas == null) return;
+        var canvas = e.Surface.Canvas;
+        var info = e.Info;
+        canvas.Clear(SKColors.Transparent);
 
-        try
+        if (_normUpper == null || _normLower == null || info.Width <= 0 || info.Height <= 0)
+            return;
+
+        float w = info.Width;
+        float h = info.Height;
+
+        using var path = new SKPath();
+
+        // Upper edge (left → right)
+        path.MoveTo(0, _normUpper[0] * h);
+        for (int i = 1; i < _normUpper.Length; i++)
         {
-            double width = WaveformCanvas.ActualWidth;
-            double height = WaveformCanvas.ActualHeight;
-
-            if (width <= 0 || height <= 0) return;
-
-            double playheadProportion = 0;
-            if (_duration > 0 && _playheadLine != null)
-            {
-                playheadProportion = _currentPosition / _duration;
-            }
-
-            WaveformCanvas.Children.Clear();
-            _waveformPolygon = null;
-            _playheadLine = null;
-
-            var points = _waveformData.WaveformPoints;
-            if (points == null || points.Count == 0) return;
-
-            var polygonPoints = new PointCollection();
-            double centerY = height / 2;
-            double xStep = width / Math.Max(points.Count - 1, 1);
-
-            for (int i = 0; i < points.Count; i++)
-            {
-                double x = i * xStep;
-                double y = centerY - (points[i][1] * centerY * 0.9);
-                polygonPoints.Add(new Point(x, y));
-            }
-
-            for (int i = points.Count - 1; i >= 0; i--)
-            {
-                double x = i * xStep;
-                double y = centerY - (points[i][0] * centerY * 0.9);
-                polygonPoints.Add(new Point(x, y));
-            }
-
-            polygonPoints.Add(polygonPoints[0]);
-
-            _waveformPolygon = new Polygon
-            {
-                Points = polygonPoints,
-                Fill = (Brush)_waveformBrush ?? GetThemeBrush("WaveformBrush", Color.FromRgb(74, 144, 217), 128),
-                Stroke = GetThemeBrush("WaveformBrush", Color.FromRgb(74, 144, 217)),
-                StrokeThickness = 1
-            };
-
-            WaveformCanvas.Children.Add(_waveformPolygon);
-
-            if (_duration > 0)
-            {
-                _playheadLine = new Line
-                {
-                    X1 = playheadProportion * width,
-                    X2 = playheadProportion * width,
-                    Y1 = 0,
-                    Y2 = height,
-                    Stroke = GetThemeBrush("PlayheadBrush", Color.FromRgb(255, 107, 107)),
-                    StrokeThickness = 2,
-                    Opacity = 1,
-                    IsHitTestVisible = false
-                };
-                WaveformCanvas.Children.Add(_playheadLine);
-            }
+            path.LineTo((i / (float)(_normUpper.Length - 1)) * w, _normUpper[i] * h);
         }
-        catch (System.Exception)
+
+        // Lower edge (right → left)
+        for (int i = _normLower.Length - 1; i >= 0; i--)
         {
-            // Silently handle any rendering errors
+            path.LineTo((i / (float)(_normLower.Length - 1)) * w, _normLower[i] * h);
         }
-    }
 
-    private void UpdatePlayheadPosition()
-    {
-        if (_waveformData == null || _duration <= 0 || WaveformCanvas == null) return;
+        path.Close();
 
-        _currentPosition = Math.Max(0, Math.Min(_duration, Position));
+        // Draw fill with gradient shader (already built in RebuildGradient)
+        if (_waveformFillPaint != null)
+            canvas.DrawPath(path, _waveformFillPaint);
 
-        try
+        // Draw stroke
+        if (_waveformStrokePaint != null)
+            canvas.DrawPath(path, _waveformStrokePaint);
+
+        // Draw playhead
+        if (_totalDuration > 0 && _currentPosition > 0)
         {
-            double width = WaveformCanvas.ActualWidth;
-            double height = WaveformCanvas.ActualHeight;
-
-            if (width <= 0 || height <= 0) return;
-
-            if (_playheadLine != null)
-            {
-                double x = (_currentPosition / _duration) * width;
-                x = Math.Max(0, Math.Min(x, width));
-                _playheadLine.X1 = x;
-                _playheadLine.X2 = x;
-                _playheadLine.Y1 = 0;
-                _playheadLine.Y2 = height;
-            }
-        }
-        catch (System.Exception)
-        {
-            // Silently handle
+            float px = (float)(_currentPosition / _totalDuration) * w;
+            canvas.DrawLine(px, 0, px, h, _playheadPaint!);
         }
     }
 
@@ -234,7 +263,7 @@ public partial class WaveformControl : UserControl
         {
             if (TimeStartLabel != null)
                 TimeStartLabel.Text = "0:00";
-            
+
             if (TimeEndLabel != null)
             {
                 if (_duration > 0)
@@ -249,7 +278,7 @@ public partial class WaveformControl : UserControl
                 }
             }
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             LoggerService.Log($"UpdateTimeline error: {ex.Message}");
         }
@@ -259,65 +288,45 @@ public partial class WaveformControl : UserControl
 
     public event EventHandler<double>? SeekRequested;
 
-    private void WaveformCanvas_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void RootBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         _isDragging = true;
-        HandleSeek(e.GetPosition(WaveformCanvas).X);
-        WaveformCanvas.CaptureMouse();
+        HandleSeek(e.GetPosition(SkiaCanvas).X);
+        SkiaCanvas.CaptureMouse();
         e.Handled = true;
     }
 
-    private void WaveformCanvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    private void RootBorder_MouseMove(object sender, MouseEventArgs e)
     {
         if (_isDragging)
-        {
-            HandleSeek(e.GetPosition(WaveformCanvas).X);
-        }
+            HandleSeek(e.GetPosition(SkiaCanvas).X);
     }
 
-    private void WaveformCanvas_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void RootBorder_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         if (_isDragging)
         {
             _isDragging = false;
-            WaveformCanvas.ReleaseMouseCapture();
+            SkiaCanvas.ReleaseMouseCapture();
             e.Handled = true;
         }
     }
 
     private void HandleSeek(double x)
     {
-        if (_duration <= 0 || WaveformCanvas.ActualWidth <= 0) return;
+        if (_duration <= 0 || SkiaCanvas.CanvasSize.Width <= 0) return;
 
-        double newPosition = (x / WaveformCanvas.ActualWidth) * _duration;
+        double newPosition = (x / SkiaCanvas.CanvasSize.Width) * _duration;
         newPosition = Math.Max(0, Math.Min(_duration, newPosition));
 
         _currentPosition = newPosition;
         Position = newPosition;
-        UpdatePlayheadPosition();
-        
+        UpdateProgress();
         SeekRequested?.Invoke(this, newPosition);
     }
+}
 
-    private SolidColorBrush GetThemeBrush(string resourceKey, Color fallback, byte? alphaOverride = null)
-    {
-        try
-        {
-            if (Application.Current?.Resources[resourceKey] is SolidColorBrush themeBrush)
-            {
-                var color = themeBrush.Color;
-                if (alphaOverride.HasValue)
-                    color = Color.FromArgb(alphaOverride.Value, color.R, color.G, color.B);
-                return new SolidColorBrush(color);
-            }
-        }
-        catch (Exception ex)
-        {
-            LoggerService.Log($"WaveformControl.GetThemeBrush: {ex.Message}");
-        }
-        
-        if (alphaOverride.HasValue)
-            return new SolidColorBrush(Color.FromArgb(alphaOverride.Value, fallback.R, fallback.G, fallback.B));
-        return new SolidColorBrush(fallback);
-    }
+public static class ColorExtensions
+{
+    public static SKColor ToSkColor(this System.Windows.Media.Color c) => new SKColor(c.R, c.G, c.B, c.A);
 }

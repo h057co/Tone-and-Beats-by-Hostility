@@ -119,36 +119,109 @@
             </Grid.RowDefinitions>
             
             <!-- Row 0: Custom Title Bar (24px) -->
-            <Grid Grid.Row="0" Background="#1a1a1a" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                
-                <!-- Title -->
-                <TextBlock Text="Tone &amp; Beats by Hostility" 
-                           Foreground="White" 
-                           VerticalAlignment="Center" 
-                           Margin="10,0,0,0"
-                           FontSize="11"
-                           FontWeight="Medium"/>
-                
-                <!-- Window Buttons -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button Content="─" Width="32" Height="24" 
-                            Click="Minimize_Click" 
-                            Background="Transparent" Foreground="White"
-                            BorderThickness="0" FontSize="10"/>
-                    <Button Content="□" Width="32" Height="24" 
-                            Click="Maximize_Click" 
-                            Background="Transparent" Foreground="White"
-                            BorderThickness="0" FontSize="10"/>
-                    <Button Content="×" Width="32" Height="24" 
-                            Click="Close_Click" 
-                            Background="Transparent" Foreground="#ff5555"
-                            BorderThickness="0" FontSize="12"/>
-                </StackPanel>
-            </Grid>
+            <Border Grid.Row="0" Background="#1a1a1a" CornerRadius="10,10,0,0">
+                <Grid MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Title -->
+                    <TextBlock Text="Tone &amp; Beats by Hostility" 
+                               Foreground="White" 
+                               VerticalAlignment="Center" 
+                               Margin="10,0,0,0"
+                               FontSize="11"
+                               FontWeight="Medium"/>
+                    
+                    <!-- Window Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <!-- Minimize -->
+                        <Button Content="─" Width="32" Height="24" 
+                                WindowChrome.IsHitTestVisibleInChrome="True"
+                                Click="Minimize_Click" 
+                                FontSize="10" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" Padding="0">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#33ffffff"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <!-- Maximize/Restore -->
+                        <Button x:Name="MaximizeButton" Content="□" Width="32" Height="24" 
+                                WindowChrome.IsHitTestVisibleInChrome="True"
+                                Click="Maximize_Click" 
+                                FontSize="10" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" Padding="0">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#33ffffff"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <!-- Close -->
+                        <Button Content="×" Width="32" Height="24" 
+                                WindowChrome.IsHitTestVisibleInChrome="True"
+                                Click="Close_Click" 
+                                FontSize="12" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="#ff5555"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" 
+                                                        CornerRadius="0,10,0,0" Padding="0">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#e81123"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
             
             <!-- Row 1: Main Content -->
             <Grid Grid.Row="1" Margin="5">

@@ -232,7 +232,26 @@ public partial class MainWindow : Window
 
     private void Window_StateChanged(object sender, EventArgs e)
     {
-        // Maximizar/restaurar funciona sin intervención
+        if (WindowState == WindowState.Maximized)
+        {
+            // Al maximizar con WindowStyle=None + AllowsTransparency,
+            // la ventana se desborda fuera de la pantalla.
+            // Ajustamos MaxWidth/MaxHeight al área de trabajo del monitor actual.
+            var screen = System.Windows.SystemParameters.WorkArea;
+            MaxHeight = screen.Height + 16; // +16 para compensar el Margin="10" del Border exterior
+            MaxWidth = screen.Width + 16;
+
+            // Actualizar icono del botón maximizar → restaurar
+            MaximizeButton.Content = "❐";
+        }
+        else
+        {
+            MaxHeight = double.PositiveInfinity;
+            MaxWidth = double.PositiveInfinity;
+
+            // Restaurar icono del botón maximizar
+            MaximizeButton.Content = "□";
+        }
     }
 
     protected override void OnClosed(EventArgs e)

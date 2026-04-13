@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
              mc:Ignorable="d"
              d:DesignHeight="100" d:DesignWidth="600"
              Background="{DynamicResource WaveformBackgroundBrush}"
@@ -13,12 +14,16 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource WaveformBackgroundBrush}" ClipToBounds="True" Margin="0">
-            <Canvas x:Name="WaveformCanvas" Background="Transparent" 
-                    MouseLeftButtonDown="WaveformCanvas_MouseLeftButtonDown"
-                    MouseMove="WaveformCanvas_MouseMove"
-                    MouseLeftButtonUp="WaveformCanvas_MouseLeftButtonUp"
-                    Cursor="Hand"/>
+
+        <!-- Waveform: GPU-accelerated via SkiaSharp/Direct3D -->
+        <Border Grid.Row="0" Background="{DynamicResource WaveformBackgroundBrush}" 
+                ClipToBounds="True" Margin="0"
+                MouseLeftButtonDown="RootBorder_MouseLeftButtonDown"
+                MouseMove="RootBorder_MouseMove"
+                MouseLeftButtonUp="RootBorder_MouseLeftButtonUp"
+                Cursor="Hand">
+            <skia:SKElement x:Name="SkiaCanvas" 
+                            PaintSurface="SkiaCanvas_PaintSurface"/>
         </Border>
         
         <!-- Timeline -->
