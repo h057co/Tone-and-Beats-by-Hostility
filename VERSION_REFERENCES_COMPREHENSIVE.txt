@@ -1,0 +1,99 @@
+================================================================================
+COMPREHENSIVE VERSION REFERENCES SEARCH REPORT
+Tone & Beats by Hostility Codebase
+================================================================================
+Date: 2026-04-13
+Search Pattern: 1.0.[0-9] (versions 1.0.0 through 1.0.10)
+
+================================================================================
+1. PROJECT CONFIGURATION FILES (.csproj)
+================================================================================
+
+FILE: O:\Tone and Beats\src\AudioAnalyzer.csproj
+---------------------------------------------------
+Line 14: <Version>1.0.6</Version>
+Line 15: <FileVersion>1.0.6.0</FileVersion>
+Line 16: <AssemblyVersion>1.0.6.0</AssemblyVersion>
+
+FILE: O:\Tone and Beats\backups\backup_pre_rebuild_20260410_155548\src\AudioAnalyzer.csproj
+---------------------------------------------------
+Line 14: <Version>1.0.5</Version>
+Line 15: <FileVersion>1.0.5.0</FileVersion>
+Line 16: <AssemblyVersion>1.0.5.0</AssemblyVersion>
+
+================================================================================
+2. ASSEMBLY INFORMATION FILES (.cs)
+================================================================================
+
+FILE: O:\Tone and Beats\src\AssemblyInfo.cs
+---------------------------------------------------
+Line 8: [assembly: AssemblyVersion("1.0.6.0")]
+Line 9: [assembly: AssemblyFileVersion("1.0.6.0")]
+
+FILE: O:\Tone and Beats\backups\backup_pre_rebuild_20260410_155548\src\AssemblyInfo.cs
+---------------------------------------------------
+Line 8: [assembly: AssemblyVersion("1.0.5.0")]
+Line 9: [assembly: AssemblyFileVersion("1.0.5.0")]
+
+FILE: O:\Tone and Beats\src\Services\BpmDetector.cs
+---------------------------------------------------
+Line 85: // Step 3.5: SpectralFlux — NUEVO v1.0.7
+
+================================================================================
+3. USER INTERFACE FILES (.xaml)
+================================================================================
+
+FILE: O:\Tone and Beats\src\AboutWindow.xaml
+---------------------------------------------------
+Line 57: <TextBlock Text="Versión 1.0.6" FontSize="12"
+
+FILE: O:\Tone and Beats\backups\backup_pre_rebuild_20260410_155548\src\AboutWindow.xaml
+---------------------------------------------------
+Line 57: <TextBlock Text="Versión 1.0.5" FontSize="12"
+
+================================================================================
+4. KEY DOCUMENTATION FILES
+================================================================================
+
+CURRENT VERSION INDICATORS:
+- O:\Tone and Beats\src\AudioAnalyzer.csproj: 1.0.6
+- O:\Tone and Beats\src\AssemblyInfo.cs: 1.0.6.0
+- O:\Tone and Beats\src\AboutWindow.xaml: 1.0.6
+- O:\Tone and Beats\README.md: 1.0.6
+- O:\Tone and Beats\docs\ARCHITECTURE.md: 1.0.6
+- O:\Tone and Beats\scripts\BUILD.md: 1.0.6
+- O:\Tone and Beats\REPORTE_TECNICO_BPM_DETECTION.md: 1.0.6
+- O:\Tone and Beats\Code_Audit_Report.md: 1.0.6
+
+CHANGELOG AND RELEASE NOTES:
+- O:\Tone and Beats\CHANGELOG.md: 1.0.0 through 1.0.7
+- O:\Tone and Beats\RELEASE_NOTES_v1.0.5.md: 1.0.4, 1.0.5
+- O:\Tone and Beats\REPORTE_V1.0.7_SPECTRALFLUX.md: 1.0.6, 1.0.7
+- O:\Tone and Beats\REPORTE_V1.0.8_BANDLIMITED_ADAPTIVE.md: 1.0.7, 1.0.8
+- O:\Tone and Beats\REPORTE_V1.0.9_GUARDIA_DE_PULSO.md: 1.0.6 through 1.0.9
+
+DEVELOPMENT JOURNAL:
+- O:\Tone and Beats\JOURNAL.md: 1.0.2 through 1.0.10 (planned)
+
+HISTORICAL DOCUMENTATION:
+- O:\Tone and Beats\DOCUMENTACION.md: 1.0.0 through 1.0.3
+
+================================================================================
+5. VERSION TIMELINE
+================================================================================
+
+1.0.0 - 2026-04-07 - Initial release
+1.0.1 - 2026-04-07 - Hotfix
+1.0.2 - 2026-04-08 - OGG support, themes (Dark/Light/Blue)
+1.0.3 - 2026-04-09 - iOS themes, KoFi donation, LUFS module
+1.0.4 - 2026-04-09 - I/O centralization, pipeline pattern, GC optimization
+1.0.5 - 2026-04-09 - Theme-aware waveform, iOS themes, clickable links
+1.0.6 - 2026-04-11 - Tresillo BPM detection, Alternative BPM display (CURRENT)
+1.0.7 - 2026-04-12 - SpectralFlux Implementation
+1.0.8 - 2026-04-12 - Band-Limited + Adaptive SpectralFlux
+1.0.9 - 2026-04-12 - Pulse Guard - VoteThreeSources Refinement
+1.0.10 - Planned - BPM-Pipeline (mentioned in JOURNAL.md)
+
+================================================================================
+END OF REPORT
+================================================================================

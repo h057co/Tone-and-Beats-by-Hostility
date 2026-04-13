@@ -1,6 +1,6 @@
 # Tone & Beats by Hostility
 
-**Versión:** 1.0.6  
+**Versión:** 1.0.10  
 **Tipo:** Donationware - Aplicación de análisis de audio para DJs y Productores Musicales  
 **Licencia:** [CC BY-NC-ND 4.0](LICENSE.md)
 
@@ -56,7 +56,7 @@ Tone & Beats by Hostility es una potente herramienta de análisis de audio dise�
 ## Instalación
 
 ### Instalador (Recomendado)
-1. Descarga `ToneAndBeatsByHostility_Setup_v1.0.6.exe` desde la sección de Releases
+1. Descarga `ToneAndBeatsByHostility_Setup_v1.0.10.exe` desde la sección de Releases
 2. Ejecuta el instalador
 3. Sigue las instrucciones del asistente
 4. Opcional: Crea acceso directo en escritorio
