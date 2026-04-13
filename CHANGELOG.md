@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.11] - 2026-04-13 (Release)
+
+### Window Chrome - Borderless + Custom Title Bar
+
+#### UI Improvements
+- **Borderless Window:** WindowChrome with rounded corners (10px radius) and drop shadow
+- **Custom Title Bar:** 24px title bar with custom window buttons (─, □, ×)
+- **Native Resize:** ResizeBorderThickness=6 enables resize from all edges/corners
+- **Free Scaling:** Window can be resized freely without fixed aspect ratio
+
+#### Technical Details
+- WindowChrome configured with GlassFrameThickness=0, UseAeroCaptionButtons=False
+- TitleBar_MouseLeftButtonDown handles both drag and double-click maximize
+- Minimize_Click, Maximize_Click, Close_Click for window control
+- Maximize respects taskbar (uses WindowState.Maximized correctly)
+
+---
+
 ## [1.0.10] - 2026-04-12 (Release)
 
 ### BPM Detection Pipeline - Advanced Guards & Fallbacks

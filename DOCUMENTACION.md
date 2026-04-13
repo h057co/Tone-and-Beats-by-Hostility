@@ -1,7 +1,7 @@
 # Tone & Beats by Hostility - Documentación Técnica
 
-**Versión:** 1.0.3  
-**Fecha:** 9 de Abril de 2026  
+**Versión:** 1.0.11  
+**Fecha:** 13 de Abril de 2026  
 **Framework:** .NET 8.0 + WPF  
 **Estado:** Release (Donationware)
 **Licencia:** CC BY-NC-ND 4.0
@@ -18,16 +18,17 @@
 
 ### Características Principales
 
-- Interfaz redimensionable con escala proporcional (Viewbox) - solo diagonal
-- Sistema de temas visuales (Dark, Light, Blue)
+- Interfaz borderless con WindowChrome (bordes redondeados, sombra)
+- Title bar custom con botones de ventana (minimizar, maximizar, cerrar)
+- Redimensionamiento libre con WindowChrome (bordes y esquinas)
+- Sistema de temas visuales (Dark, Light, Blue, iOS Light, iOS Dark)
 - Reproducción de audio con seek interactivo
 - Guardado de metadatos BPM y Key en el archivo
 - Drag & drop de archivos
 - Ajuste manual de BPM detectado
 - Visualización de tonalidad relativa (mayor/menor)
 - Análisis paralelo de BPM + Key + Waveform
-- Redimensionado desde esquinas (no bordes)
-- Ventana de tamaño fijo 400x760px con proporcionalidad
+- Tamaño mínimo 350x900, maximizado respeta barra de tareas
 
 ---
 
@@ -255,6 +256,25 @@ Ver archivo `LICENSE.txt` para información completa.
 
 ## 8. Historial de Versiones
 
+### v1.0.11 (13 de Abril 2026) - WINDOW CHROME
+
+**Mejoras de ventana:**
+- ✅ Ventana borderless con WindowChrome
+- ✅ Title bar custom (24px) con botones custom
+- ✅ CornerRadius 10 con sombra exterior
+- ✅ ResizeBorderThickness 6 para resize nativo
+- ✅ Maximizar respeta barra de tareas
+- ✅ Free scaling (sin proporción fija)
+
+### v1.0.10 (12 de Abril 2026) - BPM PIPELINE
+
+**Mejoras de detección BPM:**
+- ✅ 9 guards y fallbacks implementados
+- ✅ Score 95% (19/20 MATCH)
+- ✅ GRID NOISE GUARD para audio 74 BPM
+- ✅ ST/2 Guard para audio 76.7 BPM
+- ✅ Cross-validation en fallback
+
 ### v1.0.2 (8 de Abril 2026) - LUFS MODULE
 
 **Nuevo módulo implementado:**
@@ -383,7 +403,7 @@ O:\Test\BPM KEY\
 
 ---
 
-*Documentación actualizada: 9 de Abril de 2026*
+*Documentación actualizada: 13 de Abril de 2026*
 *Desarrollado por: Luis Jiménez (Hostility) - Medellín, Colombia*
 *Contacto: info@hostilitymusic.com*
 *Web: www.hostilitymusic.com*

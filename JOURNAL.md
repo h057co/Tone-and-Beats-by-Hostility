@@ -2,6 +2,67 @@
 
 ---
 
+## 2026-04-13 - Window Borderless + Custom Title Bar [SUCCESSFUL MERGE] ✅
+
+### Snapshot de Seguridad
+- **Fecha:** 13 de Abril de 2026
+- **Acción:** Merge de ventana borderless con título custom y WindowChrome
+- **Rama activa:** master
+- **Resultado compilación:** ✅ 0 errores, 18 warnings (pre-existentes)
+- **Git Commit Hash:** `69ca316`
+
+---
+
+### 🌟 Resumen Técnico (Lo logrado):
+
+**Ventana Borderless con Title Bar Custom:**
+1. **WindowChrome configurado** ✅
+   - `GlassFrameThickness="0"` - elimina glass effect de Windows
+   - `ResizeBorderThickness="6"` - permite resize desde bordes
+   - `CaptionHeight="24"` - altura de la barra de título
+   - `CornerRadius="10,10,10,10"` - bordes redondeados
+   - `UseAeroCaptionButtons="False"` - botones custom
+
+2. **Title Bar Custom (24px)** ✅
+   - Grid con `MouseLeftButtonDown` para drag + double-click maximize
+   - Botones custom: ─ (minimize), □ (maximize/restore), × (close)
+   - Close button con color rojo (#ff5555) al hover
+
+3. **Funcionalidades de Ventana** ✅
+   - Minimizar: `WindowState = Minimized`
+   - Maximizar/Restaurar: toggle con DoubleClick en title bar
+   - DragMove() para mover ventana
+   - WindowChrome maneja resize nativo
+
+4. **Border Externo** ✅
+   - CornerRadius="10" con DropShadow
+   - Background respetado del tema actual
+   - Margin="10" para espacio visual
+
+**Ramas Involucradas:**
+- `feature/window-responsive-experiment` → `master` (merge)
+- Commits: `5eb70a9`, `1ce7317`, `69ca316`
+
+---
+
+### 🌟 Known Issues / Pendiente:
+
+- **Snap Windows Hover Menu:** No disponible con botones custom
+  - Solo funciona con `UseAeroCaptionButtons="True"`
+  - Solución futura: popup custom o mantener como está
+
+---
+
+### 🌟 Files Modificados:
+
+```
+M src/MainWindow.xaml (WindowStyle=None, AllowsTransparency=True, WindowChrome)
+M src/MainWindow.xaml.cs (TitleBar_MouseLeftButtonDown, Minimize/Maximize/Close_Click)
+M src/Controls/WaveformControl.xaml.cs (OnSizeChanged optimizado)
+```
+
+---
+
 ## 2026-04-12 - BPM Detection Pipeline Optimization: Advanced Guards & Fallbacks [SUCCESSFUL] ✅
 
 ### Snapshot de Seguridad
