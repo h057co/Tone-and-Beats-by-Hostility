@@ -8,17 +8,28 @@
         xmlns:infra="clr-namespace:AudioAnalyzer.Infrastructure"
         mc:Ignorable="d"
         Title="Tone &amp; Beats by Hostility" 
-        Width="400" Height="900" MinWidth="350" MinHeight="700" 
-        ResizeMode="CanResize" WindowStartupLocation="CenterScreen" 
-        SourceInitialized="Window_SourceInitialized"
-        StateChanged="Window_StateChanged"
-        Background="{DynamicResource BackgroundBrush}"
+        Width="400" Height="900"
+        MinWidth="350" MinHeight="900"
+        WindowStartupLocation="CenterScreen" 
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip"
+        Background="Transparent"
         AllowDrop="True"
+        StateChanged="Window_StateChanged"
         DragEnter="Window_DragEnter"
         DragLeave="Window_DragLeave"
         Drop="Window_Drop"
-        infra:CornerResizeBehavior.EnableOnlyCornerResize="True"
         DataContext="{Binding}">
+    
+    <WindowChrome.WindowChrome>
+        <WindowChrome 
+            GlassFrameThickness="0"
+            ResizeBorderThickness="6"
+            CaptionHeight="24"
+            CornerRadius="10,10,10,10"
+            UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
     
     <Window.Resources>
         <Style TargetType="Button">
@@ -93,22 +104,70 @@
         <infra:LevelToBrushConverter x:Key="LevelToBrushConverter"/>
     </Window.Resources>
     
-    <Grid>
-        <Viewbox Stretch="Uniform" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center">
-    <Grid Margin="0" Width="400" Height="900">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="120"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <!-- Window Container: Border with rounded corners and shadow -->
+    <Border Background="{DynamicResource BackgroundBrush}"
+            CornerRadius="10"
+            Margin="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.4" Color="Black"/>
+        </Border.Effect>
+        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Row 0: Custom Title Bar (24px) -->
+            <Grid Grid.Row="0" Background="#1a1a1a" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Title -->
+                <TextBlock Text="Tone &amp; Beats by Hostility" 
+                           Foreground="White" 
+                           VerticalAlignment="Center" 
+                           Margin="10,0,0,0"
+                           FontSize="11"
+                           FontWeight="Medium"/>
+                
+                <!-- Window Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="─" Width="32" Height="24" 
+                            Click="Minimize_Click" 
+                            Background="Transparent" Foreground="White"
+                            BorderThickness="0" FontSize="10"/>
+                    <Button Content="□" Width="32" Height="24" 
+                            Click="Maximize_Click" 
+                            Background="Transparent" Foreground="White"
+                            BorderThickness="0" FontSize="10"/>
+                    <Button Content="×" Width="32" Height="24" 
+                            Click="Close_Click" 
+                            Background="Transparent" Foreground="#ff5555"
+                            BorderThickness="0" FontSize="12"/>
+                </StackPanel>
+            </Grid>
+            
+            <!-- Row 1: Main Content -->
+            <Grid Grid.Row="1" Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
         
         <!-- Row 0: Title centered with floating Theme Button -->
         <Grid Grid.Row="0" Margin="0,5,0,5">
@@ -170,8 +229,8 @@
         </Border>
         
         <!-- Row 3: Waveform (with playhead) -->
-        <Border Grid.Row="3" Style="{StaticResource ResultBox}" Padding="5">
-            <controls:WaveformControl x:Name="WaveformDisplay"/>
+        <Border Grid.Row="3" Style="{StaticResource ResultBox}" Padding="5" MinHeight="80">
+            <controls:WaveformControl x:Name="WaveformDisplay" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         </Border>
         
         <!-- Row 4: Loudness (NEW) -->
@@ -419,16 +478,6 @@
                     Margin="0,2,0,0"/>
         </StackPanel>
         </Grid>
-        </Viewbox>
-        
-        <!-- Visual Resize Grabber (Bottom Right) -->
-        <Path Data="M 12 0 L 12 12 L 0 12 Z" 
-              Fill="{DynamicResource TextSecondaryBrush}" 
-              Width="12" Height="12" 
-              HorizontalAlignment="Right" 
-              VerticalAlignment="Bottom" 
-              Margin="0,0,4,4" 
-              Opacity="0.4"
-              IsHitTestVisible="False" />
     </Grid>
+    </Border>
 </Window>

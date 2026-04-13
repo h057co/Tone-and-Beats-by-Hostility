@@ -8,14 +8,12 @@
              Background="{DynamicResource WaveformBackgroundBrush}"
              Loaded="OnLoaded">
     
-    <Grid x:Name="RootGrid">
+    <Grid x:Name="RootGrid" MinHeight="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
-        
-        <!-- Waveform Display Area -->
-        <Border Grid.Row="0" Background="{DynamicResource WaveformBackgroundBrush}" ClipToBounds="True">
+        <Border Grid.Row="0" Background="{DynamicResource WaveformBackgroundBrush}" ClipToBounds="True" Margin="0">
             <Canvas x:Name="WaveformCanvas" Background="Transparent" 
                     MouseLeftButtonDown="WaveformCanvas_MouseLeftButtonDown"
                     MouseMove="WaveformCanvas_MouseMove"

@@ -25,9 +25,7 @@ public partial class MainWindow : Window
 
     private void Window_SourceInitialized(object? sender, EventArgs e)
     {
-        IntPtr hwnd = new WindowInteropHelper(this).Handle;
-        HwndSource source = HwndSource.FromHwnd(hwnd);
-        source?.AddHook(WindowPosChangingHook);
+        // Hook removed - free scaling enabled
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -46,19 +44,17 @@ public partial class MainWindow : Window
 
     private IntPtr WindowPosChangingHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg == WM_WINDOWPOSCHANGING)
-        {
-            WINDOWPOS windowPos = (WINDOWPOS)Marshal.PtrToStructure(lParam, typeof(WINDOWPOS))!;
-
-            // Solo aplicar proporción fija cuando NO está maximizada
-            // Cuando está maximizada, permitir que llene la pantalla completa (sin letterboxing)
-            if (WindowState != WindowState.Maximized && (windowPos.flags & 0x0001) == 0)
-            {
-                // BLOQUEO ABSOLUTO: El ancho (cx) SIEMPRE será proporcional al alto (cy)
-                windowPos.cx = (int)(windowPos.cy * _aspectRatio);
-                Marshal.StructureToPtr(windowPos, lParam, true);
-            }
-        }
+        // ESCALADO LIBRE - Sin restricción de proporción
+        // Comented out to allow free resizing:
+        // if (msg == WM_WINDOWPOSCHANGING)
+        // {
+        //     WINDOWPOS windowPos = (WINDOWPOS)Marshal.PtrToStructure(lParam, typeof(WINDOWPOS))!;
+        //     if (WindowState != WindowState.Maximized && (windowPos.flags & 0x0001) == 0)
+        //     {
+        //         windowPos.cx = (int)(windowPos.cy * _aspectRatio);
+        //         Marshal.StructureToPtr(windowPos, lParam, true);
+        //     }
+        // }
         return IntPtr.Zero;
     }
 
@@ -202,24 +198,7 @@ public partial class MainWindow : Window
 
     private void Window_StateChanged(object sender, EventArgs e)
     {
-        if (WindowState == WindowState.Maximized)
-        {
-            var screenHeight = SystemParameters.WorkArea.Height;
-            var screenWidth = SystemParameters.PrimaryScreenWidth;
-            
-            double targetWidth = screenHeight * _aspectRatio;
-            
-            Width = targetWidth;
-            Height = screenHeight;
-            Left = (screenWidth - targetWidth) / 2;
-            Top = 0;
-        }
-        else if (WindowState == WindowState.Normal)
-        {
-            Width = 400;
-            Height = 900;
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        }
+        // Maximizar/restaurar funciona sin intervención
     }
 
     protected override void OnClosed(EventArgs e)
