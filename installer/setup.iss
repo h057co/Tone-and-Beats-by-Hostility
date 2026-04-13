@@ -1,9 +1,9 @@
 ; Inno Setup Script for Tone & Beats by Hostility
-; Version: 1.0.11
+; Version: 1.0.12
 ; Last Updated: 2026-04-13
 
 #define MyAppName "Tone & Beats by Hostility"
-#define MyAppVersion "1.0.11"
+#define MyAppVersion "1.0.12"
 #define MyAppPublisher "Hostility Music"
 #define MyAppURL "https://www.hostilitymusic.com"
 #define MyAppExeName "ToneAndBeatsByHostility.exe"
