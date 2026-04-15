@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.0.13] - 2026-04-15 (Release)
+
+### UI/UX Responsiveness & Zoom Features
+
+#### UI Improvements
+- **Responsive Layout:** Replaced rigid Viewbox with Grid LayoutTransform to allow native horizontal fluid scaling and intelligent vertical scale-down for small screens.
+- **Minimum Support Bounds:** Adjusted `MinHeight` to 650px ensuring the app perfectly fits 1366x768 screens without overlapping the Windows taskbar.
+- **Smart Window Sizing:** On startup, windows now detect the system `WorkArea` and cap their maximum size automatically to prevent clipping.
+
+#### Feature Additions
+- **Interactive Lightbox (Zoom):** Added a new clickable overlay for the QR code in the About Window.
+- **Smooth Animations:** Integrated pure C# `DoubleAnimation` for a smooth fade-in/fade-out lightbox effect when interacting with the Donation QR code, preventing XAML parsing errors.
+- **Code Organization:** Fully commented and labeled the XAML structure of `MainWindow` and `AboutWindow` for improved maintainability.
+
+---
+
 ## [1.0.12] - 2026-04-13 (Final Release)
 
 ### Theme System Refactoring - Complete Redesign

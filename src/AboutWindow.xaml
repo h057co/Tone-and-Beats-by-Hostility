@@ -4,7 +4,8 @@
         xmlns:infra="clr-namespace:AudioAnalyzer.Infrastructure"
         Title="Acerca De - Tone And Beat's by Hostility"
         Height="910" Width="460"
-        MinHeight="910" MinWidth="460"
+        MinHeight="350" MinWidth="300"
+        SizeChanged="Window_SizeChanged"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource BackgroundBrush}"
@@ -36,13 +37,16 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-
-    <Viewbox Stretch="Uniform">
-        <Grid Margin="5" Width="450" Height="850">
+    <!-- Main container to allow z-index layering (content + overlay) -->
+    <Grid>
+        <Grid x:Name="ContentGrid" Margin="5">
+        <Grid.LayoutTransform>
+            <ScaleTransform x:Name="ContentScale" ScaleX="1" ScaleY="1"/>
+        </Grid.LayoutTransform>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -50,17 +54,19 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-        
+                <!-- Section 0: Title & Version -->
         <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,10">
             <TextBlock Text="Tone &amp; Beats by Hostility" FontSize="24" FontWeight="Bold" 
                        Foreground="{DynamicResource TitleBrush}" HorizontalAlignment="Center"/>
-             <TextBlock Text="Versión 1.0.11" FontSize="12" 
+             <TextBlock Text="Versión 1.0.13" FontSize="12" 
                         Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,5,0,0"/>
         </StackPanel>
         
+        <!-- Section 1: Brand Logo -->
          <Image x:Name="LogoImageAbout" Grid.Row="1" Height="50" 
                 HorizontalAlignment="Center" Margin="0,5,0,15"/>
         
+        <!-- Section 2: Libraries & Modules -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" MaxHeight="250">
             <StackPanel>
                 <TextBlock Text="Librerías y Módulos:" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
@@ -127,6 +133,7 @@
             </StackPanel>
         </ScrollViewer>
         
+        <!-- Section 3: Support & Motivation Message -->
         <TextBlock Grid.Row="3" FontSize="12" 
                    Foreground="{DynamicResource TextSecondaryBrush}"
                    TextAlignment="Center"
@@ -136,17 +143,23 @@
             Este proyecto nació de las ganas de compartir algo útil con ustedes. Si te gusta lo que ves y quieres invitarme a un café (o a un cable nuevo), tu donación me motiva a seguir innovando.
         </TextBlock>
         
+        <!-- Section 4: Donation Button (Ko-fi) -->
         <Button Grid.Row="4" Style="{StaticResource KoFiButton}" 
                 HorizontalAlignment="Center" 
                 Margin="0,0,0,15"
                 Click="KoFiButton_Click"/>
         
+        <!-- Section 5: QR Code for Donations -->
         <Image x:Name="QrImage" Grid.Row="5" 
                Height="280" 
                HorizontalAlignment="Center" 
                Margin="0,0,0,15"
-               RenderOptions.BitmapScalingMode="HighQuality"/>
+               RenderOptions.BitmapScalingMode="HighQuality"
+               Cursor="Hand"
+               MouseLeftButtonDown="QrImage_Click"
+               ToolTip="Clic para ampliar"/>
         
+        <!-- Section 6: Contact & Website -->
         <StackPanel Grid.Row="6" HorizontalAlignment="Center" Margin="0,0,0,15">
             <TextBlock FontSize="14" HorizontalAlignment="Center">
                 <Hyperlink NavigateUri="https://www.hostilitymusic.com" 
@@ -158,6 +171,7 @@
                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
         </StackPanel>
         
+        <!-- Section 7: Footer & Copyright -->
         <TextBlock Grid.Row="7" FontSize="11" 
                    Foreground="{DynamicResource TextSecondaryBrush}" 
                    HorizontalAlignment="Center" 
@@ -167,8 +181,17 @@
             © 2026 Hostility Music. www.hostilitymusic.com. Todos los derechos reservados.
         </TextBlock>
         
-        <Button Grid.Row="8" Content="Cerrar" HorizontalAlignment="Center" 
-                Width="120" Padding="0,10" FontSize="13" Click="CloseButton_Click"/>
+        <!-- Section 8: Close Button -->
+        </Grid>
+        
+        <!-- Lightbox Overlay for QR Zoom -->
+        <Grid x:Name="QrOverlay" Visibility="Collapsed" Background="#E6000000" MouseLeftButtonDown="QrOverlay_Click" Panel.ZIndex="100">
+            <Image x:Name="QrOverlayImage" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center"
+                   Margin="40"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   Cursor="Hand"/>
+        </Grid>
     </Grid>
-    </Viewbox>
 </Window>

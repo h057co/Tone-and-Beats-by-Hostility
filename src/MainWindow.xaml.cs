@@ -14,6 +14,14 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        
+        // Cap initial height to available screen work area (primary screen)
+        var workArea = SystemParameters.WorkArea;
+        if (Height > workArea.Height)
+        {
+            Height = workArea.Height;
+        }
+
         LogoImage.Source = EmbeddedResourceHelper.LoadImage("HOST_BLANCO.png");
         Loaded += MainWindow_Loaded;
     }
@@ -185,6 +193,51 @@ public partial class MainWindow : Window
     private void BpmSwap_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         ViewModel?.SwapBpmValues();
+    }
+    private bool _isUpdatingScale;
+
+    private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (!_isUpdatingScale)
+        {
+            Dispatcher.BeginInvoke(UpdateContentScale, System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+    }
+
+    /// <summary>
+    /// Calculates and applies uniform scale to fit all content vertically
+    /// while keeping the width responsive (filling available space).
+    /// </summary>
+    private void UpdateContentScale()
+    {
+        if (_isUpdatingScale) return;
+        _isUpdatingScale = true;
+
+        try
+        {
+            // Reset scale to measure natural content size
+            ContentScale.ScaleX = 1;
+            ContentScale.ScaleY = 1;
+
+            // Measure content at full scale to get desired height
+            ContentGrid.Measure(new Size(ContentGrid.ActualWidth > 0 ? ContentGrid.ActualWidth : ActualWidth, double.PositiveInfinity));
+            double contentDesiredHeight = ContentGrid.DesiredSize.Height;
+
+            // Available height for content = window inner area minus title bar and margins
+            // Border Margin=10 (top+bottom=20) + TitleBar=24 + Grid Margin=5 (top+bottom=10)
+            double availableHeight = ActualHeight - 54;
+
+            if (contentDesiredHeight > 0 && availableHeight > 0 && contentDesiredHeight > availableHeight)
+            {
+                double scale = availableHeight / contentDesiredHeight;
+                ContentScale.ScaleX = scale;
+                ContentScale.ScaleY = scale;
+            }
+        }
+        finally
+        {
+            _isUpdatingScale = false;
+        }
     }
 
     private void Window_StateChanged(object sender, EventArgs e)

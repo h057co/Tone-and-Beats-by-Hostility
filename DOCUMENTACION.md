@@ -1,7 +1,7 @@
 # Tone & Beats by Hostility - Documentación Técnica
 
-**Versión:** 1.0.12  
-**Fecha:** 13 de Abril de 2026  
+**Versión:** 1.0.13  
+**Fecha:** 15 de Abril de 2026  
 **Framework:** .NET 8.0 + WPF  
 **Estado:** Release (Donationware) - Final
 **Licencia:** CC BY-NC-ND 4.0
@@ -412,6 +412,15 @@ O:\Test\BPM KEY\
 - iOS Light: Paleta Apple Light con contraste optimizado
 - iOS Dark: Paleta Apple Dark con contraste optimizado
 
+### Versión 1.0.13 - UI Responsiveness & Zoom Features (15 Abril 2026)
+
+**Optimización de Interfaz:**
+- ✅ Escalamiento responsivo en ventana principal usando Grid y ScaleTransform.
+- ✅ Límite mínimo inteligente (MinHeight 650px) para acomodar pantallas de 1366x768.
+- ✅ Autocorrección de tamaño en inicio (WorkArea clamp) para evitar overflow.
+- ✅ Lightbox interactivo (Z-index 100) para el código QR de donación.
+- ✅ Animaciones puras en C# (DoubleAnimation) previniendo errores de XAML parse.
+
 ### Git Checkpoints
 
 | Commit | Descripción |
@@ -422,7 +431,7 @@ O:\Test\BPM KEY\
 
 ---
 
-*Documentación actualizada: 13 de Abril de 2026*
+*Documentación actualizada: 15 de Abril de 2026*
 *Desarrollado por: Luis Jiménez (Hostility) - Medellín, Colombia*
 *Contacto: info@hostilitymusic.com*
 *Web: www.hostilitymusic.com*

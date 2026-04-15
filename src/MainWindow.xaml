@@ -8,8 +8,8 @@
         xmlns:infra="clr-namespace:AudioAnalyzer.Infrastructure"
         mc:Ignorable="d"
         Title="Tone &amp; Beats by Hostility" 
-        Width="400" Height="900"
-        MinWidth="350" MinHeight="600"
+        Width="400" Height="720"
+        MinWidth="300" MinHeight="650"
         WindowStartupLocation="CenterScreen" 
         WindowStyle="None"
         AllowsTransparency="True"
@@ -17,6 +17,7 @@
         Background="Transparent"
         AllowDrop="True"
         StateChanged="Window_StateChanged"
+        SizeChanged="Window_SizeChanged"
         DragEnter="Window_DragEnter"
         DragLeave="Window_DragLeave"
         Drop="Window_Drop"
@@ -332,8 +333,11 @@
                 </Grid>
             </Border>
             
-            <!-- Row 1: Main Content -->
-            <Grid Grid.Row="1" Margin="5">
+            <!-- Row 1: Main Content (scales uniformly when height is insufficient) -->
+            <Grid x:Name="ContentGrid" Grid.Row="1" Margin="5">
+                <Grid.LayoutTransform>
+                    <ScaleTransform x:Name="ContentScale" ScaleX="1" ScaleY="1"/>
+                </Grid.LayoutTransform>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -372,7 +376,7 @@
             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                 <TextBlock Text="Tone &amp; Beats" FontSize="24" FontWeight="Bold" 
                            Foreground="{DynamicResource TitleBrush}" HorizontalAlignment="Center"/>
-                 <Image x:Name="LogoImage" Height="50" 
+                 <Image x:Name="LogoImage" Height="40" 
                         HorizontalAlignment="Center" Margin="0,5,0,0"/>
             </StackPanel>
         </Grid>
@@ -411,7 +415,7 @@
         </Border>
         
         <!-- Row 3: Waveform (with playhead) -->
-        <Border Grid.Row="3" Style="{StaticResource ResultBox}" Padding="5" MinHeight="80">
+        <Border Grid.Row="3" Style="{StaticResource ResultBox}" Padding="5" MinHeight="60">
             <controls:WaveformControl x:Name="WaveformDisplay" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         </Border>
         
