@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="Tone &amp; Beats by Hostility" 
         Width="400" Height="900"
-        MinWidth="350" MinHeight="900"
+        MinWidth="350" MinHeight="600"
         WindowStartupLocation="CenterScreen" 
         WindowStyle="None"
         AllowsTransparency="True"
