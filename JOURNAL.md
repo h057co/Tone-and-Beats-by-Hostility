@@ -2,6 +2,33 @@
 
 ---
 
+## 2026-04-16 - Hotfix: Startup Crash (WPF Single-File + AssemblyVersion) [SUCCESSFUL] ✅
+
+### Snapshot de Seguridad
+- **Fecha:** 16 de Abril de 2026
+- **Acción:** Solución al error `FileNotFoundException` en despliegues Single-File.
+- **Resultado:** Aplicación v1.0.13 estable y funcional en modo Single-File.
+
+---
+
+### 🌟 Resumen Técnico:
+
+**Problema Detectado:**
+La aplicación crasheaba inmediatamente al abrirse con un error `System.IO.FileNotFoundException`. El error se debía a un bug conocido de WPF en .NET Core/.NET 5-8: cuando una app se publica como `PublishSingleFile="true"` y el `AssemblyVersion` es distinto a `1.0.0.0`, WPF intenta cargar recursos (como `App.xaml`) usando la versión inyectada en la URI de pack. El cargador interno no puede resolver esta ruta y falla.
+
+**Solución Implementada:**
+1. **AssemblyResolve Domain Handler:** Se añadió un manejador de eventos en el constructor de `App.xaml.cs` que fuerza la resolución del ensamblado hacia sí mismo cuando se busca la versión `1.0.13.0`.
+2. **MSBuild Properties:** Se añadió `<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>` en el archivo `.csproj` para asegurar la integridad de los recursos embebidos.
+3. **Sincronización de Dependencias:** Se limpió y repobló el directorio `publish` con el ejecutable reparado y las carpetas de `ffmpeg` completas.
+4. **Instalador:** Se regeneró el instalador Inno Setup v1.0.13 sin errores de resolución.
+
+**Archivos Modificados:**
+- `src/App.xaml.cs` (Manejador AssemblyResolve)
+- `src/AudioAnalyzer.csproj` (Propiedades de publicación)
+- `CHANGELOG.md` (Documentación del fix)
+
+---
+
 ## 2026-04-13 - Window Borderless + Custom Title Bar [SUCCESSFUL MERGE] ✅
 
 ### Snapshot de Seguridad

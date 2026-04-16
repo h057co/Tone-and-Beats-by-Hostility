@@ -10,6 +10,18 @@ namespace AudioAnalyzer;
 
 public partial class App : Application
 {
+    public App()
+    {
+        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+        {
+            if (args.Name.StartsWith("ToneAndBeatsByHostility,"))
+            {
+                return System.Reflection.Assembly.GetExecutingAssembly();
+            }
+            return null;
+        };
+    }
+
     private MainViewModel? _viewModel;
     private DispatcherTimer? _positionTimer;
 

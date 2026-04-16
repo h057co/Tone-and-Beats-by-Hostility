@@ -8,6 +8,12 @@ All notable changes to this project will be documented in this file.
 
 ### UI/UX Responsiveness & Zoom Features
 
+#### Stability & Core Refinement (Critical Fix)
+- **Startup Crash Fix:** Resolved a critical `FileNotFoundException` that occurred in v1.0.13 when running as a Single-File executable.
+- **Resource Resolution Handler:** Implemented a custom `AssemblyResolve` domain handler in `App.xaml.cs` to ensure all embedded resources are correctly located in memory.
+- **Loudness Module Restoration:** Fixed a regression where the Loudness module (FFmpeg) couldn't be located due to the app running in a temporary extraction folder.
+- **Optimized Deployment:** Disabled `IncludeAllContentForSelfExtract` to keep the application running from its installation directory, ensuring direct access to local dependencies like FFmpeg while maintaining the startup fix.
+
 #### UI Improvements
 - **Responsive Layout:** Replaced rigid Viewbox with Grid LayoutTransform to allow native horizontal fluid scaling and intelligent vertical scale-down for small screens.
 - **Minimum Support Bounds:** Adjusted `MinHeight` to 650px ensuring the app perfectly fits 1366x768 screens without overlapping the Windows taskbar.
