@@ -189,6 +189,7 @@ public class BpmDetector : IBpmDetectorService
             // Si el motor base decidió un tempo entre 98 y 105 (firma tipica del tresillo de 150-155 BPM),
             // pero el TransientGrid estuvo detectando velocidades altisimas (> 160) en el fondo,
             // asumimos con seguridad que es un Trap/Drill masterizado y lo forzamos a Half-time.
+            bool trapCorrectionApplied = false;
             if (finalBpm >= BpmConstants.TRAP_MIN_BPM &&
                 finalBpm <= BpmConstants.TRAP_MAX_BPM &&
                 gridBpm   > BpmConstants.TRAP_GRID_BPM_THRESHOLD)
@@ -202,6 +203,7 @@ public class BpmDetector : IBpmDetectorService
                 {
                     double pre = finalBpm;
                     finalBpm   = finalBpm * BpmConstants.TRAP_CORRECTION_MULTIPLIER;
+                    trapCorrectionApplied = true;
                     LoggerService.Log($"[Trap] {pre:F1} → {finalBpm:F1} BPM");
                 }
                 else
@@ -214,7 +216,9 @@ public class BpmDetector : IBpmDetectorService
             finalBpm = NormalizeTempoRange(finalBpm, profile);
 
             // Resolucion de ambigüedad 2:1
-            finalBpm = ResolveDoubleTimeAmbiguity(finalBpm, soundTouchBpm, gridBpm);
+            // Skip si Trap heuristic ya corrigió (evitar que ResolveDoubleTimeAmbiguity revierta la corrección)
+            if (!trapCorrectionApplied)
+                finalBpm = ResolveDoubleTimeAmbiguity(finalBpm, soundTouchBpm, gridBpm);
 
             // === Step 6: Snap to integer if within 0.3 BPM ===
             finalBpm = SnapToInteger(finalBpm);
@@ -575,11 +579,12 @@ public class BpmDetector : IBpmDetectorService
                     return stBpm;
                 }
                 
-                // Si no es armónico pero Grid+SF tienen baja confianza, preferir ST
+                // Si no es armónico pero Grid+SF tienen confianza no abrumadora, preferir ST
+                // Umbral 0.8: protege contra sub-armónicos falsos (ej: audio12: Grid+SF=65, ST=98)
                 double maxConf = Math.Max(gridConf, sfConf);
-                if (maxConf < 0.6)
+                if (maxConf < 0.8)
                 {
-                    LoggerService.Log($"[Vote] CONSENSO Grid+SF={winner:F1} baja confianza ({maxConf:F2}), ST={stBpm:F1} diferente. Prefiriendo ST.");
+                    LoggerService.Log($"[Vote] CONSENSO Grid+SF={winner:F1} confianza insuficiente ({maxConf:F2} < 0.8), ST={stBpm:F1} diferente. Prefiriendo ST.");
                     return stBpm;
                 }
             }

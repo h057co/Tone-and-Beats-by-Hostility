@@ -858,10 +858,10 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
         var positions = transients.Select(t => t.position).ToArray();
         var amplitudes = transients.Select(t => t.amplitude).ToArray();
 
-        // Test every 0.5 BPM increment for fine resolution
+        // Test every 0.25 BPM increment for fine resolution
         var candidates = new List<(double bpm, double score)>();
 
-        for (double bpm = minBpm; bpm <= maxBpm; bpm += 0.5)
+        for (double bpm = minBpm; bpm <= maxBpm; bpm += 0.25)
         {
             double period = 60.0 / bpm;
             // Tolerancia proporcional al período: 4% del beat, mínimo 15ms
