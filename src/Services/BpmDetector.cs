@@ -40,7 +40,7 @@ public class BpmDetector : IBpmDetectorService
     public (double PrimaryBpm, double AlternativeBpm) DetectBpm(string filePath, IProgress<int>? progress = null, BpmRangeProfile profile = BpmRangeProfile.Auto)
     {
         var (monoSamples, sampleRate) = new AudioDataProvider().LoadMono(filePath);
-        return DetectBpmFromSamples(monoSamples, sampleRate, progress);
+        return DetectBpmFromSamples(monoSamples, sampleRate, progress, profile);
     }
 
     /// <summary>
@@ -212,19 +212,26 @@ public class BpmDetector : IBpmDetectorService
                 }
             }
 
-            // === Step 5: Normalize tempo range ===
-            finalBpm = NormalizeTempoRange(finalBpm, profile);
-
+            // === Step 5: Post-processing heuristics ===
             // Resolucion de ambigüedad 2:1
-            // Skip si Trap heuristic ya corrigió (evitar que ResolveDoubleTimeAmbiguity revierta la corrección)
-            if (!trapCorrectionApplied)
+            // Solo aplicamos esto en modo AUTO, porque en otros perfiles el usuario ya decidió el rango.
+            if (!trapCorrectionApplied && profile == BpmRangeProfile.Auto)
                 finalBpm = ResolveDoubleTimeAmbiguity(finalBpm, soundTouchBpm, gridBpm);
 
-            // === Step 6: Snap to integer if within 0.3 BPM ===
+            // === Step 6: Normalize tempo range — FINAL GATE ===
+            // Este es el filtro final que garantiza el cumplimiento del perfil elegido.
+            finalBpm = SelectBestCandidateForProfile(
+                finalBpm, 
+                soundTouchBpm, 
+                allGridCandidates, 
+                allSfCandidates ?? new List<(double bpm, double score)>(), 
+                profile);
+
+            // === Step 7: Snap to integer if within 0.3 BPM ===
             finalBpm = SnapToInteger(finalBpm);
             LoggerService.Log($"BpmDetector - Final BPM: {finalBpm}");
 
-            // === Step 7: Calculate Alternative BPM ===
+            // === Step 8: Calculate Alternative BPM ===
             double altBpm = CalculateAlternativeBpm(finalBpm);
             LoggerService.Log($"BpmDetector - Resultado Final: {finalBpm} BPM (Alternativo: {altBpm} BPM)");
 
@@ -351,85 +358,96 @@ public class BpmDetector : IBpmDetectorService
         return monoSamples.AsSpan(startSample, Math.Min(targetSamples, monoSamples.Length - startSample)).ToArray();
     }
 
-    private double NormalizeTempoRange(double bpm, BpmRangeProfile profile)
+    private (double min, double max) GetProfileRange(BpmRangeProfile profile)
+    {
+        return profile switch
+        {
+            BpmRangeProfile.Low_50_100 => (50, 100),
+            BpmRangeProfile.Mid_75_150 => (75, 150),
+            BpmRangeProfile.High_100_200 => (100, 200),
+            BpmRangeProfile.VeryHigh_150_300 => (150, 300),
+            _ => (0, 0)
+        };
+    }
+
+    private double NormalizeTempoRangeAuto(double bpm)
     {
         if (bpm <= 0) return 0;
+        if (bpm > 175) return bpm / 2.0;
+        if (bpm < 55) return bpm * 2.0;
+        return bpm;
+    }
 
-        // Si es Auto, usamos una regla general permisiva (60-170) 
-        // pero preferimos dejarlo como lo detectó el motor base
+    /// <summary>
+    /// Selecciona el mejor BPM del pool de candidatos reales que encaje en el perfil.
+    /// NO inventa valores nuevos arbitrarios — prioriza candidatos detectados por los motores.
+    /// </summary>
+    private double SelectBestCandidateForProfile(
+        double currentBpm,
+        double soundTouchBpm,
+        List<(double bpm, double score)> allGridCandidates,
+        List<(double bpm, double score)> allSfCandidates,
+        BpmRangeProfile profile)
+    {
+        if (currentBpm <= 0) return 0;
+
+        // Caso Auto: Usar la regla de normalización permisiva estándar
         if (profile == BpmRangeProfile.Auto)
         {
-            if (bpm > 175) return bpm / 2.0;
-            if (bpm < 55) return bpm * 2.0;
-            return bpm;
+            return NormalizeTempoRangeAuto(currentBpm);
         }
 
-        double minBpm, maxBpm;
-        switch (profile)
+        var (minBpm, maxBpm) = GetProfileRange(profile);
+
+        // 1. Construir pool de todos los candidatos reales detectados
+        var pool = new List<(double bpm, double score, string source)>();
+        
+        // El ganador actual es el candidato más fuerte inicialmente
+        pool.Add((currentBpm, 1.0, "Winner"));
+
+        if (soundTouchBpm > 0)
+            pool.Add((soundTouchBpm, 0.5, "ST"));
+        
+        if (allGridCandidates != null)
+            foreach (var c in allGridCandidates)
+                pool.Add((c.bpm, c.score, "Grid"));
+        
+        if (allSfCandidates != null)
+            foreach (var c in allSfCandidates)
+                pool.Add((c.bpm, c.score, "SF"));
+
+        // 2. Filtrar candidatos que están dentro del rango del perfil
+        var inRangeCandidates = pool
+            .Where(c => c.bpm >= minBpm && c.bpm <= maxBpm)
+            .OrderByDescending(c => c.score)
+            .ToList();
+
+        if (inRangeCandidates.Count > 0)
         {
-            case BpmRangeProfile.Low_50_100: minBpm = 50; maxBpm = 100; break;
-            case BpmRangeProfile.Mid_75_150: minBpm = 75; maxBpm = 150; break;
-            case BpmRangeProfile.High_100_200: minBpm = 100; maxBpm = 200; break;
-            case BpmRangeProfile.VeryHigh_150_300: minBpm = 150; maxBpm = 300; break;
-            default: return bpm;
+            var best = inRangeCandidates[0];
+            LoggerService.Log($"BpmDetector.RangeFilter [{profile}] - Pool: {pool.Count} candidatos, {inRangeCandidates.Count} en rango [{minBpm}-{maxBpm}]. " +
+                $"Seleccionado: {best.bpm:F1} BPM ({best.source}, score={best.score:F3})");
+            return best.bpm;
         }
 
-        // NUEVO: Siempre buscar el mejor candidato en el rango, incluso si el input ya está en rango.
-        // Esto maneja el caso donde 142.5 está en rango pero 95 también está y es "más limpio" (no es tresillo)
-        double[] candidates = new double[]
-        {
-            bpm, bpm * 0.5, bpm * 2.0,
-            bpm / 1.5, bpm * 1.5,
-            bpm / 3.0, bpm * 3.0,
-            bpm / 4.0, bpm * 4.0
-        };
+        // 3. Fallback: Si no hay NINGÚN candidato real en el rango deseado, 
+        // intentamos el ajuste matemático tradicional (pero limitado a multiplicadores armónicos comunes)
+        LoggerService.Log($"BpmDetector.RangeFilter [{profile}] - Advertencia: Sin candidatos reales en [{minBpm}-{maxBpm}]. Fallback desde {currentBpm:F1}");
         
-        double bestCandidate = bpm;
-        bool foundBetter = false;
-        
-        foreach (var candidate in candidates)
+        double[] commonMultipliers = { 2.0, 0.5, 1.5, 0.667, 3.0 };
+        foreach (var mult in commonMultipliers)
         {
-            // Solo considerar si está en el rango Y es más bajo que el actual (preferir tempo base sobre tresillo)
-            if (candidate >= minBpm && candidate <= maxBpm && candidate < bestCandidate)
-            {
-                // Verificar que no sea un tresillo obvio de un valor ya en rango
-                // Si el candidato es < actual Y el actual está muy cerca de ser candidato*1.5, probablemente es un tresillo
-                double ratio = bpm / candidate;
-                if (Math.Abs(ratio - 1.5) < 0.1 || Math.Abs(ratio - 3.0) < 0.1 || Math.Abs(ratio - 0.667) < 0.05)
-                {
-                    LoggerService.Log($"BpmDetector.Normalize - Descartado candidato {candidate:F1} (ratio {ratio:F3} indica tresillo/armónico del original)");
-                    continue;
-                }
-                
-                bestCandidate = candidate;
-                foundBetter = true;
-            }
-        }
-        
-        if (foundBetter)
-        {
-            LoggerService.Log($"BpmDetector.Normalize - Mejor candidato encontrado: {bpm:F1} -> {bestCandidate:F1} (perfil {profile})");
-            return bestCandidate;
-        }
-
-        // Si ya está en el rango, lo retornamos tal cual
-        if (bpm >= minBpm && bpm <= maxBpm) return bpm;
-
-        // Si ningúnmultiplicador directo funciona, usar el ajuste tradicional con más multipliers
-        double[] multipliers = { 2.0, 0.5, 1.5, 0.667, 3.0, 0.333, 1.25, 0.8 };
-        
-        foreach (var mult in multipliers)
-        {
-            double adjusted = bpm * mult;
+            double adjusted = currentBpm * mult;
             if (adjusted >= minBpm && adjusted <= maxBpm)
             {
-                LoggerService.Log($"BpmDetector.Normalize - Ajustado por perfil ({minBpm}-{maxBpm}): {bpm:F1} -> {adjusted:F1} (Multiplicador: x{mult:F3})");
+                LoggerService.Log($"BpmDetector.RangeFilter [{profile}] - Fallback exitoso: {currentBpm:F1} -> {adjusted:F1} (Multiplicador x{mult:F3})");
                 return adjusted;
             }
         }
 
-        LoggerService.Log($"BpmDetector.Normalize - Advertencia: No se pudo encajar {bpm:F1} en el rango {minBpm}-{maxBpm}. Se devuelve original.");
-        return bpm;
+        // Si nada funcionó, devolver original pero loguear que falló el rango
+        LoggerService.Log($"BpmDetector.RangeFilter [{profile}] - CRÍTICO: No se encontró forma de llevar {currentBpm:F1} al rango [{minBpm}-{maxBpm}].");
+        return currentBpm;
     }
 
     private double SnapToInteger(double bpm)
