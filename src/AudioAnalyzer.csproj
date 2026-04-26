@@ -47,15 +47,15 @@
     <EmbeddedResource Include="Assets\qrdonaciones.png" />
   </ItemGroup>
 
-   <!-- FFmpeg files excluded in development build - only needed for Loudness analysis -->
-   <!-- <ItemGroup>
-    <Content Include="..\publish\ffmpeg\ffmpeg.exe" CopyToOutputDirectory="PreserveNewest">
-      <Link>publish\ffmpeg\ffmpeg.exe</Link>
+   <!-- FFmpeg binaries for Loudness analysis (Always included to ensure 100% standalone functionality) -->
+   <ItemGroup>
+    <Content Include="..\dependencies\ffmpeg\ffmpeg.exe" CopyToOutputDirectory="PreserveNewest">
+      <Link>ffmpeg\ffmpeg.exe</Link>
     </Content>
-    <Content Include="..\publish\ffmpeg\ffprobe.exe" CopyToOutputDirectory="PreserveNewest">
-      <Link>publish\ffmpeg\ffprobe.exe</Link>
+    <Content Include="..\dependencies\ffmpeg\ffprobe.exe" CopyToOutputDirectory="PreserveNewest">
+      <Link>ffmpeg\ffprobe.exe</Link>
     </Content>
-  </ItemGroup> -->
+  </ItemGroup>
 
   <!-- Build Validation Task: Verifica que assets críticos existan antes de compilar -->
   <Target Name="ValidateCriticalAssets" BeforeTargets="Build">
@@ -63,6 +63,8 @@
     <Error Condition="!Exists('Assets\qrdonaciones.png')" Text="CRITICAL: Assets\qrdonaciones.png not found. This file must exist as an EmbeddedResource." />
     <Error Condition="!Exists('Assets\HOST_BLANCO.png')" Text="CRITICAL: Assets\HOST_BLANCO.png not found. This file must exist as an EmbeddedResource." />
     <Error Condition="!Exists('Assets\HOST_NEGRO.png')" Text="CRITICAL: Assets\HOST_NEGRO.png not found. This file must exist as an EmbeddedResource." />
+    <Error Condition="!Exists('..\dependencies\ffmpeg\ffmpeg.exe')" Text="CRITICAL: ffmpeg.exe no encontrado. Es necesario para que LUFS/LoudnessAnalyzer funcione en producción." />
+    <Error Condition="!Exists('..\dependencies\ffmpeg\ffprobe.exe')" Text="CRITICAL: ffprobe.exe no encontrado." />
     <Message Text="[Asset Validation] ✓ All critical assets present" Importance="high" />
   </Target>
 
