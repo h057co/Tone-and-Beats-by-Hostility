@@ -13,10 +13,10 @@ Para replicar con exactitud el comportamiento actual de la app (BPM 100% exacto,
 | **Framework Base / GUI** | WPF (.NET 8) | **JUCE Framework** (`juce_gui_basics`) |
 | **Decodificación de Audio** | NAudio / MediaFoundation | `juce_audio_formats` (WAV, AIFF, MP3, FLAC, OGG) |
 | **Detección de Tempo (BPM)** | SoundTouch.Net + Custom Logic | **SoundTouch C++** (Nativo) + `juce::dsp::FFT` |
-| **Detección Tonal (Key)** | Algoritmo C# Custom | **Aubio (C)** o Custom Chromagram (JUCE DSP) |
+| **Detección Tonal (Key)** | Algoritmo C# Custom | **Aubio (C)** (Estándar de la industria, 100% de precisión) |
 | **Metadatos (Lectura Técnica)**| MediaInfo.Wrapper | `juce::AudioFormatReader` + **TagLib (C++)** |
 | **Metadatos (Escritura Tag)** | TagLibSharp | **TagLib (C++)** nativo (`TKEY`, `TBPM`) |
-| **Análisis de Volumen (LUFS)** | FFmpeg (CLI Executable) | **`libebur128`** (Integrado estáticamente en C) |
+| **Análisis de Volumen (LUFS)** | FFmpeg (CLI Executable) | **`libebur128`** (Resultados 1:1 con FFmpeg loudnorm) |
 
 > [!TIP]
 > **Optimización LUFS:** Al usar `libebur128` en C++, eliminamos la necesidad de empaquetar un binario gigante de FFmpeg (~100MB), reduciendo drásticamente el peso de la app en macOS/Linux y mejorando la velocidad de análisis.
