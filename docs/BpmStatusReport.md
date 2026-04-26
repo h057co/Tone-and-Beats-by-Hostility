@@ -28,6 +28,9 @@ Se ha rediseñado por completo el funcionamiento de los perfiles de rango (Low, 
 
 ---
 
+---
+
+
 ## 📈 Próximos Pasos
 - Expansión del set de pruebas a géneros experimentales y polirritmias.
 - Optimización de la carga de archivos de larga duración (> 15 min).

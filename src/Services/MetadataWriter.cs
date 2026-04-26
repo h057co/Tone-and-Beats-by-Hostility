@@ -23,22 +23,34 @@ public class MetadataWriter
 
             file = TagLib.File.Create(filePath);
             
+            // Standard fallback
             file.Tag.BeatsPerMinute = (uint)Math.Round(bpm);
             
-            string keyComment = $"Key: {key} {mode}";
-            if (string.IsNullOrEmpty(file.Tag.Comment))
+            string keyString = $"{key} {mode}";
+            string bpmString = bpm.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+
+            // Inyectar/Actualizar ID3v2 (Para MP3, WAV, AIFF)
+            if (file.GetTag(TagTypes.Id3v2, true) is TagLib.Id3v2.Tag id3v2Tag)
             {
-                file.Tag.Comment = keyComment;
+                var tkeyFrame = TagLib.Id3v2.TextInformationFrame.Get(id3v2Tag, "TKEY", true);
+                tkeyFrame.Text = new[] { keyString };
+
+                var tbpmFrame = TagLib.Id3v2.TextInformationFrame.Get(id3v2Tag, "TBPM", true);
+                tbpmFrame.Text = new[] { bpmString };
             }
-            else
+
+            // Inyectar/Actualizar VorbisComment (Para FLAC, OGG)
+            if (file.GetTag(TagTypes.Xiph, true) is TagLib.Ogg.XiphComment xiphTag)
             {
-                // Reemplazar entry existente de Key en lugar de acumular duplicados
-                var parts = file.Tag.Comment.Split(';')
-                    .Select(p => p.Trim())
-                    .Where(p => !p.StartsWith("Key:"))
-                    .ToList();
-                parts.Add(keyComment);
-                file.Tag.Comment = string.Join("; ", parts);
+                xiphTag.SetField("INITIALKEY", new[] { keyString });
+                xiphTag.SetField("BPM", new[] { bpmString });
+            }
+
+            // Inyectar en AppleTag (Para M4A, AAC)
+            if (file.GetTag(TagTypes.Apple, true) is TagLib.Mpeg4.AppleTag appleTag)
+            {
+                appleTag.SetDashBox("com.apple.iTunes", "initialkey", keyString);
+                appleTag.SetDashBox("com.apple.iTunes", "bpm", bpmString);
             }
             
             file.Save();
@@ -50,13 +62,7 @@ public class MetadataWriter
                 return (false, "Error: El archivo desapareció después de escribir.");
             }
 
-            using var verifyFile = TagLib.File.Create(filePath);
-            if (verifyFile.Tag.BeatsPerMinute != (uint)Math.Round(bpm))
-            {
-                return (false, "Error: La verificación de escritura falló.");
-            }
-
-            return (true, $"Metadata guardada:\nBPM: {bpm}\nKey: {key} {mode}");
+            return (true, $"Metadata guardada:\nBPM: {bpmString}\nKey: {keyString}");
         }
         catch (UnauthorizedAccessException)
         {
@@ -82,30 +88,63 @@ public class MetadataWriter
         {
             using var file = TagLib.File.Create(filePath);
             
-            string currentBpm = file.Tag.BeatsPerMinute > 0 ? file.Tag.BeatsPerMinute.ToString() : "No establecido";
-            
-            string currentKey = "No establecido";
-            if (!string.IsNullOrEmpty(file.Tag.Comment))
+            string currentBpm = "";
+            string currentKey = "";
+
+            // 1. Leer ID3v2 (MP3, WAV, AIFF)
+            if (file.GetTag(TagTypes.Id3v2, false) is TagLib.Id3v2.Tag id3v2Tag)
             {
-                if (file.Tag.Comment.Contains("Key:"))
+                var tkeyFrame = TagLib.Id3v2.TextInformationFrame.Get(id3v2Tag, "TKEY", false);
+                if (tkeyFrame != null && tkeyFrame.Text.Length > 0) currentKey = tkeyFrame.Text[0];
+
+                var tbpmFrame = TagLib.Id3v2.TextInformationFrame.Get(id3v2Tag, "TBPM", false);
+                if (tbpmFrame != null && tbpmFrame.Text.Length > 0) currentBpm = tbpmFrame.Text[0];
+            }
+
+            // 2. Leer VorbisComment (FLAC, OGG)
+            if (string.IsNullOrEmpty(currentKey) || string.IsNullOrEmpty(currentBpm))
+            {
+                if (file.GetTag(TagTypes.Xiph, false) is TagLib.Ogg.XiphComment xiphTag)
                 {
-                    var parts = file.Tag.Comment.Split(';');
-                    foreach (var part in parts)
+                    var keys = xiphTag.GetField("INITIALKEY");
+                    if (keys != null && keys.Length > 0) currentKey = keys[0];
+
+                    var bpms = xiphTag.GetField("BPM");
+                    if (bpms != null && bpms.Length > 0) currentBpm = bpms[0];
+                }
+            }
+
+            // 3. Fallbacks Legacy
+            if (string.IsNullOrEmpty(currentBpm))
+            {
+                currentBpm = file.Tag.BeatsPerMinute > 0 ? file.Tag.BeatsPerMinute.ToString() : "No establecido";
+            }
+            
+            if (string.IsNullOrEmpty(currentKey))
+            {
+                currentKey = "No establecido";
+                if (!string.IsNullOrEmpty(file.Tag.Comment))
+                {
+                    if (file.Tag.Comment.Contains("Key:"))
                     {
-                        if (part.Trim().StartsWith("Key:"))
+                        var parts = file.Tag.Comment.Split(';');
+                        foreach (var part in parts)
                         {
-                            currentKey = part.Trim().Substring(4).Trim();
-                            break;
+                            if (part.Trim().StartsWith("Key:"))
+                            {
+                                currentKey = part.Trim().Substring(4).Trim();
+                                break;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    currentKey = file.Tag.Comment;
+                    else
+                    {
+                        currentKey = file.Tag.Comment;
+                    }
                 }
             }
             
-            bool hasMetadata = file.Tag.BeatsPerMinute > 0 || !string.IsNullOrEmpty(file.Tag.Comment);
+            bool hasMetadata = currentBpm != "No establecido" || currentKey != "No establecido";
             
             return (hasMetadata, currentBpm, currentKey);
         }

@@ -201,32 +201,35 @@ Los tres análisis (BPM, Key, Waveform) se ejecutan en paralelo usando `Task.Whe
 
 ---
 
-## 6. Construcción y Distribución
+## 6. Construcción y Distribución (Protocolo v1.1.0+)
 
-### Compilación
+El proyecto utiliza un sistema de **Fuente Única de Verdad** basado en el archivo de proyecto `.csproj`.
 
-```bash
-cd src
-dotnet publish -c Release -r win-x64 --self-contained true -o ../publish
+### 6.1 Proceso de Build
+Para garantizar una compilación limpia y sincronizada, se debe utilizar el script de orquestación:
+
+```powershell
+./release_build.ps1
 ```
 
-### Instalador (Inno Setup)
+Este script realiza las siguientes tareas:
+1.  **Limpieza:** Elimina compilaciones previas en la carpeta `publish/`.
+2.  **Detección de Versión:** Extrae la versión actual directamente de `src/AudioAnalyzer.csproj`.
+3.  **Publicación:** Genera un binario único (Self-Contained) para Windows x64.
+4.  **UI Dinámica:** Los cambios se reflejan automáticamente en la ventana "Acerca de" mediante Reflection.
 
-El instalador se genera con Inno Setup 6:
+### 6.2 Generación del Instalador (Inno Setup)
+El instalador se genera con Inno Setup 6 utilizando el script `installer/setup.iss`. No es necesario editar el script para actualizar la versión, ya que utiliza la función `GetFileVersion` sobre el binario publicado.
 
-```bash
-iscc setup.iss
-```
+1. Abrir `installer/setup.iss`.
+2. Compilar (F9).
+3. El instalador resultante se ubicará en `installer/output/`.
 
-Ubicación del instalador:
-- `installer/ToneAndBeatsByHostility_Setup_v1.0.0.exe`
-
-### Distribución
-
+### 6.3 Métodos de Distribución
 | Método | Ubicación | Descripción |
 |--------|-----------|-------------|
-| Instalador | `installer/ToneAndBeatsByHostility_Setup_v1.0.0.exe` | ~140 MB (comprimido) |
-| Portable | `publish/` | 511 archivos (incluye runtime) |
+| Instalador | `installer/output/` | Ejecutable de instalación (Setup) |
+| Portable | `publish/` | Binario único con runtime incluido |
 
 ---
 

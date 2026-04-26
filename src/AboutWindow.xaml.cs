@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 using AudioAnalyzer.Helpers;
 using AudioAnalyzer.Services;
@@ -22,7 +23,27 @@ public partial class AboutWindow : Window
         }
         
         LoadEmbeddedImages();
+        SetVersionText();
         LoggerService.Log("AboutWindow - Constructor completado");
+    }
+
+    private void SetVersionText()
+    {
+        try
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var version = assembly.GetName().Version;
+            if (version != null)
+            {
+                VersionText.Text = $"Versión {version.Major}.{version.Minor}.{version.Build}";
+                LoggerService.Log($"AboutWindow - Versión detectada: {VersionText.Text}");
+            }
+        }
+        catch (Exception ex)
+        {
+            LoggerService.Log($"AboutWindow - Error al obtener versión: {ex.Message}");
+            VersionText.Text = "Versión 1.1.0"; // Fallback
+        }
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

@@ -3,11 +3,11 @@
 ; Last Updated: 2026-04-26
 
 #define MyAppName "Tone & Beats by Hostility"
-#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Hostility Music"
 #define MyAppURL "https://www.hostilitymusic.com"
 #define MyAppExeName "ToneAndBeatsByHostility.exe"
 #define SourceDir "..\publish"
+#define MyAppVersion GetFileVersion(SourceDir + "\" + MyAppExeName)
 
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}}

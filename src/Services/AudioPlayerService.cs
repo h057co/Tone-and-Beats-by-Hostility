@@ -102,21 +102,7 @@ public class AudioPlayerService : IAudioPlayerService
                 return null;
             }
 
-            var format = _audioFile.WaveFormat;
-            string fileType = Path.GetExtension(CurrentFile)?.ToUpper().TrimStart('.') ?? "Unknown";
-
-            var info = new AudioFileInfo
-            {
-                FileType = fileType,
-                SampleRate = format.SampleRate,
-                BitDepth = format.BitsPerSample,
-                Channels = format.Channels
-            };
-
-            LoggerService.Log($"GetAudioFileInfo() - FileType: {info.FileType}");
-            LoggerService.Log($"GetAudioFileInfo() - SampleRate: {info.SampleRate}");
-            LoggerService.Log($"GetAudioFileInfo() - BitDepth: {info.BitDepth}");
-            LoggerService.Log($"GetAudioFileInfo() - Channels: {info.Channels}");
+            var info = new AudioFileInfo();
 
             if (!string.IsNullOrEmpty(CurrentFile))
             {
@@ -126,10 +112,15 @@ public class AudioPlayerService : IAudioPlayerService
                     if (mediaInfo.Success && mediaInfo.AudioStreams.Any())
                     {
                         var audioStream = mediaInfo.AudioStreams.First();
+                        info.FileType = audioStream.Format;
+                        info.SampleRate = (int)audioStream.SamplingRate;
+                        info.BitDepth = audioStream.BitDepth;
+                        // info.Channels se obtendrá del fallback de NAudio
+                        
                         info.Bitrate = (int)(audioStream.Bitrate / 1000);
                         info.BitrateMode = audioStream.BitrateMode.ToString();
-                        LoggerService.Log($"GetAudioFileInfo() - Bitrate: {info.Bitrate} kbps");
-                        LoggerService.Log($"GetAudioFileInfo() - BitrateMode: {info.BitrateMode}");
+                        
+                        LoggerService.Log($"GetAudioFileInfo() - MediaInfo extraído con éxito.");
                     }
                 }
                 catch (Exception ex)
@@ -137,6 +128,16 @@ public class AudioPlayerService : IAudioPlayerService
                     LoggerService.Log($"GetAudioFileInfo() - MediaInfo error: {ex.Message}");
                 }
             }
+
+            // Fallbacks si MediaInfo no pudo obtener los datos
+            var format = _audioFile.WaveFormat;
+            if (string.IsNullOrEmpty(info.FileType)) 
+                info.FileType = Path.GetExtension(CurrentFile)?.ToUpper().TrimStart('.') ?? "Unknown";
+            if (info.SampleRate == 0) info.SampleRate = format.SampleRate;
+            if (info.BitDepth == 0) info.BitDepth = format.BitsPerSample;
+            if (info.Channels == 0) info.Channels = format.Channels;
+
+            LoggerService.Log($"GetAudioFileInfo() - Final Properties -> Type:{info.FileType}, SR:{info.SampleRate}, BD:{info.BitDepth}, Ch:{info.Channels}");
 
             return info;
         }

@@ -179,18 +179,25 @@ src/
 
 ---
 
-## Desarrollo
+## Desarrollo y Release (v1.1.0+)
 
+El proceso de construcción y despliegue ha sido automatizado mediante un script de orquestación.
+
+### 1. Requisitos
+- **Framework:** .NET 8.0 SDK
+- **Inno Setup:** v6.0+ (para generar el instalador)
+
+### 2. Flujo de Release Automatizado
+Para compilar una nueva versión y preparar el instalador:
+
+1.  **Versión Maestro:** Modifica la versión únicamente en `src/AudioAnalyzer.csproj`.
+2.  **Construcción:** Ejecuta el script `./release_build.ps1`. Este script automatiza la limpieza, compilación y publicación del binario (`win-x64`).
+3.  **Instalador:** Abre `installer/setup.iss` con Inno Setup y compila (F9). El instalador lee automáticamente la versión del ejecutable generado.
+
+Para desarrollo rápido:
 ```bash
-# Compilar
 cd src
-dotnet build
-
-# Ejecutar
 dotnet run
-
-# Publicar
-dotnet publish -c Release -r win-x64 --self-contained true -o ../publish
 ```
 
 ---
