@@ -57,6 +57,7 @@ build/
 
 # Test assets (large audio files)
 Assets/audiotest/
+audiotest/
 
 # Obsidian vault (local only)
 .obsidian/
