@@ -6,4 +6,4 @@ using System.Reflection;
 [assembly: AssemblyCompany("Hostility Music")]
 [assembly: AssemblyCopyright("Copyright 2026 Hostility Music")]
 [assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]

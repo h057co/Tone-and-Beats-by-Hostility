@@ -1,6 +1,6 @@
 ; Inno Setup Script for Tone & Beats by Hostility
-; Version: 1.1.0
-; Last Updated: 2026-04-26
+; Version: 1.2.0
+; Last Updated: 2026-05-01
 
 #define MyAppName "Tone & Beats by Hostility"
 #define MyAppPublisher "Hostility Music"
@@ -62,7 +62,7 @@ Source: "{#SourceDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; Supporting files (if any additional content is needed)
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; License and documentation
-Source: "..\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion isreadme
+Source: "..\LICENSE.md"; DestDir: "{app}"; Flags: ignoreversion isreadme
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
