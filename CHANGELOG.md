@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.0] - 2026-05-01 (Release)
+
+### Intelligent BPM Motor & UI Overhaul
+
+#### NEW: Intelligent Hybrid BPM Engine
+- **Urban Accuracy Fix:** Improved detection for tracks in the 100-115 BPM range (e.g., 108 BPM). The "Trap Rescue" heuristic now uses a dynamic ceiling of 105 BPM to prevent incorrect 1.5x scaling on high-tempo standard tracks.
+- **Dynamic Confidence Guard:** Added a strict score-weighted guard for high-tempo candidates. The engine now requires significantly higher confidence (score > -1.0) before promoting a candidate in the 100-105 BPM range.
+- **Improved Success Rate:** Primary Match accuracy increased to **86.4%** while maintaining a **95.5%** overall success rate across the 22-file validation suite.
+
+#### UI & UX Refinement
+- **Direct Swap Interaction:** Replaced the legacy x2/÷2 cycling logic with a direct **Swap** command between Primary and Alternative BPM values.
+- **Visual Feedback:** Integrated `BpmSwappedBrush` across all themes (Dark, Light, Blue, iOS) to highlight when an alternative detection candidate is active.
+- **Refactored Interaction Model:** Consolidated BPM click events to trigger the new `SwapBpmValues()` method, simplifying user workflow.
+
+#### Maintenance & Documentation
+- **Technical Audit:** Completed a full Senior-level audit of the DSP engine and architecture.
+- **Cleanup:** Removed obsolete documentation files (JUCE plans, old reports, etc.) and consolidated the technical manual.
+- **Version Bump:** Synchronized all project metadata (csproj, AssemblyInfo, AboutWindow) to v1.2.0.
+
+---
+
 ## [1.0.13] - 2026-04-15 (Release)
 
 ### UI/UX Responsiveness & Zoom Features

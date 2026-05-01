@@ -26,7 +26,7 @@
     <SolidColorBrush x:Key="StatusErrorBrush" Color="#FF3B30"/>
     <SolidColorBrush x:Key="FileNameInactiveBrush" Color="#8E8E93"/>
     <SolidColorBrush x:Key="FileNameActiveBrush" Color="#000000"/>
-    <SolidColorBrush x:Key="BpmModifiedBrush" Color="#FF3B30"/>
+    <SolidColorBrush x:Key="BpmSwappedBrush" Color="#FF3B30"/>
     
     <!-- ComboBox Specific Brushes -->
     <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="#FFFFFF"/>

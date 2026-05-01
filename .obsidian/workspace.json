@@ -4,21 +4,33 @@
     "type": "split",
     "children": [
       {
-        "id": "3a48ac11f61960ac",
+        "id": "70b1d0460a95ea43",
         "type": "tabs",
         "children": [
           {
-            "id": "6aa349b86add63cb",
+            "id": "549d10bc9c19627d",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/BPM_DETECTION_REPORT.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "BPM_DETECTION_REPORT"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Vista gráfica"
+            }
+          }
+        ]
+      },
+      {
+        "id": "806542e701686830",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7973a80261ccac3b",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Vista gráfica"
             }
           }
         ]
@@ -94,7 +106,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "docs/BPM_DETECTION_REPORT.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +115,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Enlaces entrantes de BPM_DETECTION_REPORT"
+              "title": "Enlaces entrantes"
             }
           },
           {
@@ -169,8 +180,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -183,19 +193,24 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "0429fba7a65e315d",
+  "active": "7973a80261ccac3b",
   "lastOpenFiles": [
-    "VERSION_REFERENCES_COMPREHENSIVE.txt",
-    "src/obj/Release/net8.0-windows/win-x64/MainWindow.baml",
-    "src/obj/Release/net8.0-windows/win-x64/AboutWindow.baml",
-    "src/obj/Release/net8.0-windows/win-x64/App.baml",
-    "src/obj/Release/net8.0-windows/win-x64/AudioAnalyzer_sfm2tcus_wpftmp.GlobalUsings.g.cs",
-    "src/obj/Release/net8.0-windows/win-x64/AudioAnalyzer_sfm2tcus_wpftmp.GeneratedMSBuildEditorConfig.editorconfig",
-    "src/obj/Release/net8.0-windows/win-x64/AudioAnalyzer_sfm2tcus_wpftmp.assets.cache",
-    "src/AudioAnalyzer_sfm2tcus_wpftmp.csproj",
-    "src/obj/AudioAnalyzer_sfm2tcus_wpftmp.csproj.nuget.dgspec.json",
-    "src/obj/AudioAnalyzer_sfm2tcus_wpftmp.csproj.nuget.g.targets",
-    "src/obj/AudioAnalyzer_sfm2tcus_wpftmp.csproj.nuget.g.props",
+    "src/obj/Debug/net8.0-windows/MainWindow.baml",
+    "src/obj/Debug/net8.0-windows/AboutWindow.baml",
+    "src/obj/Debug/net8.0-windows/App.baml",
+    "src/obj/Debug/net8.0-windows/AudioAnalyzer_aridtj2p_wpftmp.sourcelink.json",
+    "src/obj/Debug/net8.0-windows/AudioAnalyzer_aridtj2p_wpftmp.GlobalUsings.g.cs",
+    "src/obj/Debug/net8.0-windows/AudioAnalyzer_aridtj2p_wpftmp.GeneratedMSBuildEditorConfig.editorconfig",
+    "src/obj/Debug/net8.0-windows/AudioAnalyzer_aridtj2p_wpftmp.assets.cache",
+    "src/AudioAnalyzer_aridtj2p_wpftmp.csproj",
+    "src/obj/AudioAnalyzer_aridtj2p_wpftmp.csproj.nuget.g.props",
+    "src/obj/AudioAnalyzer_aridtj2p_wpftmp.csproj.nuget.g.targets",
+    "src/obj/AudioAnalyzer_aridtj2p_wpftmp.csproj.nuget.dgspec.json",
+    "docs/BpmStatusReport.md",
+    "docs/Technical_UI_Architecture.md",
+    "docs/HUB_DOCS.md",
+    "docs/UI_UX_Specification.md",
+    "docs/ARCHITECTURE.md",
     "INSTRUCCIONES_EJECUCION_TEST.md",
     "REPORTE_TECNICO_BPM_DETECTION.md",
     "REPORTE_V1.0.9_GUARDIA_DE_PULSO.md",
@@ -203,7 +218,6 @@
     "REPORTE_V1.0.8_BANDLIMITED_ADAPTIVE.md",
     "REPORTE_V1.0.7_SPECTRALFLUX.md",
     "docs/GRID_DETECTION_CONFIGURATION.md",
-    "docs/ARCHITECTURE.md",
     "RELEASE_NOTES_v1.0.5.md",
     "CONTRIBUTING.md",
     "docs/BPM_DETECTION_REPORT.md",

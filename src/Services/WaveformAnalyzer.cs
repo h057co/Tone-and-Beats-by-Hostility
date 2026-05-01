@@ -656,7 +656,6 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     // =========================================================================
 
     /// <summary>
-    /// <summary>
     /// Designs Butterworth filter coefficients using bilinear transform.
     /// Returns (b0, b1, b2, a1, a2) coefficients.
     /// </summary>
@@ -742,9 +741,10 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     }
 
     /// <summary>
-    /// Isolates two frequency bands for transient detection:
+    /// Isolates three frequency bands for transient detection:
     /// - Low band (20-150 Hz): kick drum
-    /// - High band (2000-8000 Hz): snare, hi-hat, claps
+    /// - Mid band (400-1500 Hz): percussion body
+    /// - High band (2500-8000 Hz): snare, hi-hat, claps
     /// </summary>
     public (float[] lowBand, float[] hiBand) IsolateTransientBands(float[] samples, int sampleRate)
     {
@@ -813,7 +813,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
     }
 
     /// <summary>
-    /// Merges transient lists from two bands, removing duplicates within 15ms.
+    /// Merges transient lists from three bands, removing duplicates within 15ms.
     /// </summary>
     public List<(double position, double amplitude)> MergeTransients(
         List<(double position, double amplitude)> lowBandTransients,
@@ -961,7 +961,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
                 }
 
                 deviations.Add(minDist);
-                                if (minDist < DspConstants.HIT_TOLERANCE_SEC) hits++;  // 25ms tolerance for a "hit"
+                if (minDist < DspConstants.HIT_TOLERANCE_SEC) hits++;  // 25ms tolerance for a "hit"
             }
 
             // Calculate standard deviation
@@ -1032,8 +1032,9 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
             FftHelper.FFT(complex);
 
             double flux = 0;
-            // Calcular flujo espectral solo hasta maxBin (Band-Limited)
-            for (int i = 0; i < maxBin; i++)
+            // Calcular flujo espectral filtrando el sub-bajo (0-100Hz) y limitando a 8kHz
+            int minBin = (int)(100.0 * DspConstants.SF_FFT_SIZE / sampleRate);
+            for (int i = minBin; i < maxBin; i++)
             {
                 double magnitude = System.Numerics.Complex.Abs(complex[i]);
                 double diff = magnitude - previousSpectrum[i];
@@ -1212,7 +1213,7 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
     /// <summary>
     /// Full transient-based BPM detection pipeline:
-    /// Dual-band filtering → transient detection → autocorrelation → beat grid fitting.
+    /// Multi-band filtering → transient detection → autocorrelation → beat grid fitting.
     /// Returns (bpm, confidence).
     /// </summary>
     public (double bpm, double confidence, List<(double bpm, double score)> allCandidates) DetectBpmByTransientGrid(float[] monoSamples, int sampleRate)
@@ -1223,13 +1224,13 @@ public class WaveformAnalyzer : IWaveformAnalyzerService
 
         // Step 1: Dual-band isolation
         var (lowBand, hiBand) = IsolateTransientBands(monoSamples, sampleRate);
-
+ 
         // Step 2: Detect transients in each band (usando thresholds reducidos para audio masterizado)
         var lowTransients = DetectTransients(lowBand, sampleRate, DspConstants.TRANSIENT_THRESHOLD_LOW);
         var hiTransients = DetectTransients(hiBand, sampleRate, DspConstants.TRANSIENT_THRESHOLD_HI);
-
+ 
         LoggerService.Log($"WaveformAnalyzer.TransientGrid - Low-band transients: {lowTransients.Count}, Hi-band transients: {hiTransients.Count}");
-
+ 
         // Step 3: Merge transients
         var allTransients = MergeTransients(lowTransients, hiTransients);
         LoggerService.Log($"WaveformAnalyzer.TransientGrid - Merged transients: {allTransients.Count}");

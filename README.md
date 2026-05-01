@@ -1,6 +1,6 @@
 # Tone & Beats by Hostility
 
-**Versión:** 1.0.12  
+**Versión:** 1.2.0  
 **Tipo:** Donationware - Aplicación de análisis de audio para DJs y Productores Musicales  
 **Licencia:** [CC BY-NC-ND 4.0](LICENSE.md)
 
@@ -31,10 +31,10 @@ Tone & Beats by Hostility es una potente herramienta de análisis de audio dise�
 ## Características
 
 ### Análisis de Audio
-- Detección de BPM precisa
-- Identificación de tonalidad musical
-- Visualización de forma de onda
-- Análisis de volumen (LUFS, LRA, True Peak)
+- **Detección de BPM Inteligente**: Motor híbrido triple (SoundTouch, Transientes y Flujo Espectral) con perfiles de rango y corrección automática de armónicos.
+- **Identificación de Tonalidad**: Algoritmo avanzado con visualización en Rueda Camelot.
+- **Visualización de Waveform**: Renderizado de alta fidelidad mediante SkiaSharp.
+- **Análisis de Volumen Profesional**: Medición de LUFS (EBU R128), LRA y True Peak (dBTP).
 
 ### Formatos Soportados
 - MP3, WAV, FLAC, OGG, M4A, AAC, WMA, OPUS

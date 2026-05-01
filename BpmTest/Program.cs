@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using AudioAnalyzer.Services;
+using AudioAnalyzer.Interfaces;
 
 Console.WriteLine("╔════════════════════════════════════════════════════════════════════════════════╗");
 Console.WriteLine("║          BPM DETECTION TEST - FASE 1 BASELINE (20 archivos de test)           ║");
@@ -31,6 +32,8 @@ var testFiles = new (string path, double expectedBpm, string description)[]
     ("..\\audiotest\\sin master bpm 152.mp3", 152.0, "Trap (sin master MP3)"),
     ("..\\audiotest\\sin master bpm 152.wav", 152.0, "Trap (sin master WAV)"),
     ("..\\audiotest\\Ta Buena Rancha bpm 108.mp3", 108.0, "Reggaeton 3"),
+    ("..\\audiotest\\eso pa que - Pipe Calderon bpm 90.mp3", 90.0, "Reggaeton/Pop 1"),
+    ("..\\audiotest\\eso pa que - Pipe Calderon bpm 90 .flac", 90.0, "Reggaeton/Pop 2 (FLAC)"),
 };
 
 var results = new List<TestResult>();
@@ -130,6 +133,51 @@ Console.WriteLine($"║ ✓ TASA DE ÉXITO TOTAL:          {successRate,5:F1}%  
 Console.WriteLine($"╚════════════════════════════════════════════════════════════════════════════════╝");
 
 Console.WriteLine($"\n📊 Logs disponibles en: %LOCALAPPDATA%\\ToneAndBeats\\app.log");
+
+// ── FASE 2: VERIFICACIÓN DE PERFILES DE RANGO ────────────────────────────────
+Console.WriteLine("\n╔════════════════════════════════════════════════════════════════════════════════╗");
+Console.WriteLine("║          FASE 2: VERIFICACIÓN DE PERFILES DE RANGO (Range Profiles)            ║");
+Console.WriteLine("╚════════════════════════════════════════════════════════════════════════════════╝\n");
+
+// Usaremos un audio conocido (90 BPM) para probar los rangos
+var profileTestFile = Path.Combine(Directory.GetCurrentDirectory(), "..\\audiotest\\audio 17 bpm 90.mp3");
+if (File.Exists(profileTestFile))
+{
+    var profiles = new (BpmRangeProfile profile, string range)[]
+    {
+        (BpmRangeProfile.Low_50_100, "50-100"),
+        (BpmRangeProfile.Mid_75_150, "75-150"),
+        (BpmRangeProfile.High_100_200, "100-200"),
+        (BpmRangeProfile.VeryHigh_150_300, "150-300")
+    };
+
+    foreach (var p in profiles)
+    {
+        var (primary, _) = bpmDetector.DetectBpm(profileTestFile, null, p.profile);
+        string status = (primary >= GetMin(p.profile) && primary <= GetMax(p.profile)) ? "[OK]" : "[FAIL]";
+        Console.WriteLine($"Perfil {p.profile,-18} [{p.range,-7}]: Resultado = {primary,5:F1} BPM {status}");
+    }
+}
+else
+{
+    Console.WriteLine("Omitiendo Fase 2: Archivo de prueba no encontrado.");
+}
+
+static double GetMin(BpmRangeProfile p) => p switch {
+    BpmRangeProfile.Low_50_100 => 50,
+    BpmRangeProfile.Mid_75_150 => 75,
+    BpmRangeProfile.High_100_200 => 100,
+    BpmRangeProfile.VeryHigh_150_300 => 150,
+    _ => 0
+};
+
+static double GetMax(BpmRangeProfile p) => p switch {
+    BpmRangeProfile.Low_50_100 => 100,
+    BpmRangeProfile.Mid_75_150 => 150,
+    BpmRangeProfile.High_100_200 => 200,
+    BpmRangeProfile.VeryHigh_150_300 => 300,
+    _ => 999
+};
 
 // === HELPER FUNCTIONS ===
 

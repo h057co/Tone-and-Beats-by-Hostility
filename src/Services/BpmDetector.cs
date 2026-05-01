@@ -191,15 +191,16 @@ public class BpmDetector : IBpmDetectorService
             // asumimos con seguridad que es un Trap/Drill masterizado y lo forzamos a Half-time.
             bool trapCorrectionApplied = false;
             if (finalBpm >= BpmConstants.TRAP_MIN_BPM &&
-                finalBpm <= BpmConstants.TRAP_MAX_BPM &&
-                gridBpm   > BpmConstants.TRAP_GRID_BPM_THRESHOLD)
+                finalBpm <= BpmConstants.TRAP_MAX_BPM)
             {
+                // Solo rescatamos si el Grid confirma que hay energía en el rango superior (> 140)
+                // O si el Grid coincide directamente con el objetivo (finalBpm * 1.5)
                 // Pasar AMBAS listas de candidatos al guard para más contexto
                 var combinedCandidates = allGridCandidates
                     .Concat(allSfCandidates)
                     .ToList();
 
-                if (ShouldApplyTrapHeuristic(finalBpm, combinedCandidates))
+                if (sfConfidence < BpmConstants.HIGH_CONFIDENCE_THRESHOLD && ShouldApplyTrapHeuristic(finalBpm, combinedCandidates))
                 {
                     double pre = finalBpm;
                     finalBpm   = finalBpm * BpmConstants.TRAP_CORRECTION_MULTIPLIER;
@@ -629,8 +630,8 @@ public class BpmDetector : IBpmDetectorService
             if (Math.Abs(ratio - 1.5) < 0.08 || Math.Abs(ratio - 0.667) < 0.08)
             {
                 // Si hay relación de tresillo, confiamos en SoundTouch como la base del pulso,
-                // a menos que SF tenga una confianza absolutamente abrumadora (> 0.85).
-                if (sfConf < 0.85)
+                // a menos que SF tenga una confianza absoluta muy alta (> 0.75).
+                if (sfConf < BpmConstants.HIGH_CONFIDENCE_THRESHOLD)
                 {
                     LoggerService.Log($"[Vote] GUARDIA DE PULSO: Relación {ratio:F2} detectada. Gana SoundTouch base → {stBpm:F1} BPM");
                     return stBpm;
@@ -709,19 +710,24 @@ public class BpmDetector : IBpmDetectorService
         List<(double bpm, double score)> allGridCandidates)
     {
         if (allGridCandidates == null || allGridCandidates.Count == 0)
-            return true;
+            return false;
 
-        double halfTimeTarget = soundTouchBpm * BpmConstants.TRESILLO_RATIO;
         foreach (var candidate in allGridCandidates)
         {
-            if (Math.Abs(candidate.bpm - halfTimeTarget) < 5.0)
+            double ratio = candidate.bpm / soundTouchBpm;
+            
+            // Umbral dinámico: si el BPM base ya es alto (> 100), exigimos más confianza para el 1.5x
+            // para evitar falsos positivos en temas que ya están en su tempo real (ej. 108 BPM).
+            double minScore = (soundTouchBpm > 100) ? -1.0 : -1.8;
+
+            if ((Math.Abs(ratio - 1.5) < 0.05 || Math.Abs(ratio - 3.0) < 0.05) && candidate.score > minScore)
             {
-                LoggerService.Log($"[Trap Guard] Candidato {candidate.bpm:F1} sugiere que {soundTouchBpm:F1} es half-time. Trap cancelada.");
-                return false;
+                LoggerService.Log($"[Trap Guard] Candidato {candidate.bpm:F1} confirma relación {ratio:F2}x con score {candidate.score:F3} (min={minScore}). Rescatando.");
+                return true; 
             }
         }
 
-        return true;
+        return false;
     }
 
     /// <summary>

@@ -557,13 +557,13 @@
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding BpmDisplayText}" FontSize="32" FontWeight="Bold"
                           HorizontalAlignment="Center" TextAlignment="Center"
                           MouseLeftButtonDown="BpmText_LeftClick" Cursor="Hand"
-                          ToolTip="Click: ×2 → ÷2 → reset">
+                          ToolTip="Click para intercambiar con el BPM Alternativo">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="{DynamicResource TitleBrush}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsBpmModified}" Value="True">
-                                    <Setter Property="Foreground" Value="{DynamicResource BpmModifiedBrush}"/>
+                                <DataTrigger Binding="{Binding IsBpmSwapped}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource BpmSwappedBrush}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

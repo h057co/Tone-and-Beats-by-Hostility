@@ -187,7 +187,7 @@ public partial class MainWindow : Window
 
     private void BpmText_LeftClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        ViewModel?.CycleBpmAdjustment();
+        ViewModel?.SwapBpmValues();
     }
 
     private void BpmSwap_Click(object sender, System.Windows.RoutedEventArgs e)

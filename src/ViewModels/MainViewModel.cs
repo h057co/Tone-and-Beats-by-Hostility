@@ -53,11 +53,8 @@ public class MainViewModel : ViewModelBase
     private RelayCommand? _openUrlCommand;
     private double _originalBpm;
     private double _displayBpm;
-    private bool _bpmAdjusted;
-    private string _bpmModifierText = "";
     private double _originalAlternativeBpm;  // Almacena el BPM alternativo original detectado
     private bool _hasSwappedBpm;              // Tracking: true si el usuario ha intercambiado
-    private int _bpmCycleState = 0;           // 0=original, 1=×2, 2=÷2
     private BpmRangeProfile _selectedBpmProfile = BpmRangeProfile.Auto;
     private string _audioFileType = "";
     private string _sampleRateText = "";
@@ -225,11 +222,6 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _selectedBpmProfile, value);
     }
 
-    /// <summary>
-    /// Semantic flag: true when BPM has been adjusted (×2 or ÷2).
-    /// The View uses this with DataTrigger to switch between TitleBrush and BpmModifiedBrush.
-    /// </summary>
-    public bool IsBpmModified => !string.IsNullOrEmpty(_bpmModifierText);
 
     /// <summary>
     /// Retorna true cuando hay un BPM alternativo válido para intercambiar.
@@ -634,13 +626,10 @@ public class MainViewModel : ViewModelBase
             _displayBpm = 0;
             _originalAlternativeBpm = 0;
             _hasSwappedBpm = false;
-            _bpmAdjusted = false;
-            _bpmModifierText = "";
-            _bpmCycleState = 0;
             _keyIndex = -1;
             _showRelativeKey = false;
             OnPropertyChanged(nameof(BpmDisplayText));
-            OnPropertyChanged(nameof(IsBpmModified));
+            OnPropertyChanged(nameof(IsBpmSwapped));
             OnPropertyChanged(nameof(CanSwapBpm));
             OnPropertyChanged(nameof(KeyDisplayText));
 
@@ -715,12 +704,9 @@ public class MainViewModel : ViewModelBase
                 _originalBpm = report.Bpm;
                 _displayBpm = report.Bpm;
                 _originalAlternativeBpm = report.AlternativeBpm;
-                _bpmAdjusted = false;
-                _bpmModifierText = "";
                 _hasSwappedBpm = false;
-                _bpmCycleState = 0;
                 OnPropertyChanged(nameof(BpmDisplayText));
-                OnPropertyChanged(nameof(IsBpmModified));
+                OnPropertyChanged(nameof(IsBpmSwapped));
                 OnPropertyChanged(nameof(CanSwapBpm));
             }
 
@@ -910,52 +896,6 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    /// <summary>
-    /// Ciclo de ajuste BPM con un solo click izquierdo:
-    ///   Estado 0 → 1: multiplica el BPM base ×2
-    ///   Estado 1 → 2: divide el BPM base ÷2
-    ///   Estado 2 → 0: restaura el BPM base original
-    /// Funciona sobre el BPM actualmente activo: si hay swap activo,
-    /// opera sobre _originalAlternativeBpm como base.
-    /// </summary>
-    public void CycleBpmAdjustment()
-    {
-        // Determinar la base: si swap activo, usar el alternativo; si no, el original
-        double baseBpm = _hasSwappedBpm ? _originalAlternativeBpm : _originalBpm;
-
-        if (baseBpm <= 0) return;
-
-        // Avanzar al siguiente estado del ciclo: 0 → 1 → 2 → 0
-        _bpmCycleState = (_bpmCycleState + 1) % 3;
-
-        switch (_bpmCycleState)
-        {
-            case 1: // ×2
-                _displayBpm = baseBpm * 2;
-                _bpmModifierText = "×2";
-                _bpmAdjusted = true;
-                StatusText = $"BPM ×2 = {_displayBpm:F1}";
-                break;
-
-            case 2: // ÷2
-                _displayBpm = baseBpm / 2;
-                _bpmModifierText = "÷2";
-                _bpmAdjusted = true;
-                StatusText = $"BPM ÷2 = {_displayBpm:F1}";
-                break;
-
-            case 0: // reset
-            default:
-                _displayBpm = baseBpm;
-                _bpmModifierText = "";
-                _bpmAdjusted = false;
-                StatusText = "BPM reset al valor original";
-                break;
-        }
-
-        OnPropertyChanged(nameof(BpmDisplayText));
-        OnPropertyChanged(nameof(IsBpmModified));
-    }
 
     /// <summary>
     /// Intercambia el BPM principal con el BPM alternativo.
@@ -965,11 +905,6 @@ public class MainViewModel : ViewModelBase
     public void SwapBpmValues()
     {
         if (!CanSwapBpm) return;
-
-        // Al intercambiar siempre se resetea el ciclo de ajuste
-        _bpmCycleState = 0;
-        _bpmAdjusted = false;
-        _bpmModifierText = "";
 
         if (_hasSwappedBpm)
         {
@@ -988,7 +923,6 @@ public class MainViewModel : ViewModelBase
 
         OnPropertyChanged(nameof(BpmDisplayText));
         OnPropertyChanged(nameof(AlternativeBpmText));
-        OnPropertyChanged(nameof(IsBpmModified));
         OnPropertyChanged(nameof(IsSwapped));
         OnPropertyChanged(nameof(IsBpmSwapped));
     }

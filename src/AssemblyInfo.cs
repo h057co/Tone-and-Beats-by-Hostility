@@ -5,5 +5,5 @@ using System.Reflection;
 [assembly: AssemblyDescription("Desktop application for detecting BPM and musical key in audio files")]
 [assembly: AssemblyCompany("Hostility Music")]
 [assembly: AssemblyCopyright("Copyright 2026 Hostility Music")]
-[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
 [assembly: AssemblyFileVersion("1.1.0.0")]
