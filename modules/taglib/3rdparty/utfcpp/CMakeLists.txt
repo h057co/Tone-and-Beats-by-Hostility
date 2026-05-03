@@ -1,0 +1,5 @@
+add_library(utf8_cpp INTERFACE)
+add_library(utf8::cpp ALIAS utf8_cpp)
+target_include_directories(utf8_cpp INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/source")
+set(utf8cpp_FOUND TRUE PARENT_SCOPE)
+set(utf8cpp_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PARENT_SCOPE)

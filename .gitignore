@@ -1,0 +1,25 @@
+# Build directories
+/build/
+bin/
+obj/
+
+# IDE files
+.vs/
+.vscode/
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.suo
+*.db
+*.opendb
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# JUCE generated
+JuceLibraryCode/
+
+# Scratch files
+scratch/

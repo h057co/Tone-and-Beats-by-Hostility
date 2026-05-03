@@ -1,0 +1,73 @@
+name: Build macOS Universal Binary
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install CMake
+      run: brew install cmake
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+          -DJUCE_BUILD_EXTRAS=OFF
+
+    - name: Build
+      run: cmake --build build --config Release --target ToneAndBeats -j $(sysctl -n hw.ncpu)
+
+    - name: Verify App Bundle
+      run: |
+        APP_PATH="build/ToneAndBeats_artefacts/Release/ToneAndBeats.app"
+        echo "=== App Bundle Structure ==="
+        ls -laR "$APP_PATH"
+        echo ""
+        echo "=== Binary Info ==="
+        file "$APP_PATH/Contents/MacOS/ToneAndBeats"
+        echo ""
+        echo "=== Architecture Check (Universal Binary) ==="
+        lipo -info "$APP_PATH/Contents/MacOS/ToneAndBeats"
+        echo ""
+        echo "=== Deployment Target Check ==="
+        otool -l "$APP_PATH/Contents/MacOS/ToneAndBeats" | grep -A 5 "LC_BUILD_VERSION" | head -20
+        echo ""
+        echo "=== Binary Size ==="
+        du -sh "$APP_PATH/Contents/MacOS/ToneAndBeats"
+        echo ""
+        echo "=== Total App Size ==="
+        du -sh "$APP_PATH"
+
+    - name: Remove Quarantine and Package
+      run: |
+        APP_PATH="build/ToneAndBeats_artefacts/Release/ToneAndBeats.app"
+        
+        # Remove any quarantine attributes
+        xattr -cr "$APP_PATH"
+        
+        # Ad-hoc sign the app so macOS doesn't reject it
+        codesign --force --deep --sign - "$APP_PATH"
+        echo "Ad-hoc signed successfully"
+        
+        # Use ditto to create a proper macOS zip that preserves resource forks and metadata
+        ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" ToneAndBeats_macOS.zip
+        
+        echo "=== Final ZIP size ==="
+        du -sh ToneAndBeats_macOS.zip
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ToneAndBeats-macOS
+        path: ToneAndBeats_macOS.zip
