@@ -245,27 +245,31 @@ MainComponent::MainComponent()
                 if (result != 0) 
                 {
                     updateButton.setVisible(false);
-                    if (updateProgressBar) updateProgressBar->setVisible(true);
+                    if (updateProgressBar) 
+                    {
+                        updateProgressBar->setVisible(true);
+                        resized();
+                    }
                     updateManager.startUpdateDownload();
                 }
             }));
     };
     addChildComponent(updateButton);
 
-    // Barra de progreso de actualización
+    // Barra de progreso de actualización (oculta por defecto)
     updateProgressBar = std::make_unique<juce::ProgressBar>(updateProgress);
     updateProgressBar->setTextToDisplay("Downloading Update...");
     updateProgressBar->setColour(juce::ProgressBar::foregroundColourId, HostilityLookAndFeel::getAccent());
-    updateProgressBar->setVisible(false);
-    addAndMakeVisible(updateProgressBar.get());
+    addChildComponent(updateProgressBar.get());
 
     updateManager.onUpdateAvailable = [this](juce::String version, juce::String notes) {
         updateButton.setVisible(true);
         resized();
     };
 
-    updateManager.onDownloadProgress = [this](double progress) {
-        updateProgress = progress;
+    updateManager.onDownloadProgress = [this](float progress) {
+        updateProgress = static_cast<double>(progress);
+        juce::MessageManager::callAsync([this]() { repaint(); });
     };
 
     updateManager.onDownloadFinished = [this](bool success, juce::String msg) {
