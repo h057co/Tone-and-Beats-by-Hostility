@@ -54,7 +54,7 @@ if (-not (Test-Path $iscc)) { Write-Error "Inno Setup not found at: $iscc"; exit
 & $iscc "$ProjectRoot\Installers\tone_and_beats_installer.iss"
 if ($LASTEXITCODE -ne 0) { Write-Error "Installer compilation failed"; exit 1 }
 
-$InstallerName = "ToneBeats_v${Version}_Installer.exe"
+$InstallerName = "ToneAndBeats_v${Version}_Installer.exe"
 $InstallerPath = "$ProjectRoot\Installers\$InstallerName"
 if (-not (Test-Path $InstallerPath)) { Write-Error "Installer not found: $InstallerPath"; exit 1 }
 
