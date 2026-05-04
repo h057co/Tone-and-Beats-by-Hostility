@@ -122,6 +122,10 @@ endif()
 
 install(TARGETS ToneAndBeats DESTINATION bin)
 
+# === Auto-generate version info for Inno Setup ===
+file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/Installers/version_info.iss"
+"#define MyAppVersion \"${PROJECT_VERSION}\"\n")
+
 # === BPM Test Harness (CLI) ===
 juce_add_console_app(BpmTestHarness
     PRODUCT_NAME "BPM Test Harness"

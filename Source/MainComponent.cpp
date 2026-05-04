@@ -262,7 +262,7 @@ MainComponent::MainComponent()
     updateProgressBar->setColour(juce::ProgressBar::foregroundColourId, HostilityLookAndFeel::getAccent());
     addChildComponent(updateProgressBar.get());
 
-    updateManager.onUpdateAvailable = [this](juce::String version, juce::String notes) {
+    updateManager.onUpdateAvailable = [this](juce::String /*version*/, juce::String /*notes*/) {
         updateButton.setVisible(true);
         resized();
     };
@@ -273,8 +273,10 @@ MainComponent::MainComponent()
     };
 
     updateManager.onDownloadFinished = [this](bool success, juce::String msg) {
+        if (updateProgressBar) updateProgressBar->setVisible(false);
         if (!success)
         {
+            updateButton.setVisible(true);
             juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Update Failed", msg);
             statusLabel.setText("Update failed.", juce::dontSendNotification);
         }
@@ -480,7 +482,7 @@ void MainComponent::buttonClicked(juce::Button* button)
     else if (button == &analyzeButton) { if (currentFile.exists()) analyzeFile(); }
     else if (button == &aboutButton) {
         auto* dw = new juce::AlertWindow(juce::String::fromUTF8("Acerca de Tone & Beats"), 
-                                        juce::String::fromUTF8("Version 1.2.0\nAudio Analysis & Metadata Tool\nDeveloped by Hostility\n\n"
+                                        juce::String::fromUTF8("Version ") + ProjectInfo::versionString + juce::String::fromUTF8("\nAudio Analysis & Metadata Tool\nDeveloped by Hostility\n\n"
                                         "Si te gusta mi trabajo, puedes apoyarme para seguir mejorando esta herramienta:\n\n"
                                         "Third-Party Licenses:\n"
                                         "- JUCE Framework (GPLv3/Personal)\n"
@@ -616,7 +618,7 @@ void MainComponent::loadAudioFile(const juce::File& file)
 
 void MainComponent::analyzeFile()
 {
-    if (loadedAudio.first.empty()) return;
+    if (loadedAudio.first.empty() || !analyzeButton.isEnabled()) return;
     analyzeButton.setEnabled(false); saveButton.setEnabled(false);
     analysisProgress = 0.0; statusLabel.setText("Analizando audio...", juce::dontSendNotification);
     auto samples = loadedAudio.first; auto sampleRate = loadedAudio.second;
