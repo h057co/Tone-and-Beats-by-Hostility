@@ -55,7 +55,7 @@ MainComponent::MainComponent()
     : hasResults(false)
 {
     // HEADER: Title + Logo
-    titleLabel.setText("Tone & Beats by Hostility", juce::dontSendNotification);
+    titleLabel.setText("Tone & Beats", juce::dontSendNotification);
     configLabel(titleLabel, 24.0f, HostilityLookAndFeel::getAccent(), juce::Justification::centred, juce::Font::bold);
     addAndMakeVisible(titleLabel);
 
