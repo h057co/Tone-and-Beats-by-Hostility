@@ -59,9 +59,8 @@ MainComponent::MainComponent()
     configLabel(titleLabel, 24.0f, HostilityLookAndFeel::getAccent(), juce::Justification::centred, juce::Font::bold);
     addAndMakeVisible(titleLabel);
 
-    // Cargar Logo (Ruta absoluta para asegurar visibilidad)
-    juce::File logoFile("o:/Desarrollos/Tone And Beats OSX/ToneAndBeats_JUCE/Assets/HOST_BLANCO.png");
-    logoImage = juce::ImageFileFormat::loadFrom(logoFile);
+    // Cargar Logo desde BinaryData para asegurar portabilidad
+    logoImage = juce::ImageFileFormat::loadFrom(BinaryData::HOST_BLANCO_png, BinaryData::HOST_BLANCO_pngSize);
     
     if (logoImage.isValid())
     {

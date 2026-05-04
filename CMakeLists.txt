@@ -53,6 +53,8 @@ juce_add_binary_data(AssetsData
     SOURCES
         "Assets/qrdonaciones.png"
         "Assets/Icono.jpg"
+        "Assets/HOST_BLANCO.png"
+        "Assets/HOST_NEGRO.png"
 )
 
 juce_generate_juce_header(ToneAndBeats)

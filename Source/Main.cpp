@@ -48,9 +48,8 @@ public:
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(true);
            #else
-            juce::ImageFileFormat::loadFrom(juce::File()); // Fuerza registro implícito de formatos base
-            juce::File iconFile("o:/Desarrollos/Tone And Beats OSX/ToneAndBeats_JUCE/Assets/Icono.jpg");
-            juce::Image iconImage = juce::ImageFileFormat::loadFrom(iconFile);
+            // Cargar icono desde BinaryData
+            juce::Image iconImage = juce::ImageFileFormat::loadFrom(BinaryData::Icono_jpg, BinaryData::Icono_jpgSize);
             
             if (iconImage.isValid()) {
                 setIcon(iconImage);
