@@ -41,6 +41,8 @@ void UpdateManager::startUpdateDownload()
         // The thread is likely already finished checking, so we restart it
         if (!isThreadRunning())
             startThread();
+            
+        startTimerHz(15);
     }
 }
 
@@ -67,6 +69,7 @@ void UpdateManager::run()
             if (onDownloadFinished)
             {
                 juce::MessageManager::callAsync([this]() {
+                    stopTimer();
                     onDownloadFinished(true, "Download complete. Starting installer...");
                 });
             }
@@ -77,6 +80,7 @@ void UpdateManager::run()
             if (onDownloadFinished)
             {
                 juce::MessageManager::callAsync([this]() {
+                    stopTimer();
                     onDownloadFinished(false, "Download failed.");
                 });
             }
