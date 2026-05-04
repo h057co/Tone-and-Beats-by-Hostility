@@ -232,6 +232,40 @@ MainComponent::MainComponent()
     footerLink.setColour(juce::HyperlinkButton::textColourId, HostilityLookAndFeel::getTextMuted());
     addAndMakeVisible(footerLink);
 
+    // Update Manager Setup
+    updateButton.setButtonText("Update Available!");
+    updateButton.setColour(juce::TextButton::buttonColourId, HostilityLookAndFeel::getAccent());
+    updateButton.setVisible(false);
+    updateButton.onClick = [this] {
+        juce::AlertWindow::showOkCancelBox(juce::AlertWindow::QuestionIcon, "Update Available", 
+            "A new version (" + updateManager.getLatestVersion() + ") is available. Do you want to download and install it now?\n\nRelease Notes:\n" + updateManager.getReleaseNotes(),
+            "Update", "Later", nullptr,
+            juce::ModalCallbackFunction::create([this](int result) {
+                if (result != 0) updateManager.startUpdateDownload();
+            }));
+    };
+    addAndMakeVisible(updateButton);
+
+    updateManager.onUpdateAvailable = [this](juce::String version, juce::String notes) {
+        updateButton.setVisible(true);
+        resized();
+    };
+
+    updateManager.onDownloadProgress = [this](float progress) {
+        analysisProgress = progress * 100.0f; // Reuse progress bar
+        statusLabel.setText("Downloading update... " + juce::String(juce::roundToInt(progress * 100.0f)) + "%", juce::dontSendNotification);
+    };
+
+    updateManager.onDownloadFinished = [this](bool success, juce::String msg) {
+        if (!success)
+        {
+            juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Update Failed", msg);
+            statusLabel.setText("Update failed.", juce::dontSendNotification);
+        }
+    };
+
+    updateManager.checkForUpdates(true); // Silent check on startup
+
     setSize(400, 720); // Window limits
 
     waveformView.onSeek = [this](double progress) {
@@ -307,6 +341,9 @@ void MainComponent::resized()
 
     // --- Layout Top Area ---
     titleLabel.setBounds(topArea.removeFromTop(30).toNearestInt());
+    if (updateButton.isVisible())
+        updateButton.setBounds(titleLabel.getBounds().withSizeKeepingCentre(120, 20).translated(0, 25));
+
     logoComponent.setBounds(topArea.removeFromTop(40).toNearestInt());
     topArea.removeFromTop(5);
     
@@ -423,7 +460,9 @@ void MainComponent::buttonClicked(juce::Button* button)
                                         "- JUCE Framework (GPLv3/Personal)\n"
                                         "- SoundTouch Library (LGPL v2.1)\n"
                                         "- libebur128 (MIT)\n"
-                                        "- TagLib (LGPL/MPL)"), 
+                                        "- TagLib (LGPL/MPL)\n\n"
+                                        "Código Fuente (GPLv3):\n"
+                                        "https://github.com/h057co/Tone-and-Beats-by-Hostility"), 
                                         juce::AlertWindow::NoIcon);
         
         auto customComp = std::make_unique<juce::Component>();

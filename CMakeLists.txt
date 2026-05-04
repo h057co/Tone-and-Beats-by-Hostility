@@ -87,6 +87,8 @@ target_sources(ToneAndBeats PRIVATE
     Source/UI/WaveformView.cpp
     Source/UI/PianoScaleView.cpp
     Source/Core/DspUtils.cpp
+    Source/Core/UpdateManager.cpp
+    Source/Core/UpdateManager.h
 )
 
 target_link_libraries(ToneAndBeats

@@ -8,6 +8,7 @@
 #include "Core/Metadata.h"
 #include "Core/WaveformData.h"
 #include "Core/ScalePlayerSource.h"
+#include "Core/UpdateManager.h"
 #include "UI/LookAndFeel.h"
 #include "UI/WaveformView.h"
 #include "UI/PianoScaleView.h"
@@ -138,6 +139,9 @@ private:
     juce::Rectangle<float> rangeCard;
     juce::Rectangle<float> actionCard;
     juce::Rectangle<float> resultsCard;
+
+    UpdateManager updateManager;
+    juce::TextButton updateButton;
 };
 
 } // namespace ToneAndBeats
