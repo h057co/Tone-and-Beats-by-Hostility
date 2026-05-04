@@ -112,10 +112,28 @@ bool UpdateManager::checkGitHubReleases()
             latestVersion = tagName.startsWithIgnoreCase("v") ? tagName.substring(1) : tagName;
             releaseNotes = json.getDynamicObject()->getProperty("body").toString();
 
-            // Simple version comparison (can be improved for semver)
+            // Robust version comparison
             juce::String currentVersion = ProjectInfo::versionString;
             
-            if (latestVersion != currentVersion)
+            auto isVersionNewer = [](const juce::String& latest, const juce::String& current)
+            {
+                juce::StringArray latestParts;
+                latestParts.addTokens (latest, ".", "");
+                juce::StringArray currentParts;
+                currentParts.addTokens (current, ".", "");
+                
+                for (int i = 0; i < juce::jmax (latestParts.size(), currentParts.size()); ++i)
+                {
+                    int l = (i < latestParts.size()) ? latestParts[i].getIntValue() : 0;
+                    int c = (i < currentParts.size()) ? currentParts[i].getIntValue() : 0;
+                    
+                    if (l > c) return true;
+                    if (l < c) return false;
+                }
+                return false;
+            };
+
+            if (isVersionNewer (latestVersion, currentVersion))
             {
                 // Find the Windows installer asset (.exe)
                 auto assets = json.getDynamicObject()->getProperty("assets");
