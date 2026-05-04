@@ -142,6 +142,8 @@ private:
 
     UpdateManager updateManager;
     juce::TextButton updateButton;
+    double updateProgress = 0.0;
+    std::unique_ptr<juce::ProgressBar> updateProgressBar;
 };
 
 } // namespace ToneAndBeats

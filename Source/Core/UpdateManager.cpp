@@ -112,8 +112,9 @@ bool UpdateManager::checkGitHubReleases()
             latestVersion = tagName.startsWithIgnoreCase("v") ? tagName.substring(1) : tagName;
             releaseNotes = json.getDynamicObject()->getProperty("body").toString();
 
-            // Robust version comparison
             juce::String currentVersion = ProjectInfo::versionString;
+            
+            DBG("UpdateManager: Comparing Versions -> Latest: " << latestVersion << " | Local: " << currentVersion);
             
             auto isVersionNewer = [](const juce::String& latest, const juce::String& current)
             {

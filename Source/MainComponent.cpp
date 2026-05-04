@@ -231,28 +231,41 @@ MainComponent::MainComponent()
     footerLink.setColour(juce::HyperlinkButton::textColourId, HostilityLookAndFeel::getTextMuted());
     addAndMakeVisible(footerLink);
 
-    // Update Manager Setup
-    updateButton.setButtonText("Update Available!");
-    updateButton.setColour(juce::TextButton::buttonColourId, HostilityLookAndFeel::getAccent());
+    // Update Manager Setup - Estilo Overlay flotante
+    updateButton.setButtonText(juce::String::fromUTF8("\xf0\x9f\x94\x94 Update")); // Bell Icon
+    updateButton.setColour(juce::TextButton::buttonColourId, HostilityLookAndFeel::getAccent().withAlpha(0.9f));
+    updateButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
     updateButton.setVisible(false);
+    updateButton.setAlwaysOnTop(true);
     updateButton.onClick = [this] {
         juce::AlertWindow::showOkCancelBox(juce::AlertWindow::QuestionIcon, "Update Available", 
             "A new version (" + updateManager.getLatestVersion() + ") is available. Do you want to download and install it now?\n\nRelease Notes:\n" + updateManager.getReleaseNotes(),
             "Update", "Later", nullptr,
             juce::ModalCallbackFunction::create([this](int result) {
-                if (result != 0) updateManager.startUpdateDownload();
+                if (result != 0) 
+                {
+                    updateButton.setVisible(false);
+                    if (updateProgressBar) updateProgressBar->setVisible(true);
+                    updateManager.startUpdateDownload();
+                }
             }));
     };
-    addAndMakeVisible(updateButton);
+    addChildComponent(updateButton);
+
+    // Barra de progreso de actualización
+    updateProgressBar = std::make_unique<juce::ProgressBar>(updateProgress);
+    updateProgressBar->setTextToDisplay("Downloading Update...");
+    updateProgressBar->setColour(juce::ProgressBar::foregroundColourId, HostilityLookAndFeel::getAccent());
+    updateProgressBar->setVisible(false);
+    addAndMakeVisible(updateProgressBar.get());
 
     updateManager.onUpdateAvailable = [this](juce::String version, juce::String notes) {
         updateButton.setVisible(true);
         resized();
     };
 
-    updateManager.onDownloadProgress = [this](float progress) {
-        analysisProgress = progress * 100.0f; // Reuse progress bar
-        statusLabel.setText("Downloading update... " + juce::String(juce::roundToInt(progress * 100.0f)) + "%", juce::dontSendNotification);
+    updateManager.onDownloadProgress = [this](double progress) {
+        updateProgress = progress;
     };
 
     updateManager.onDownloadFinished = [this](bool success, juce::String msg) {
@@ -340,10 +353,20 @@ void MainComponent::resized()
 
     // --- Layout Top Area ---
     titleLabel.setBounds(topArea.removeFromTop(30).toNearestInt());
-    if (updateButton.isVisible())
-        updateButton.setBounds(titleLabel.getBounds().withSizeKeepingCentre(120, 20).translated(0, 25));
-
     logoComponent.setBounds(topArea.removeFromTop(40).toNearestInt());
+    
+    // Ubicar botón de update como overlay en la esquina superior derecha
+    if (updateButton.isVisible())
+    {
+        updateButton.setBounds(getWidth() - 95, 15, 80, 24);
+        updateButton.toFront(false);
+    }
+
+    if (updateProgressBar && updateProgressBar->isVisible())
+    {
+        updateProgressBar->setBounds(getWidth() / 2 - 100, 15, 200, 20);
+    }
+
     topArea.removeFromTop(5);
     
     fileCard = topArea.removeFromTop(40).reduced(5, 0);
