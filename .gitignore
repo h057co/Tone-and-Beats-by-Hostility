@@ -23,3 +23,7 @@ JuceLibraryCode/
 
 # Scratch files
 scratch/
+
+# Build and Installers
+*.exe
+/Installers/ToneAndBeats_*_Installer.exe
